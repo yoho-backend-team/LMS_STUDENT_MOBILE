@@ -1,13 +1,21 @@
-import { ScreenContent } from 'components/ScreenContent';
-import { StatusBar } from 'expo-status-bar';
-
-import './global.css';
+import { NavigationContainer } from '@react-navigation/native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
+import { Provider } from 'react-redux';
+import Routes from './src/routes/index';
+import { store } from './src/store/store';
 
 export default function App() {
   return (
     <>
-      <ScreenContent title="Home" path="App.tsx"></ScreenContent>
-      <StatusBar style="auto" />
+      <Provider store={store}>
+        <SafeAreaProvider>
+          <NavigationContainer>
+            <Routes />
+            <Toast />
+          </NavigationContainer>
+        </SafeAreaProvider>
+      </Provider>
     </>
   );
 }
