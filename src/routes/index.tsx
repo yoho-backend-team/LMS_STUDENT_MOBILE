@@ -60,7 +60,7 @@ const Routes = () => {
   useEffect(() => {
     const checkAuthState = async () => {
       try {
-        const isLoggedIn = true;
+        const isLoggedIn = false;
         if (isLoggedIn) {
           navigation.reset({
             index: 0,
