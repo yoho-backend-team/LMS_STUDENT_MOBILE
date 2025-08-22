@@ -1,5 +1,5 @@
 {
-  "name": "LMS_Student_MobileApp",
+  "name": "lms-student-mobileapp",
   "version": "1.0.0",
   "scripts": {
     "android": "expo start --android",
@@ -38,6 +38,7 @@
     "react-native-modal-datetime-picker": "^18.0.0",
     "react-native-chart-kit": "^6.12.0",
     "react-native-gesture-handler": "^2.28.0",
+    "react-native-pager-view": "^6.9.1",
     "react-native-reanimated": "~3.17.4",
     "react-native-responsive-fontsize": "^0.5.1",
     "react-native-responsive-screen": "^1.4.2",
