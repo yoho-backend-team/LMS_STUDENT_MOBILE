@@ -25,6 +25,9 @@ import {
   TicketsScreen,
 } from '../screens';
 import StudentDrawer from '../tabs/StudentDrawer';
+import CreateTicket from '~/components/Ticket/CreatTicket';
+import CreateTicketComponent from '~/components/Ticket/CreatTicket';
+import TicketView from '~/components/Ticket/TicketView';
 
 const Routes = () => {
   type RootStackParamList = {
@@ -110,6 +113,8 @@ const Routes = () => {
         <Stack.Screen name="FAQ" component={FAQScreen} />
         <Stack.Screen name="CommunitiesScreen" component={CommunitiesScreen} />
         <Stack.Screen name="CommunityViewScreen" component={CommunityByIdScreen} />
+        <Stack.Screen name="CreateTicketcomponent" component={CreateTicketComponent} />
+        <Stack.Screen name="TicketView" component={TicketView} />
       </Stack.Navigator>
     );
   };
