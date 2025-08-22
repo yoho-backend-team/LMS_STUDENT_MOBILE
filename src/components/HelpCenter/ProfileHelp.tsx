@@ -2,7 +2,7 @@ import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 
-const ProfileHelp = () => {
+const ProfileHelp = ({ searchQuery }: { searchQuery: string }) => {
   return (
     <View style={styles.container}>
       <View style={styles.card}>

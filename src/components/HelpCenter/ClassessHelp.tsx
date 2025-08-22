@@ -10,7 +10,7 @@ type ClassItem = {
   image: any;
 };
 
-const ClassessHelp = () => {
+const ClassessHelp =({ searchQuery }: { searchQuery: string })  => {
   const [selectedItem, setSelectedItem] = useState<ClassItem | null>(null);
 
   const data: ClassItem[] = [

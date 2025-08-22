@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Image } from 'react-native';
 import React, { useState } from 'react';
 
-const AttendanceHelp = () => {
+const AttendanceHelp =  ({ searchQuery }: { searchQuery: string })  => {
   const helpTopics = [
     {
       title: "How to Mark Attendance",
@@ -25,6 +25,12 @@ const AttendanceHelp = () => {
     },
   ];
 
+ const filteredTopics = helpTopics.filter(
+    (topic) =>
+      topic.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      topic.content.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const [selectedTopic, setSelectedTopic] = useState<number | null>(null);
 
   const toggleTopic = (index: number) => {
@@ -36,7 +42,7 @@ const AttendanceHelp = () => {
       <Text style={styles.sectionTitle}>Help Centre</Text>
 
       <ScrollView>
-        {helpTopics.map((topic, index) => (
+        {filteredTopics.map((topic, index) => (
           <View key={index} style={{ marginBottom: 12 }}>
             <TouchableOpacity
               style={styles.topicBox}

@@ -26,17 +26,19 @@ import ClassessHelp from '~/components/HelpCenter/ClassessHelp';
 const HelpCenter = () => {
   const [selectedTab, setSelectedTab] = useState(0);
   const pagerRef = useRef<PagerView>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const scrollViewRef = useRef<ScrollView>(null);
 
   const tabData = [
-    { key: 'Mail', count: 0, component: <EmailHelp /> },
-    { key: 'Profile', count: 1, component: <ProfileHelp /> },
-    { key: 'Classes', count: 0, component: <ClassessHelp /> },
-    { key: 'Password', count: 2, component: <PasswordHelp /> },
-    { key: 'Attendance', count: 3, component: <AttendanceHelp /> },
-    { key: 'Payment', count: 1, component: <PaymentHelp /> },
-    { key: 'Login & Sign Up', count: 0, component: <LoginHelp /> },
-  ];
+  { key: 'Mail', count: 0, component: <EmailHelp searchQuery={searchQuery} /> },
+  { key: 'Profile', count: 1, component: <ProfileHelp searchQuery={searchQuery} /> },
+  { key: 'Classes', count: 0, component: <ClassessHelp searchQuery={searchQuery} /> },
+  { key: 'Password', count: 2, component: <PasswordHelp searchQuery={searchQuery} /> },
+  { key: 'Attendance', count: 3, component: <AttendanceHelp searchQuery={searchQuery} /> },
+  { key: 'Payment', count: 1, component: <PaymentHelp searchQuery={searchQuery} /> },
+  { key: 'Login & Sign Up', count: 0, component: <LoginHelp searchQuery={searchQuery} /> },
+];
+
 
   const scrollToTab = (index: number) => {
     const tabWidth = 200;
@@ -112,7 +114,13 @@ const HelpCenter = () => {
         </View>
 
         <View style={styles.searchContainer}>
-          <TextInput placeholder="Search" style={styles.searchInput} />
+          <TextInput
+  placeholder="Search"
+  style={styles.searchInput}
+  value={searchQuery}
+  onChangeText={(text) => setSearchQuery(text)}
+/>
+
         </View>
 
         <PagerView
