@@ -185,6 +185,11 @@ const ServiceDrawerContent: React.FC<DrawerContentProps> = ({ navigation }) => {
             onPress={() => navigation.navigate('Payment')}
           />
           <CustomDrawerItem
+            label="Placement"
+            icon={icons.course_filled}
+            onPress={() => navigation.navigate('Placement')}
+          />
+          <CustomDrawerItem
             label="Notifications"
             icon={icons.course_filled}
             onPress={() => navigation.navigate('Notification')}
