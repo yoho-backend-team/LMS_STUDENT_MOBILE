@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View, TouchableOpacity, Image } from "react-native";
+import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState } from "react";
 
 type ClassItem = {
@@ -6,44 +7,48 @@ type ClassItem = {
   title: string;
   subtitle: string;
   info: string;
-  image: any; 
+  image: any;
 };
 
 const ClassessHelp = () => {
   const [selectedItem, setSelectedItem] = useState<ClassItem | null>(null);
 
   const data: ClassItem[] = [
-    { 
-      id: 1, 
-      title: "How to learn?", 
-      subtitle: "Sample Video", 
-      info: "This is details about Learning.", 
-      image: require("./../../assets/helpcenter/classess.png") 
+    {
+      id: 1,
+      title: "How to learn?",
+      subtitle: "Sample Video",
+      info: "This is details about Learning.",
+      image: require("./../../assets/helpcenter/classess.png"),
     },
-    { 
-      id: 2, 
-      title: "Attendance Guide", 
-      subtitle: "Track classes", 
-      info: "This is details about Attendance.", 
-      image: require("./../../assets/helpcenter/classess.png") 
+    {
+      id: 2,
+      title: "Attendance Guide",
+      subtitle: "Track classes",
+      info: "This is details about Attendance.",
+      image: require("./../../assets/helpcenter/classess.png"),
     },
   ];
 
   if (selectedItem) {
     return (
       <View style={styles.container}>
-        <TouchableOpacity onPress={() => setSelectedItem(null)} style={styles.backBtn}>
-          <Image source={require("./../../assets/helpcenter/back.png")} style={{ width: 24, height: 24 }} />
-        </TouchableOpacity>
+        {/* Back Header */}
+        <View style={styles.headerRow}>
+          <TouchableOpacity onPress={() => setSelectedItem(null)} style={styles.backIcon}>
+            <Image
+              source={require("./../../assets/icons/backarrow.png")}
+              style={{ width: 24, height: 24 }}
+            />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>{selectedItem.title}</Text>
+        </View>
 
-        <Text style={styles.title}>{selectedItem.title}</Text>
+        <Text style={styles.sectionTitle}>Additional Information</Text>
         <Text style={styles.subtitle}>{selectedItem.info}</Text>
 
         <View style={styles.videoBox}>
           <Image source={selectedItem.image} style={styles.video} />
-          <View style={styles.playButton}>
-            <Text style={{ color: "white", fontSize: 20 }}>▶</Text>
-          </View>
         </View>
       </View>
     );
@@ -62,10 +67,17 @@ const ClassessHelp = () => {
 
           <TouchableOpacity
             activeOpacity={0.8}
-            style={styles.button}
+            style={styles.buttonContainer}
             onPress={() => setSelectedItem(item)}
           >
-            <Text style={styles.buttonText}>View Details</Text>
+            <LinearGradient
+              colors={['#7B00FF', '#B200FF']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.button}
+            >
+              <Text style={styles.buttonText}>View Details</Text>
+            </LinearGradient>
           </TouchableOpacity>
         </View>
       ))}
@@ -76,7 +88,22 @@ const ClassessHelp = () => {
 export default ClassessHelp;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 15, backgroundColor: "#F9FAFB" },
+  container: { flex: 1, padding: 5 },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  backIcon: {
+    marginRight: 10,
+    padding: 5,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#000",
+  },
+
   card: {
     backgroundColor: "#F8F9FA",
     borderRadius: 15,
@@ -103,37 +130,31 @@ const styles = StyleSheet.create({
   badgeText: { fontSize: 13, fontWeight: "600", color: "#555" },
   title: { fontSize: 18, fontWeight: "700", marginBottom: 4, color: "#000" },
   subtitle: { fontSize: 14, color: "#666", marginBottom: 15 },
-  button: {
+
+  buttonContainer: {
     alignSelf: "flex-end",
-    backgroundColor: "#FF00FF",
+  },
+  button: {
     borderRadius: 10,
     paddingVertical: 8,
     paddingHorizontal: 20,
-    shadowColor: "#FF00FF",
+    shadowColor: "#7B00FF",
     shadowOpacity: 0.4,
     shadowOffset: { width: 0, height: 4 },
     shadowRadius: 6,
     elevation: 3,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   buttonText: { color: "#fff", fontWeight: "600", fontSize: 14 },
-  backBtn: { marginBottom: 15 },
-  videoBox: {
-    borderRadius: 12,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 4,
-    marginTop: 20,
+
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 10,
+    color: "#111",
   },
-  video: { width: "100%", height: 200, borderRadius: 12 },
-  playButton: {
-    position: "absolute",
-    top: "40%",
-    left: "45%",
-    backgroundColor: "rgba(0,0,0,0.6)",
-    borderRadius: 50,
-    padding: 10,
-  },
+
+  videoBox: {},
+  video: { width: "100%", height: 300, borderRadius: 10 },
 });

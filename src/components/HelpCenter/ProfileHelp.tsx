@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 
 const ProfileHelp = () => {
@@ -14,9 +15,16 @@ const ProfileHelp = () => {
         <Text style={styles.title}>ASDF</Text>
         <Text style={styles.description}>ZCV</Text>
 
-        {/* Button */}
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>View Details</Text>
+        {/* Button with Gradient */}
+        <TouchableOpacity style={styles.buttonContainer}>
+          <LinearGradient
+            colors={['#7B00FF', '#B200FF']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.button}
+          >
+            <Text style={styles.buttonText}>View Details</Text>
+          </LinearGradient>
         </TouchableOpacity>
       </View>
     </View>
@@ -66,13 +74,15 @@ const styles = StyleSheet.create({
     color: '#666',
     marginBottom: 15,
   },
-  button: {
+  buttonContainer: {
     alignSelf: 'flex-end',
+  },
+  button: {
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
-    backgroundColor: '#FF00FF',
-    // backgroundColor: 'linear-gradient(90deg, #FF00FF, #FF1493)', 
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   buttonText: {
     color: '#fff',

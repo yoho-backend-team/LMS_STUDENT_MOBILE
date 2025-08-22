@@ -1,10 +1,20 @@
-import React, { useState } from 'react';
-import { ScrollView, StatusBar, StyleSheet, Text, View, TouchableOpacity, TextInput } from 'react-native';
+import React, { useRef, useState } from 'react';
+import {
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  TextInput,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import PagerView from 'react-native-pager-view';
+import { LinearGradient } from 'expo-linear-gradient';
 import Header from '~/components/shared/Header';
 import { COLORS } from '~/constants';
 
-// Import your separate components
+// Import components
 import EmailHelp from '~/components/HelpCenter/EmailHelp';
 import ProfileHelp from '~/components/HelpCenter/ProfileHelp';
 import PasswordHelp from '~/components/HelpCenter/PasswordHelp';
@@ -14,37 +24,27 @@ import LoginHelp from '~/components/HelpCenter/LoginHelp';
 import ClassessHelp from '~/components/HelpCenter/ClassessHelp';
 
 const HelpCenter = () => {
-  const [selectedTab, setSelectedTab] = useState('Mail');
+  const [selectedTab, setSelectedTab] = useState(0);
+  const pagerRef = useRef<PagerView>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
 
   const tabData = [
-    { key: 'Mail', count: 0 },
-    { key: 'Profile', count: 1 },
-    { key: 'Classes', count: 0 },
-    { key: 'Password', count: 2 },
-    { key: 'Attendance', count: 3 },
-    { key: 'Payment', count: 1 },
-    { key: 'Login & Sign Up', count: 0 },
+    { key: 'Mail', count: 0, component: <EmailHelp /> },
+    { key: 'Profile', count: 1, component: <ProfileHelp /> },
+    { key: 'Classes', count: 0, component: <ClassessHelp /> },
+    { key: 'Password', count: 2, component: <PasswordHelp /> },
+    { key: 'Attendance', count: 3, component: <AttendanceHelp /> },
+    { key: 'Payment', count: 1, component: <PaymentHelp /> },
+    { key: 'Login & Sign Up', count: 0, component: <LoginHelp /> },
   ];
 
-  const renderContent = () => {
-    switch (selectedTab) {
-      case 'Mail':
-        return <EmailHelp />;
-      case 'Profile':
-        return <ProfileHelp />;
-      case 'Password':
-        return <PasswordHelp />;
-      case 'Attendance':
-        return <AttendanceHelp />;
-      case 'Payment':
-        return <PaymentHelp />;
-      case 'Login':
-        return <LoginHelp />;
-      case 'Classes':
-        return <ClassessHelp />;
-      default:
-        return <Text>Select a section</Text>;
-    }
+  const scrollToTab = (index: number) => {
+    const tabWidth = 200;
+    const screenOffset = index * tabWidth - tabWidth;
+    scrollViewRef.current?.scrollTo({
+      x: screenOffset > 0 ? screenOffset : 0,
+      animated: true,
+    });
   };
 
   return (
@@ -54,54 +54,83 @@ const HelpCenter = () => {
         <Header />
         <View>
           <Text style={styles.headerText}>Help Centre</Text>
+
           <ScrollView
+            ref={scrollViewRef}
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.scrollContent}
           >
-            {tabData.map(({ key, count }) => (
-              <TouchableOpacity
-                key={key}
-                style={[
-                  styles.box,
-                  selectedTab === key ? styles.activeBox : styles.inactiveBox,
-                ]}
-                onPress={() => setSelectedTab(key)}
-              >
-                <Text
-                  style={[
-                    styles.boxText,
-                    selectedTab === key ? styles.activeBoxText : styles.inactiveBoxText,
-                  ]}
+            {tabData.map(({ key, count }, index) => {
+              const isActive = selectedTab === index;
+              return (
+                <TouchableOpacity
+                  key={key}
+                  onPress={() => {
+                    setSelectedTab(index);
+                    pagerRef.current?.setPage(index);
+                    scrollToTab(index);
+                  }}
+                  activeOpacity={0.9}
                 >
-                  {key}
-                </Text>
-                <View
-                  style={[
-                    styles.countBadge,
-                    selectedTab === key ? styles.activeBadge : styles.inactiveBadge,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.countText,
-                      selectedTab === key ? styles.activeCountText : styles.inactiveCountText,
-                    ]}
-                  >
-                    {count}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ))}
+                  {isActive ? (
+                    <LinearGradient
+                      colors={['#7B00FF', '#B200FF']}
+                      start={{ x: 0.134, y: 0.021 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.activeBoxGradient}
+                    >
+                      <Text style={[styles.boxText, styles.activeBoxText]}>
+                        {key}
+                      </Text>
+                      <View style={[styles.countBadge, styles.activeBadge]}>
+                        <Text
+                          style={[styles.countText, styles.activeCountText]}
+                        >
+                          {count}
+                        </Text>
+                      </View>
+                    </LinearGradient>
+                  ) : (
+                    <View style={[styles.box, styles.inactiveBox]}>
+                      <Text style={[styles.boxText, styles.inactiveBoxText]}>
+                        {key}
+                      </Text>
+                      <View style={[styles.countBadge, styles.inactiveBadge]}>
+                        <Text
+                          style={[styles.countText, styles.inactiveCountText]}
+                        >
+                          {count}
+                        </Text>
+                      </View>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
           </ScrollView>
         </View>
-        {/* Search Bar */}
+
         <View style={styles.searchContainer}>
           <TextInput placeholder="Search" style={styles.searchInput} />
         </View>
 
-        {/* Content area */}
-        <View style={styles.contentArea}>{renderContent()}</View>
+        <PagerView
+          ref={pagerRef}
+          style={{ flex: 1 }}
+          initialPage={selectedTab}
+          onPageSelected={(e) => {
+            const index = e.nativeEvent.position;
+            setSelectedTab(index);
+            scrollToTab(index);
+          }}
+        >
+          {tabData.map((item, index) => (
+            <View key={index} style={styles.contentArea}>
+              {item.component}
+            </View>
+          ))}
+        </PagerView>
       </SafeAreaView>
     </>
   );
@@ -110,22 +139,32 @@ const HelpCenter = () => {
 export default HelpCenter;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 10,
-    backgroundColor: COLORS.white,
+  container: { 
+    flex: 1, 
+    paddingTop: 10, 
+    backgroundColor: COLORS.white 
   },
-  headerText: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    fontSize: 22,
-    fontWeight: 'bold',
+  headerText: { 
+    paddingHorizontal: 20, 
+    paddingVertical: 10, 
+    fontSize: 22, 
+    fontWeight: 'bold' 
   },
-  scrollContent: {
-    paddingHorizontal: 10,
-    gap: 10,
+  scrollContent: { 
+    paddingHorizontal: 10, 
+    gap: 10 
   },
-  box: {
+  box: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    paddingHorizontal: 15, 
+    height: 45, 
+    width: 200, 
+    justifyContent: 'space-between', 
+    borderRadius: 8 
+  },
+
+  activeBoxGradient: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 15,
@@ -133,64 +172,100 @@ const styles = StyleSheet.create({
     width: 200,
     justifyContent: 'space-between',
     borderRadius: 8,
+    // Closest approximation to multiple shadows - using the most prominent one
+    shadowColor: '#BDC2C7',
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 0.75,
+    shadowRadius: 8,
+    elevation: 8,
   },
-  activeBox: {
-    backgroundColor: '#FF00FF', 
-  },
+
   inactiveBox: {
-    backgroundColor: '#F0F0F0',
+    backgroundColor: '#EBEFF3',
+    borderRadius: 8,
+    // Inactive shadow styling
+    shadowColor: '#FFFFFF',
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 0.75,
+    shadowRadius: 8,
+    elevation: 5,
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 15,
+    height: 45,
+    width: 200,
   },
-  boxText: {
-    fontSize: 16,
-    fontWeight: '600',
+
+  boxText: { 
+    fontSize: 16, 
+    fontWeight: '600' 
   },
-  activeBoxText: {
-    color: '#FFF',
+  activeBoxText: { 
+    color: '#FFF' 
   },
-  inactiveBoxText: {
-    color: '#333',
+  inactiveBoxText: { 
+    color: '#333' 
   },
-  countBadge: {
-    marginLeft: 8,
+
+  countBadge: { 
+    marginLeft: 8, 
+    minWidth: 22, 
+    height: 22, 
+    borderRadius: 6, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    paddingHorizontal: 6 
+  },
+  activeBadge: { 
+    backgroundColor: '#FFF',
+    shadowColor: '#9C01FF',
+    shadowOffset: { width: -2, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  inactiveBadge: {
+    backgroundColor: '#EBEFF3',
+    shadowColor: '#BDC2C7',
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 0.6,
+    shadowRadius: 4,
+    elevation: 3,
+    borderRadius: 6,
     minWidth: 22,
     height: 22,
-    borderRadius: 2,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 6,
   },
-  activeBadge: {
-    backgroundColor: '#FFF',  
-    shadowColor: '#000',
+
+  countText: { 
+    fontSize: 12, 
+    fontWeight: 'bold' 
   },
-  inactiveBadge: {
-    backgroundColor: '#DDD',
+  activeCountText: { 
+    color: '#B200FF' 
   },
-  countText: {
-    fontSize: 12,
-    fontWeight: 'bold',
+  inactiveCountText: { 
+    color: '#333' 
   },
-  activeCountText: {
-    color: '#FF00FF',
+
+  contentArea: { 
+    flex: 1, 
+    padding: 15 
   },
-  inactiveCountText: {
-    color: '#333',
+  searchContainer: { 
+    paddingHorizontal: 15, 
+    marginVertical: 10 
   },
-  contentArea: {
-    flex: 1,
-    padding: 15,
-  },
-   searchContainer: {
-    paddingHorizontal: 15,
-    marginVertical: 10,
-  },
-  searchInput: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    fontSize: 16,
-    backgroundColor: '#fff',
+  searchInput: { 
+    borderWidth: 1, 
+    borderColor: '#ccc', 
+    borderRadius: 10, 
+    paddingHorizontal: 12, 
+    paddingVertical: 8, 
+    fontSize: 16, 
+    backgroundColor: '#fff' 
   },
 });
