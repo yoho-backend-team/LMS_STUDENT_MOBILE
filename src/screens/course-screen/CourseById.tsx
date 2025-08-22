@@ -214,22 +214,40 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
           </>
         )}
 
-        {/* NOTES TAB */}
-        {activeTab === "notes" && (
-          <View style={styles.card}>
-            {notesData.map((note) => (
-              <View key={note.id} style={styles.noteCard}>
-                <Text style={styles.noteTitle}>{note.name}</Text>
-                <Text style={styles.noteText}>Date: {note.date}</Text>
-                <Text style={styles.noteText}>Chapter: {note.chapter}</Text>
+       {activeTab === "notes" && (
+  <View style={styles.card}>
+    {notesData.map((note) => (
+      <View key={note.id} style={styles.noteCard}>
+        
+        {/* Name Row */}
+        <View style={styles.textRow}>
+          <Text style={styles.labelText}>Name:</Text>
+          <Text style={styles.valueText}>{note.name}</Text>
+        </View>
 
-                <TouchableOpacity style={styles.downloadButton}>
-                  <Ionicons name="download-outline" size={22} color="green" />
-                </TouchableOpacity>
-              </View>
-            ))}
-          </View>
-        )}
+        {/* Date Row */}
+        <View style={styles.textRow}>
+          <Text style={styles.labelText}>Date:</Text>
+          <Text style={styles.valueText}>{note.date}</Text>
+        </View>
+
+        {/* Chapter Row */}
+        <View style={styles.textRow}>
+          <Text style={styles.labelText}>Chapter:</Text>
+          <Text style={styles.valueText}>{note.chapter}</Text>
+        </View>
+
+        {/* Download Row */}
+        <TouchableOpacity style={styles.downloadRow}>
+          <Text style={styles.downloadText}>PDF Download</Text>
+          <Ionicons name="download-outline" size={22} color="green" />
+        </TouchableOpacity>
+      </View>
+    ))}
+  </View>
+)}
+
+
 
         {/* TASKS TAB */}
         {activeTab === "tasks" && (
@@ -488,6 +506,19 @@ playBtn: {
   borderRadius: 40,
 },
 
+downloadRow: {
+  flexDirection: "row",   // 👈 text left, icon right
+  alignItems: "center",
+  marginTop: 10,
+},
+
+downloadText: {
+  fontSize: 14,
+  fontWeight: "bold",
+  color: "green",
+  marginRight: 8,  // space between text & icon
+},
+
   
   trackCard: {
     backgroundColor: "#ebeff3",
@@ -537,11 +568,26 @@ playBtn: {
     justifyContent: "space-between", // 👈 pushes label left & value right
     alignItems: "center",
     marginVertical: 4,
+	paddingRight: 22,
   },
 
   taskValue: {
     fontSize: 14,
     color: "#555",
   },
+
+labelText: {
+  fontSize: 14,
+  fontWeight: "bold",
+  color: "#333",
+},
+
+valueText: {
+  fontSize: 14,
+  color: "#555",
+  marginLeft: 10,   // small gap from label
+  marginRight: 16,  // keeps it away from screen edge
+},
+
   
 });
