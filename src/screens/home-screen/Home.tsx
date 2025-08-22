@@ -190,6 +190,7 @@ export default Home;
 const styles = StyleSheet.create({
   container: {
     backgroundColor: COLORS.white,
+    paddingTop: 10,
     flex: 1,
   },
   scrollContainer: {
