@@ -1,43 +1,49 @@
-
-
 import React, { useState } from 'react';
-import { StatusBar, StyleSheet, Text, TouchableOpacity, View, TextInput, ScrollView } from 'react-native';
+import {
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  TextInput,
+  ScrollView,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS, icons } from '~/constants';
 import Header from '~/components/shared/Header';
 import { useNavigation } from '@react-navigation/native';
-import * as DocumentPicker from "expo-document-picker";
+import * as DocumentPicker from 'expo-document-picker';
 import { Picker } from '@react-native-picker/picker';
 import { Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 
 const CreateTicketComponent = () => {
   const navigation = useNavigation();
-  const [subject, setSubject] = useState("");
-  const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("");
+  const [subject, setSubject] = useState('');
+  const [description, setDescription] = useState('');
+  const [category, setCategory] = useState('');
   const [attachment, setAttachment] = useState<any>(null);
-  const [priority, setPriority] = useState("");
+  const [priority, setPriority] = useState('');
 
   const pickDocument = async () => {
     try {
-      const docRes = await DocumentPicker.getDocumentAsync({ type: "*/*" });
+      const docRes = await DocumentPicker.getDocumentAsync({ type: '*/*' });
       if (docRes && docRes.assets && docRes.assets.length > 0) {
         setAttachment(docRes.assets[0]);
       }
     } catch (error: any) {
-      console.log("Error while selecting the file:", error.message);
+      console.log('Error while selecting the file:', error.message);
     }
   };
 
   const handleSubmit = () => {
     if (!subject || !description) {
-      alert("Please fill all required fields");
+      alert('Please fill all required fields');
       return;
     }
 
     console.log({ subject, description, category, attachment, priority });
-    alert("Ticket created successfully!");
+    alert('Ticket created successfully!');
     navigation.goBack();
   };
 
@@ -50,7 +56,7 @@ const CreateTicketComponent = () => {
         <View style={styles.headerRow}>
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Text style={styles.backText}>←</Text>
-           <Image/>
+            <Image />
           </TouchableOpacity>
           <Text style={styles.title}>Create Ticket Screen</Text>
         </View>
@@ -87,8 +93,7 @@ const CreateTicketComponent = () => {
             <Picker
               selectedValue={priority}
               onValueChange={(itemValue: any) => setPriority(itemValue)}
-              style={styles.picker}
-            >
+              style={styles.picker}>
               <Picker.Item label="Select value" />
               <Picker.Item label="Low" value="Low" />
               <Picker.Item label="Medium" value="Medium" />
@@ -96,17 +101,15 @@ const CreateTicketComponent = () => {
             </Picker>
           </View>
 
-
           <Text style={styles.label}>Attachment</Text>
           <TouchableOpacity style={styles.attachmentButton} onPress={pickDocument}>
             <View style={styles.attachmentContent}>
               <Icon name="upload" size={24} color="#2B00FF" />
               <Text style={styles.attachmentText}>
-                {attachment ? attachment.name : "Upload file"}
+                {attachment ? attachment.name : 'Upload file'}
               </Text>
             </View>
           </TouchableOpacity>
-
 
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
             <Text style={styles.submitText}>Create Ticket</Text>
@@ -120,84 +123,83 @@ const CreateTicketComponent = () => {
 export default CreateTicketComponent;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: '#fff' },
 
   headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 10,
     marginTop: 20,
     gap: 20,
   },
 
-  title: { fontSize: 20, fontWeight: "bold", flex: 1 },
+  title: { fontSize: 20, fontWeight: 'bold', flex: 1 },
 
   backButton: {
     width: 50,
     height: 50,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#2B00FF",
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#2B00FF',
     borderRadius: 8,
   },
 
-  backText: { color: "white", fontSize: 18, fontWeight: "bold" },
+  backText: { color: 'white', fontSize: 18, fontWeight: 'bold' },
 
   formContainer: { padding: 20 },
 
-  label: { fontSize: 16, fontWeight: "600", marginBottom: 5, marginTop: 15 },
+  label: { fontSize: 16, fontWeight: '600', marginBottom: 5, marginTop: 15 },
 
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: '#ccc',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: '#f9f9f9',
   },
 
-  textarea: { height: 100, textAlignVertical: "top" },
+  textarea: { height: 100, textAlignVertical: 'top' },
 
   dropdownContainer: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: '#ccc',
     borderRadius: 8,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: '#f9f9f9',
   },
 
-  picker: { height: 50, width: "100%" },
+  picker: { height: 50, width: '100%' },
 
-attachmentButton: {
-  borderWidth: 1,
-  borderColor: "#ccc",
-  borderRadius: 8,
-  paddingVertical: 15,
-  justifyContent: "center",
-  alignItems: "center",
-  backgroundColor: "#f9f9f9",
-  marginTop: 10,
-},
+  attachmentButton: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    paddingVertical: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f9f9f9',
+    marginTop: 10,
+  },
 
-attachmentContent: {
-  justifyContent: "center",
-  alignItems: "center",
-  gap: 5, // space between icon and text
-},
+  attachmentContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 5, // space between icon and text
+  },
 
-attachmentText: { 
-  fontSize: 16, 
-  color: "#333",
-  textAlign: "center", // center text
-},
-
+  attachmentText: {
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center', // center text
+  },
 
   submitButton: {
     marginTop: 30,
-    backgroundColor: "#2B00FF",
+    backgroundColor: '#2B00FF',
     paddingVertical: 15,
     borderRadius: 8,
-    alignItems: "center",
+    alignItems: 'center',
   },
 
-  submitText: { color: "#fff", fontSize: 18, fontWeight: "600" },
+  submitText: { color: '#fff', fontSize: 18, fontWeight: '600' },
 });
