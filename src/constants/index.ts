@@ -42,6 +42,8 @@ export const icons = {
   filter: require('../assets/icons/filter.png'),
   barLine: require('../assets/icons/barLine.png'),
   greenCircle: require('../assets/icons/green circle.png'),
+  pdf: require('../assets/icons/pdf.png'),
+  download: require('../assets/icons/download.png'),
 };
 
 export const bottom_tabs = [
