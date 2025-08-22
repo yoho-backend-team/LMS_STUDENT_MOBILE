@@ -58,7 +58,7 @@ const Notifications = () => {
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Pressable onPress={() => navigation.goBack()}>
-              <Image source={backarrow} style={{ width: 22, height: 22, marginRight: 8 }} resizeMode="contain" />
+              <Image source={backarrow} style={{ width: 25, height: 25, marginRight: 15, }} resizeMode="contain" />
             </Pressable>
             <Text style={styles.headerTitle}>Notification</Text>
           </View>
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: "600",
     color: "#000",
   },
@@ -174,11 +174,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginBottom: 20,
     gap: 10,
+    justifyContent: "space-between",
   },
   activeTab: {
     paddingHorizontal: 20,
     paddingVertical: 8,
     borderRadius: 12,
+    height: 60, // Fixed height
+    minWidth: 100, // Minimum width
+    justifyContent: "center",
+    alignItems: "center",
+    flex: 1, // Equal width for all tabs
+    marginHorizontal: 4, //
   },
   activeTabText: {
     color: "#fff",
@@ -190,6 +197,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 12,
     backgroundColor: "#f3f4f6",
+    minWidth:100,
   },
   inactiveTabText: {
     color: "#374151",
