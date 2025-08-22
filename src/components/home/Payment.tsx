@@ -1,10 +1,10 @@
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { useNavigation } from "@react-navigation/native";
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useNavigation } from '@react-navigation/native';
 
 const PaymentCard = () => {
-    const navigation = useNavigation();
+  const navigation = useNavigation();
   return (
     <View style={styles.card}>
       {/* Title */}
@@ -20,22 +20,21 @@ const PaymentCard = () => {
       <Text style={styles.amount}>₹90000</Text>
 
       {/* Gradient Button */}
-      <TouchableOpacity activeOpacity={0.8} style={styles.buttonWrapper} onPress={() => navigation.navigate("Payment" as never)}>
+      <TouchableOpacity
+        activeOpacity={0.8}
+        style={styles.buttonWrapper}
+        onPress={() => navigation.navigate('Payment' as never)}>
         <LinearGradient
-          colors={["#7B00FF", "#B200FF"]}
+          colors={['#7B00FF', '#B200FF']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={styles.button}
-        >
+          style={styles.button}>
           <Text style={styles.buttonText}>Check Payments</Text>
         </LinearGradient>
       </TouchableOpacity>
 
       {/* Money Bag Icon - Right side */}
-      <Image
-        source={require("../../assets/home/money.png")} 
-        style={styles.icon}
-      />
+      <Image source={require('../../assets/home/money.png')} style={styles.icon} />
     </View>
   );
 };
@@ -44,45 +43,45 @@ export default PaymentCard;
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#fff", // light gray background
+    backgroundColor: '#fff', // light gray background
     borderRadius: 20,
     padding: 20,
-    margin: 20,
+    marginVertical: 5,
     elevation: 8,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 4, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
-    position: "relative",
-    overflow: "hidden",
+    position: 'relative',
+    overflow: 'hidden',
   },
   title: {
     fontSize: 20,
-    fontWeight: "700",
-    color: "#000",
+    fontWeight: '700',
+    color: '#000',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: "#666",
+    color: '#666',
     marginBottom: 8,
   },
   amountLabel: {
     fontSize: 14,
-    color: "#444",
+    color: '#444',
     marginTop: 5,
   },
   amount: {
     fontSize: 28,
-    fontWeight: "700",
+    fontWeight: '700',
     marginTop: 5,
-    color: "#000",
+    color: '#000',
   },
   buttonWrapper: {
     marginTop: 20,
     borderRadius: 12,
-    overflow: "hidden",
-    alignSelf: "flex-start",
+    overflow: 'hidden',
+    alignSelf: 'flex-start',
   },
   button: {
     paddingVertical: 12,
@@ -90,17 +89,17 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   buttonText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 16,
-    fontWeight: "600",
-    textAlign: "center",
+    fontWeight: '600',
+    textAlign: 'center',
   },
   icon: {
-    width: 90,
-    height: 120,
-    position: "absolute",
+    width: 110,
+    height: 110,
+    position: 'absolute',
     right: 10,
-    top: "30%",
-    resizeMode: "contain",
+    top: '30%',
+    resizeMode: 'contain',
   },
 });

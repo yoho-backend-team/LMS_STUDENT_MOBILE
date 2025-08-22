@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Dimensions,
+  Image,
+  ScrollView,
+} from 'react-native';
 import Svg, { Path, Circle } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -92,15 +100,18 @@ const AssessmentsChart: React.FC<AssessmentsChartProps> = ({
       </View>
 
       {/* Category Buttons with Gradient */}
-      <ScrollView style={styles.categoriesContainer} horizontal ={true} showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:8}}>
+      <ScrollView
+        style={styles.categoriesContainer}
+        horizontal={true}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ gap: 8 }}>
         {/* Average */}
         <TouchableOpacity style={styles.categoryWrapper} onPress={() => setActiveTab('average')}>
           <LinearGradient
             colors={activeTab === 'average' ? ['#00BFA5', '#40E0D0'] : ['#B2DFDB', '#E0F7FA']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={styles.categoryButton}
-          >
+            style={styles.categoryButton}>
             <Image source={require('../../assets/home/chart.png')} style={styles.profileicon} />
             <Text style={styles.categoryText}>Average</Text>
           </LinearGradient>
@@ -112,9 +123,11 @@ const AssessmentsChart: React.FC<AssessmentsChartProps> = ({
             colors={activeTab === 'exam' ? ['#40E0D0', '#2196F3'] : ['#BBDEFB', '#E3F2FD']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={styles.categoryButton}
-          >
-            <Image source={require('../../assets/home/clipboard-text.png')} style={styles.profileicon} />
+            style={styles.categoryButton}>
+            <Image
+              source={require('../../assets/home/clipboard-text.png')}
+              style={styles.profileicon}
+            />
             <Text style={styles.categoryText}>Exam</Text>
           </LinearGradient>
         </TouchableOpacity>
@@ -125,9 +138,11 @@ const AssessmentsChart: React.FC<AssessmentsChartProps> = ({
             colors={activeTab === 'completed' ? ['#2196F3', '#64B5F6'] : ['#C5CAE9', '#E8EAF6']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={styles.categoryButton}
-          >
-            <Image source={require('../../assets/home/task-square.png')} style={styles.profileicon} />
+            style={styles.categoryButton}>
+            <Image
+              source={require('../../assets/home/task-square.png')}
+              style={styles.profileicon}
+            />
             <Text style={styles.categoryText}>Completed task</Text>
           </LinearGradient>
         </TouchableOpacity>
@@ -141,7 +156,7 @@ const styles = StyleSheet.create({
     backgroundColor: CHART_COLORS.white,
     borderRadius: 16,
     padding: 20,
-    margin: 16,
+    marginVertical: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -155,7 +170,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   chartContainer: {
-    height: 140,
+    height: 130,
     marginBottom: 20,
     position: 'relative',
     borderRadius: 12,
@@ -198,8 +213,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
-    paddingHorizontal: 12,
-    gap: 8,
+    paddingHorizontal: 10,
+    gap: 5,
     borderRadius: 10,
   },
   categoryText: {
@@ -208,8 +223,8 @@ const styles = StyleSheet.create({
     color: CHART_COLORS.white,
   },
   profileicon: {
-    width: 25,
-    height: 24,
+    width: 15,
+    height: 15,
     borderRadius: 12,
   },
 });

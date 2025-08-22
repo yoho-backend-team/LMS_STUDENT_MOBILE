@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image } from "react-native";
-import { LinearGradient } from "expo-linear-gradient"; // ✅ Expo import
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient'; // ✅ Expo import
 
-const { width } = Dimensions.get("window");
+const { width } = Dimensions.get('window');
 
 const UpdatesScreen = () => {
-  const [activeTab, setActiveTab] = useState("today");
+  const [activeTab, setActiveTab] = useState('today');
 
   return (
     <View style={styles.container}>
@@ -17,12 +17,9 @@ const UpdatesScreen = () => {
 
       {/* Tabs */}
       <View style={styles.tabContainer}>
-        <TouchableOpacity onPress={() => setActiveTab("today")}>
-          {activeTab === "today" ? (
-            <LinearGradient
-              colors={["#a259ff", "#7209b7"]}
-              style={styles.activeTab}
-            >
+        <TouchableOpacity onPress={() => setActiveTab('today')}>
+          {activeTab === 'today' ? (
+            <LinearGradient colors={['#a259ff', '#7209b7']} style={styles.activeTab}>
               <Text style={styles.activeTabText}>Today</Text>
             </LinearGradient>
           ) : (
@@ -30,12 +27,9 @@ const UpdatesScreen = () => {
           )}
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => setActiveTab("previous")}>
-          {activeTab === "previous" ? (
-            <LinearGradient
-              colors={["#a259ff", "#7209b7"]}
-              style={styles.activeTab}
-            >
+        <TouchableOpacity onPress={() => setActiveTab('previous')}>
+          {activeTab === 'previous' ? (
+            <LinearGradient colors={['#a259ff', '#7209b7']} style={styles.activeTab}>
               <Text style={styles.activeTabText}>Previous</Text>
             </LinearGradient>
           ) : (
@@ -47,14 +41,12 @@ const UpdatesScreen = () => {
       {/* Empty State Illustration */}
       <View style={styles.emptyState}>
         <Image
-          source={require("../../assets/home/update.jpg")} // ✅ make sure this path exists
+          source={require('../../assets/home/update.jpg')} // ✅ make sure this path exists
           style={styles.image}
           resizeMode="contain"
         />
         <Text style={styles.noMsg}>No New Messages found</Text>
-        <Text style={styles.subText}>
-          Any updates will appear here when available
-        </Text>
+        <Text style={styles.subText}>Any updates will appear here when available</Text>
       </View>
     </View>
   );
@@ -62,10 +54,10 @@ const UpdatesScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor:'#fff',
+    backgroundColor: '#fff',
     borderRadius: 16,
     padding: 20,
-    margin: 16,
+    marginVertical: 5,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -77,21 +69,21 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginVertical: 5,
   },
   title: {
     fontSize: 18,
-    fontWeight: "700",
+    fontWeight: '700',
     color: '#2A2A2A',
   },
   newMsg: {
     fontSize: 16,
-    color: "#aaa",
+    color: '#aaa',
   },
   tabContainer: {
-    flexDirection: "row",
+    flexDirection: 'row',
     marginTop: 15,
     marginBottom: 20,
     gap: 15,
@@ -100,45 +92,44 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 25,
     borderRadius: 10,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 4,
   },
   activeTabText: {
-    color: "#fff",
-    fontWeight: "600",
+    color: '#fff',
+    fontWeight: '600',
     fontSize: 16,
-    textAlign: "center",
+    textAlign: 'center',
   },
   inactiveTab: {
     fontSize: 16,
-    color: "#555",
-    fontWeight: "500",
+    color: '#555',
+    fontWeight: '500',
     paddingVertical: 10,
     paddingHorizontal: 25,
   },
   emptyState: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     // marginTop: 40,
   },
   image: {
     width: width * 0.7,
     height: width * 0.5,
-   
   },
   noMsg: {
     fontSize: 18,
-    fontWeight: "600",
-    color: "#222",
+    fontWeight: '600',
+    color: '#222',
     marginBottom: 5,
   },
   subText: {
     fontSize: 14,
-    color: "#888",
-    textAlign: "center",
+    color: '#888',
+    textAlign: 'center',
     paddingHorizontal: 30,
   },
 });

@@ -21,23 +21,19 @@ interface AttendanceChartProps {
   data?: AttendanceData;
 }
 
-const AttendanceChart: React.FC<AttendanceChartProps> = ({ 
+const AttendanceChart: React.FC<AttendanceChartProps> = ({
   data = {
     overallAttendance: 0,
     remainingAttendance: 12,
-    daysAbsent: 0
-  }
+    daysAbsent: 0,
+  },
 }) => {
   // Calculate bar heights
   const getBarHeight = (value: number, maxValue: number = 100) => {
     return Math.max((value / maxValue) * 80, 8);
   };
 
-  const barHeights = [
-    getBarHeight(50),
-    getBarHeight(85),
-    getBarHeight(45),
-  ];
+  const barHeights = [getBarHeight(50), getBarHeight(85), getBarHeight(45)];
 
   return (
     <View style={styles.container}>
@@ -45,27 +41,38 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
 
       {/* Main Row → Chart on left, Stats on right */}
       <View style={styles.mainRow}>
-        
         {/* Chart Section */}
         <View style={styles.chartContainer}>
           <View style={styles.barsContainer}>
             {barHeights.map((height, index) => (
               <View key={index} style={styles.barWrapper}>
-                <View 
+                <View
                   style={[
-                    styles.bar, 
-                    { 
+                    styles.bar,
+                    {
                       height: height,
-                      backgroundColor: index === 1 ? CHART_COLORS.primary : 
-                                     index === 2 ? CHART_COLORS.secondary : CHART_COLORS.primary
-                    }
-                  ]} 
+                      backgroundColor:
+                        index === 1
+                          ? CHART_COLORS.primary
+                          : index === 2
+                            ? CHART_COLORS.secondary
+                            : CHART_COLORS.primary,
+                    },
+                  ]}
                 />
-                <View style={[
-                  styles.baseCircle,
-                  { backgroundColor: index === 1 ? CHART_COLORS.primary : 
-                                   index === 2 ? CHART_COLORS.secondary : CHART_COLORS.primary }
-                ]} />
+                <View
+                  style={[
+                    styles.baseCircle,
+                    {
+                      backgroundColor:
+                        index === 1
+                          ? CHART_COLORS.primary
+                          : index === 2
+                            ? CHART_COLORS.secondary
+                            : CHART_COLORS.primary,
+                    },
+                  ]}
+                />
               </View>
             ))}
           </View>
@@ -75,23 +82,31 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
         <View style={styles.statsContainer}>
           {/* Overall Attendance */}
           <View style={styles.statItem}>
-            <Image source={require('../../assets/home/attendance1.png')} style={styles.iconSquare} />
+            <Image
+              source={require('../../assets/home/attendance1.png')}
+              style={styles.iconSquare}
+            />
             <Text style={styles.statLabel}>Overall {data.overallAttendance}%</Text>
           </View>
 
           {/* Remaining Attendance */}
           <View style={styles.statItem}>
-            <Image source={require('../../assets/home/attendance2.png')} style={styles.iconSquare} />
+            <Image
+              source={require('../../assets/home/attendance2.png')}
+              style={styles.iconSquare}
+            />
             <Text style={styles.statLabel}>{data.remainingAttendance}% Remaining</Text>
           </View>
 
           {/* Days Absent */}
           <View style={styles.statItem}>
-            <Image source={require('../../assets/home/attendance3.png')} style={styles.iconSquare} />
+            <Image
+              source={require('../../assets/home/attendance3.png')}
+              style={styles.iconSquare}
+            />
             <Text style={styles.statLabel}>{data.daysAbsent}% Absent</Text>
           </View>
         </View>
-
       </View>
     </View>
   );
@@ -102,7 +117,7 @@ const styles = StyleSheet.create({
     backgroundColor: CHART_COLORS.white,
     borderRadius: 16,
     padding: 20,
-    margin: 16,
+    marginVertical: 15,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -147,18 +162,18 @@ const styles = StyleSheet.create({
   },
   statsContainer: {
     flex: 1,
-    marginLeft: 20,
+    marginLeft: 40,
     justifyContent: 'space-between',
     height: 120,
   },
   statItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 3,
   },
   iconSquare: {
-    width: 28,
-    height: 28,
+    width: 35,
+    height: 35,
     borderRadius: 6,
     resizeMode: 'contain',
   },
@@ -167,7 +182,6 @@ const styles = StyleSheet.create({
     color: CHART_COLORS.lightText,
     fontWeight: '500',
   },
-  
 });
 
 export default AttendanceChart;
