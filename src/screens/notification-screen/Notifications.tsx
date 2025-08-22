@@ -1,18 +1,26 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { StatusBar, Text, View, Pressable, TextInput, ScrollView, StyleSheet, Image } from "react-native"
-import { SafeAreaView } from "react-native-safe-area-context"
-import { LinearGradient } from "expo-linear-gradient"
-import { useNavigation } from "@react-navigation/native"
-import { COLORS } from "~/constants"
-import backarrow from "../../assets/icons/backarrow.png"
-import Header from "~/components/shared/Header"
+import { useState } from 'react';
+import {
+  StatusBar,
+  Text,
+  View,
+  Pressable,
+  TextInput,
+  ScrollView,
+  StyleSheet,
+  Image,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useNavigation } from '@react-navigation/native';
+import { COLORS, icons } from '~/constants';
+import Header from '~/components/shared/Header';
 
 const Notifications = () => {
-  const navigation = useNavigation()
-  const [activeTab, setActiveTab] = useState("All")
-  const [search, setSearch] = useState("")
+  const navigation = useNavigation();
+  const [activeTab, setActiveTab] = useState('All');
+  const [search, setSearch] = useState('');
 
   const [notifications, setNotifications] = useState([
     {
@@ -28,25 +36,24 @@ const Notifications = () => {
       status: 'unread',
     },
     {
-      id: "3",
-      title: "New Message",
+      id: '3',
+      title: 'New Message',
       desc: "You've received a new message from support.",
-      status: "unread",
+      status: 'unread',
     },
-  ])
+  ]);
 
   const filteredNotifications = notifications.filter((n) => {
-    const matchTab = activeTab === "All" ? true : n.status === activeTab.toLowerCase()
+    const matchTab = activeTab === 'All' ? true : n.status === activeTab.toLowerCase();
     const matchSearch =
-      n.title.toLowerCase().includes(search.toLowerCase()) || n.desc.toLowerCase().includes(search.toLowerCase())
-    return matchTab && matchSearch
-  })
+      n.title.toLowerCase().includes(search.toLowerCase()) ||
+      n.desc.toLowerCase().includes(search.toLowerCase());
+    return matchTab && matchSearch;
+  });
 
   const handleNotificationPress = (id: string) => {
-    setNotifications((prev) => 
-      prev.map((n) => (n.id === id ? { ...n, status: "read" } : n))
-    )
-  }
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, status: 'read' } : n)));
+  };
 
   return (
     <>
@@ -56,22 +63,27 @@ const Notifications = () => {
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Pressable onPress={() => navigation.goBack()}>
-              <Image source={backarrow} style={{ width: 25, height: 25, marginRight: 15, }} resizeMode="contain" />
+              <Image
+                source={icons.back_arrow}
+                style={{ width: 25, height: 25, marginRight: 15 }}
+                resizeMode="contain"
+              />
             </Pressable>
             <Text style={styles.headerTitle}>Notification</Text>
           </View>
           <Text style={styles.headerCount}>
-            {notifications.length} Message / {notifications.filter((n) => n.status === "unread").length} Unread
+            {notifications.length} Message /{' '}
+            {notifications.filter((n) => n.status === 'unread').length} Unread
           </Text>
         </View>
 
         {/* Search */}
         <View style={styles.searchWrapper}>
-          <TextInput 
-            placeholder="Search" 
-            value={search} 
-            onChangeText={setSearch} 
-            style={[styles.searchInput, styles.neumorphicBox]} 
+          <TextInput
+            placeholder="Search"
+            value={search}
+            onChangeText={setSearch}
+            style={[styles.searchInput, styles.neumorphicBox]}
           />
         </View>
 
@@ -80,7 +92,9 @@ const Notifications = () => {
           {['All', 'Read', 'Unread'].map((tab) => (
             <Pressable key={tab} onPress={() => setActiveTab(tab)}>
               {activeTab === tab ? (
-                <LinearGradient colors={["#7B00FF", "#9333ea"]} style={[styles.activeTab, styles.innerShadow]}>
+                <LinearGradient
+                  colors={['#7B00FF', '#9333ea']}
+                  style={[styles.activeTab, styles.innerShadow]}>
                   <Text style={styles.activeTabText}>{tab}</Text>
                 </LinearGradient>
               ) : (
@@ -97,25 +111,21 @@ const Notifications = () => {
           <Text style={styles.sectionTitle}>Today</Text>
 
           {filteredNotifications.length === 0 ? (
-            <Text style={{ textAlign: "center", color: "#6b7280" }}>No notifications found</Text>
+            <Text style={{ textAlign: 'center', color: '#6b7280' }}>No notifications found</Text>
           ) : (
             filteredNotifications.map((item) => (
               <Pressable
                 key={item.id}
                 onPress={() => handleNotificationPress(item.id)}
-                style={[styles.card, styles.neumorphicCard]}
-              >
-                <View style={[styles.iconWrapper, styles.neumorphicCard]}>{/* icon can go here */}</View>
+                style={[styles.card, styles.neumorphicCard]}>
+                <View style={[styles.iconWrapper, styles.neumorphicCard]}>
+                  {/* icon can go here */}
+                </View>
                 <View style={styles.cardContent}>
-                  <Text style={[
-                    item.status === "unread" ? styles.unreadTitle : styles.readTitle
-                  ]}>
+                  <Text style={[item.status === 'unread' ? styles.unreadTitle : styles.readTitle]}>
                     {item.title}
                   </Text>
-                  <Text style={[
-                    styles.cardDesc,
-                    item.status === "read" && styles.readDesc
-                  ]}>
+                  <Text style={[styles.cardDesc, item.status === 'read' && styles.readDesc]}>
                     {item.desc}
                   </Text>
                 </View>
@@ -125,10 +135,10 @@ const Notifications = () => {
         </ScrollView>
       </SafeAreaView>
     </>
-  )
-}
+  );
+};
 
-export default Notifications
+export default Notifications;
 
 const styles = StyleSheet.create({
   container: {
@@ -141,8 +151,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 26,
-    marginBottom: 24,
+    marginTop: 15,
+    marginBottom: 15,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -150,8 +160,8 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 22,
-    fontWeight: "600",
-    color: "#000",
+    fontWeight: '600',
+    color: '#000',
   },
   headerCount: {
     fontSize: 12,
@@ -161,18 +171,18 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   searchInput: {
-    backgroundColor: "#f3f4f6",
+    backgroundColor: '#f3f4f6',
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 14,
     fontSize: 15,
-    color: "#374151",
+    color: '#374151',
   },
   tabWrapper: {
     flexDirection: 'row',
     marginBottom: 20,
     gap: 10,
-    justifyContent: "space-between",
+    justifyContent: 'space-between',
   },
   activeTab: {
     paddingHorizontal: 20,
@@ -180,8 +190,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     height: 60, // Fixed height
     minWidth: 100, // Minimum width
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     flex: 1, // Equal width for all tabs
     marginHorizontal: 4, //
   },
@@ -194,8 +204,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 8,
     borderRadius: 12,
-    backgroundColor: "#f3f4f6",
-    minWidth:100,
+    backgroundColor: '#f3f4f6',
+    minWidth: 100,
   },
   inactiveTabText: {
     color: '#374151',
@@ -209,8 +219,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   card: {
-    flexDirection: "row",
-    backgroundColor: "#f3f4f6",
+    flexDirection: 'row',
+    backgroundColor: '#f3f4f6',
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
@@ -229,44 +239,44 @@ const styles = StyleSheet.create({
   },
   unreadTitle: {
     fontSize: 15,
-    fontWeight: "bold",
-    color: "#000",
+    fontWeight: 'bold',
+    color: '#000',
     marginBottom: 2,
   },
   readTitle: {
     fontSize: 15,
-    fontWeight: "600",
-    color: "#6b7280", // Gray color for read messages
+    fontWeight: '600',
+    color: '#6b7280', // Gray color for read messages
     marginBottom: 2,
   },
   cardDesc: {
     fontSize: 13,
-    color: "#000",
+    color: '#000',
   },
   readDesc: {
-    color: "#6b7280", // Gray color for read message descriptions
+    color: '#6b7280', // Gray color for read message descriptions
   },
   neumorphicBox: {
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: -2, height: -2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 6,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.8)",
+    borderColor: 'rgba(255, 255, 255, 0.8)',
   },
   neumorphicCard: {
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: -3, height: -3 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 4,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.9)",
+    borderColor: 'rgba(255, 255, 255, 0.9)',
   },
   innerShadow: {
     shadowOffset: { width: 2, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
   },
-})
+});
