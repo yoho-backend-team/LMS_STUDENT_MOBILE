@@ -1,5 +1,4 @@
-import React from 'react';
-import { StatusBar, StyleSheet, Text, View } from 'react-native';
+import { StatusBar, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '~/components/shared/Header';
 import { COLORS } from '~/constants';
@@ -11,10 +10,10 @@ const Home = () => {
       <SafeAreaView edges={['top']} style={styles.container}>
         <Header />
 
-		{/* code inside the view section*/}
-		<View>
-			
-		</View>
+        {/* code inside the view section*/}
+        <View>
+          
+        </View>
       </SafeAreaView>
     </>
   );
@@ -27,5 +26,9 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 10,
     backgroundColor: COLORS.white,
+  },
+  imageStyle: {
+    width: 15,
+    height: 15,
   },
 });
