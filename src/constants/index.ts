@@ -37,6 +37,7 @@ export const icons = {
   menu: require('../assets/icons/menu.png'),
   user_profile: require('../assets/icons/userprofile.png'),
   notification: require('../assets/icons/notification.png'),
+  app_icon: require('../assets/icons/app-icon.png'),
 };
 
 export const bottom_tabs = [

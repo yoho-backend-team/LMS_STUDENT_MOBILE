@@ -164,6 +164,17 @@ const ServiceDrawerContent: React.FC<DrawerContentProps> = ({ navigation }) => {
             }}
           />
           <CustomDrawerItem
+            label={screens.community}
+            icon={
+              selectedTab === screens.community ? icons.community_filled : icons.community_outlined
+            }
+            isFocused={selectedTab === screens.community}
+            onPress={() => {
+              dispatch(setSelectedTab(screens.community));
+              navigation.navigate('MainLayout');
+            }}
+          />
+          <CustomDrawerItem
             label="Tickets"
             icon={icons.course_filled}
             onPress={() => navigation.navigate('TicketsScreen')}
@@ -172,6 +183,11 @@ const ServiceDrawerContent: React.FC<DrawerContentProps> = ({ navigation }) => {
             label="Payments"
             icon={icons.course_filled}
             onPress={() => navigation.navigate('Payment')}
+          />
+          <CustomDrawerItem
+            label="Placement"
+            icon={icons.course_filled}
+            onPress={() => navigation.navigate('Placement')}
           />
           <CustomDrawerItem
             label="Notifications"
