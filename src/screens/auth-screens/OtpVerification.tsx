@@ -6,7 +6,6 @@ import {
   View,
   TouchableOpacity,
   TextInput,
-  Alert,
   KeyboardAvoidingView,
   ScrollView,
   Platform,
@@ -19,14 +18,15 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Auth, COLORS, FONTS, icons } from '~/constants';
-import AntDesign from '@expo/vector-icons/AntDesign';
 import toast from '~/utils/toasts';
+import { useNavigation } from '@react-navigation/native';
 
 const OTPVerification = () => {
   const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '']);
   const inputRefs = useRef<Array<TextInput | null>>([]);
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
+  const navigation = useNavigation();
 
   useEffect(() => {
     if (inputRefs.current[0]) {
@@ -103,6 +103,7 @@ const OTPVerification = () => {
     const otpString = otp.join('');
     if (otpString.length === 6) {
       toast.success('Success', `OTP Verified: ${otpString}`);
+      navigation.navigate('ResetPassword' as never);
     } else {
       toast.error('Error', 'Please enter complete OTP');
     }
@@ -190,7 +191,7 @@ const OTPVerification = () => {
 
                 {/* Timer */}
                 <Text style={styles.timerText}>
-                  {canResend ? 'OTP expired' : `Resend OTP in ${formatTime(timer)}`}
+                  {canResend ? 'OTP expired' : `OTP expired in ${formatTime(timer)}`}
                 </Text>
 
                 {/* Verify Button */}
@@ -300,6 +301,7 @@ const styles = StyleSheet.create({
     color: COLORS.text_desc,
     marginBottom: 30,
     alignSelf: 'flex-end',
+    marginRight: 5,
   },
   verifyButton: {
     width: '100%',

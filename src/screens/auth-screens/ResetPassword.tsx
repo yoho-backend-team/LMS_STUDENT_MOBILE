@@ -1,82 +1,252 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image } from 'react-native';
+import { useState } from 'react';
+import {
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  TouchableOpacity,
+  Image,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Auth } from '~/constants';
-
-const COLORS = {
-  primary: '#8B5FBF',
-  white: '#FFFFFF',
-  black: '#000000',
-  gray: '#666666',
-  inputBorder: '#E0E0E0',
-  textDark: '#333333',
-};
+import { Auth, COLORS, FONTS, icons } from '~/constants';
+import { useNavigation } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { MaterialIcons } from '@expo/vector-icons';
+import toast from '~/utils/toasts';
 
 const ResetPassword = () => {
-  const [currentPass, setCurrentPass] = useState('');
-  const [newPass, setNewPass] = useState('');
-  const [confirmPass, setConfirmPass] = useState('');
+  const navigation = useNavigation();
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [errors, setErrors] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
 
-  const handleSubmit = () => {
-    if (newPass !== confirmPass) {
-      console.log('Passwords do not match');
-      return;
+  const validateForm = () => {
+    let valid = true;
+    const newErrors = {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    };
+
+    // Current Password validation
+    if (!currentPassword.trim()) {
+      newErrors.currentPassword = 'Current password is required';
+      valid = false;
+    } else if (currentPassword.length < 6) {
+      newErrors.currentPassword = 'Password must be at least 6 characters';
+      valid = false;
     }
-    console.log('Password reset with:', { currentPass, newPass });
+
+    // New Password validation
+    if (!newPassword.trim()) {
+      newErrors.newPassword = 'New password is required';
+      valid = false;
+    } else if (newPassword.length < 6) {
+      newErrors.newPassword = 'Password must be at least 6 characters';
+      valid = false;
+    }
+
+    // Confirm Password validation
+    if (!confirmPassword.trim()) {
+      newErrors.confirmPassword = 'Please confirm your password';
+      valid = false;
+    } else if (newPassword !== confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+      valid = false;
+    }
+
+    setErrors(newErrors);
+    return valid;
+  };
+
+  const handleResetPassword = () => {
+    if (validateForm()) {
+      console.log('Reset password pressed', { currentPassword, newPassword, confirmPassword });
+      toast.success('Success', 'Password reset successfully!');
+      navigation.navigate('login' as never);
+    }
+  };
+
+  const togglePasswordVisibility = (field: 'current' | 'new' | 'confirm') => {
+    switch (field) {
+      case 'current':
+        setShowCurrentPassword(!showCurrentPassword);
+        break;
+      case 'new':
+        setShowNewPassword(!showNewPassword);
+        break;
+      case 'confirm':
+        setShowConfirmPassword(!showConfirmPassword);
+        break;
+    }
+  };
+
+  const clearError = (field: string) => {
+    setErrors((prev) => ({ ...prev, [field]: '' }));
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-       <View style={styles.headerSection}>
-				<Image source={Auth.header} style={styles.headerImage}></Image>
-					   </View>
-	  
-					   <View >
-						 <Image source={Auth.loading}></Image>
-						
-					   </View>
-	  
+    <>
+      <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
+      <SafeAreaView style={styles.container}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
+          <ScrollView
+            contentContainerStyle={styles.scrollContainer}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}>
+            <View style={styles.contentWrapper}>
+              {/* Header Section with Icon */}
+              <LinearGradient
+                colors={['#7B00FF', '#B200FF', '#7B00FF']}
+                style={styles.headerSection}>
+                <View style={styles.content}>
+                  <Image source={icons.security2} style={styles.headerImage} />
+                </View>
+              </LinearGradient>
 
-      <View style={styles.inputGroup}>
-        <Text style={styles.inputLabel}>Current Password</Text>
-        <TextInput
-          style={styles.input}
-          value={currentPass}
-          onChangeText={setCurrentPass}
-         
-          placeholderTextColor={COLORS.gray}
-          secureTextEntry={true}
-        />
-      </View>
+              <View style={{ alignItems: 'center', marginTop: 10 }}>
+                <Image source={Auth.loading} style={{ width: 75, height: 75 }} />
+              </View>
 
-      <View style={styles.inputGroup}>
-        <Text style={styles.inputLabel}>New Password</Text>
-        <TextInput
-          style={styles.input}
-          value={newPass}
-          onChangeText={setNewPass}
-          
-          placeholderTextColor={COLORS.gray}
-          secureTextEntry={true}
-        />
-      </View>
+              {/* Form Section */}
+              <View style={styles.formSection}>
+                {/* Current Password Input */}
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Current Password</Text>
+                  <View
+                    style={[styles.passwordContainer, errors.currentPassword && styles.inputError]}>
+                    <TextInput
+                      style={styles.passwordInput}
+                      value={currentPassword}
+                      onChangeText={(text) => {
+                        setCurrentPassword(text);
+                        clearError('currentPassword');
+                      }}
+                      placeholder="Enter your current password"
+                      placeholderTextColor={COLORS.shadow_01}
+                      secureTextEntry={!showCurrentPassword}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      editable={true}
+                      selectTextOnFocus={true}
+                      returnKeyType="next"
+                    />
+                    <TouchableOpacity
+                      style={styles.eyeIcon}
+                      onPress={() => togglePasswordVisibility('current')}>
+                      <MaterialIcons
+                        name={showCurrentPassword ? 'visibility' : 'visibility-off'}
+                        size={24}
+                        color={COLORS.text_desc}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                  {errors.currentPassword ? (
+                    <Text style={styles.errorText}>{errors.currentPassword}</Text>
+                  ) : null}
+                </View>
 
-      <View style={styles.inputGroup}>
-        <Text style={styles.inputLabel}>Confirm New Password</Text>
-        <TextInput
-          style={styles.input}
-          value={confirmPass}
-          onChangeText={setConfirmPass}
-          
-          placeholderTextColor={COLORS.gray}
-          secureTextEntry={true}
-        />
-      </View>
+                {/* New Password Input */}
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>New Password</Text>
+                  <View style={[styles.passwordContainer, errors.newPassword && styles.inputError]}>
+                    <TextInput
+                      style={styles.passwordInput}
+                      value={newPassword}
+                      onChangeText={(text) => {
+                        setNewPassword(text);
+                        clearError('newPassword');
+                      }}
+                      placeholder="Enter your new password"
+                      placeholderTextColor={COLORS.shadow_01}
+                      secureTextEntry={!showNewPassword}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      editable={true}
+                      selectTextOnFocus={true}
+                      returnKeyType="next"
+                    />
+                    <TouchableOpacity
+                      style={styles.eyeIcon}
+                      onPress={() => togglePasswordVisibility('new')}>
+                      <MaterialIcons
+                        name={showNewPassword ? 'visibility' : 'visibility-off'}
+                        size={24}
+                        color={COLORS.text_desc}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                  {errors.newPassword ? (
+                    <Text style={styles.errorText}>{errors.newPassword}</Text>
+                  ) : null}
+                </View>
 
-      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-        <Text style={styles.submitText}>Submit</Text>
-      </TouchableOpacity>
-    </SafeAreaView>
+                {/* Confirm Password Input */}
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Confirm Password</Text>
+                  <View
+                    style={[styles.passwordContainer, errors.confirmPassword && styles.inputError]}>
+                    <TextInput
+                      style={styles.passwordInput}
+                      value={confirmPassword}
+                      onChangeText={(text) => {
+                        setConfirmPassword(text);
+                        clearError('confirmPassword');
+                      }}
+                      placeholder="Confirm your new password"
+                      placeholderTextColor={COLORS.shadow_01}
+                      secureTextEntry={!showConfirmPassword}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      editable={true}
+                      selectTextOnFocus={true}
+                      returnKeyType="done"
+                      onSubmitEditing={handleResetPassword}
+                    />
+                    <TouchableOpacity
+                      style={styles.eyeIcon}
+                      onPress={() => togglePasswordVisibility('confirm')}>
+                      <MaterialIcons
+                        name={showConfirmPassword ? 'visibility' : 'visibility-off'}
+                        size={24}
+                        color={COLORS.text_desc}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                  {errors.confirmPassword ? (
+                    <Text style={styles.errorText}>{errors.confirmPassword}</Text>
+                  ) : null}
+                </View>
+
+                {/* Reset Password Button */}
+                <TouchableOpacity onPress={handleResetPassword} style={styles.resetButton}>
+                  <LinearGradient
+                    colors={['#7B00FF', '#B200FF']}
+                    style={styles.resetButtonGradient}>
+                    <Text style={styles.resetButtonText}>Change Password</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </>
   );
 };
 
@@ -85,14 +255,33 @@ export default ResetPassword;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
     backgroundColor: COLORS.white,
   },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: COLORS.textDark,
+  scrollContainer: {
+    flexGrow: 1,
+  },
+  contentWrapper: {
+    flex: 1,
+  },
+  headerSection: {
+    paddingHorizontal: 24,
+    paddingVertical: 40,
+    alignItems: 'center',
+    borderBottomLeftRadius: 25,
+    borderBottomRightRadius: 25,
+  },
+  content: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerImage: {
+    height: 200,
+  },
+  formSection: {
+    flex: 1,
+    paddingHorizontal: 24,
+    marginTop: 12,
+    paddingBottom: 40,
   },
   inputGroup: {
     marginBottom: 20,
@@ -100,43 +289,50 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 16,
     fontWeight: '500',
-    color: COLORS.textDark,
+    color: COLORS.text_title,
     marginBottom: 8,
   },
-  input: {
+  inputError: {
+    borderColor: COLORS.light_red,
+  },
+  errorText: {
+    color: COLORS.light_red,
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 4,
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1,
-    borderColor: COLORS.inputBorder,
+    borderColor: COLORS.text_desc,
     borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
     backgroundColor: COLORS.white,
-    color: COLORS.textDark,
     height: 48,
   },
-  submitButton: {
-    backgroundColor: COLORS.primary,
-    borderRadius: 8,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginTop: 20,
+  passwordInput: {
+    flex: 1,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    color: COLORS.text_title,
+    height: '100%',
+    textAlignVertical: 'center',
   },
-  submitText: {
+  eyeIcon: {
+    padding: 12,
+  },
+  resetButton: {
+    width: '100%',
+    marginTop: 10,
+  },
+  resetButtonGradient: {
+    borderRadius: 18,
+    paddingVertical: 15,
+    alignItems: 'center',
+  },
+  resetButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
     color: COLORS.white,
-  },
-    headerImage: {
-    height: 200,
-    
-  },
-   headerSection: {
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 24,
-    paddingVertical: 40,
-
-    alignItems: 'center',
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
   },
 });
