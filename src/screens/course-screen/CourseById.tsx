@@ -5,6 +5,7 @@ import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { COLORS, icons } from '~/constants';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { WebView } from 'react-native-webview';
+import { getImageUrl } from '~/utils/imageUtils';
 
 type RootStackParamList = {
   Courses: undefined;
@@ -13,11 +14,13 @@ type RootStackParamList = {
 
 type Course = {
   id: number;
-  title: string;
+  course_name: string;
   description: string;
-  modules: string;
+  coursemodules: string;
   duration: string;
+  class_type:string;
   image: any;
+  notes:any;
 };
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CourseViewScreen'>;
@@ -134,40 +137,60 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
         </TouchableOpacity>
 
         {/* Scrollable Tabs */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabScroll}>
-          {['about', 'notes', 'tasks', 'track'].map((tab) => (
-            <TouchableOpacity
-              key={tab}
-              style={[styles.tabButton, activeTab === tab && styles.activeTab]}
-              onPress={() => {
-                if (showVideo && tab !== 'track') {
-                  setShowVideo(false);
-                }
-                setActiveTab(tab as any);
-              }}>
-              <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
-                {tab === 'about'
-                  ? 'About'
-                  : tab === 'notes'
-                    ? 'Notes & Materials'
-                    : tab === 'tasks'
-                      ? 'Tasks & Projects'
-                      : 'Course Track'}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-
+       <ScrollView
+  horizontal
+  showsHorizontalScrollIndicator={false}
+  style={styles.tabScroll}
+  contentContainerStyle={{ flexGrow: 1 }}
+>
+  {['about', 'notes', 'tasks', 'track'].map((tab) => (
+    <TouchableOpacity
+      key={tab}
+      style={[
+        styles.tabButton,
+        activeTab === tab && styles.activeTab,
+      ]}
+      onPress={() => {
+        if (showVideo && tab !== 'track') {
+          setShowVideo(false);
+        }
+        setActiveTab(tab as any);
+      }}
+    >
+      <Text
+        style={[
+          styles.tabText,
+          activeTab === tab && styles.activeTabText,
+        ]}
+      >
+        {tab === 'about'
+          ? 'About'
+          : tab === 'notes'
+          ? 'Notes & Materials'
+          : tab === 'tasks'
+          ? 'Tasks & Projects'
+          : 'Course Track'}
+      </Text>
+    </TouchableOpacity>
+  ))}
+</ScrollView>
         {/* ABOUT TAB */}
         {activeTab === 'about' && (
           <>
             <View style={styles.card}>
               <Text style={styles.sectionTitle}>About Course</Text>
               <View style={styles.card}>
-                <Image source={course.image} style={styles.image} resizeMode="contain" />
+                <Image
+                                  source={
+                                   { uri: getImageUrl(course?.image)  }
+                                  }
+                                  style={styles.image}
+                                  resizeMode="contain"
+                                />
               </View>
-              <Text style={styles.title}>{course.title}</Text>
-              <Text style={styles.description}>{course.description}</Text>
+              <Text style={styles.title}>{course?.course_name}</Text>
+              <Text style={styles.description}>{course?.description}</Text>
+              
 
               <View style={styles.footer}>
                 <View style={styles.footerItem}>
@@ -175,14 +198,14 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
                     source={require('../../assets/courses/modules.png')}
                     style={{ width: 24, height: 24 }}
                   />
-                  <Text style={styles.footerText}>{course.modules}</Text>
+                  <Text style={styles.footerText}> {course.coursemodules?.length ?? '0'} modules</Text>
                 </View>
                 <View style={styles.footerItem}>
                   <Image
                     source={require('../../assets/courses/Alarm.png')}
                     style={{ width: 24, height: 24 }}
                   />
-                  <Text style={styles.footerText}>{course.duration}</Text>
+                  <Text style={styles.footerText}>  {course.duration ?? 'N/A'}</Text>
                 </View>
               </View>
             </View>
@@ -192,21 +215,21 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
                 <Text style={styles.infoLabel}>Course Name</Text>
                 <View style={styles.card1}>
                   <Text style={styles.infoValue}>
-                    If you can this yes successfully mobile app on Android
+                    {course?.course_name ?? ''}
                   </Text>
                 </View>
               </View>
               <View style={styles.infoCard}>
                 <Text style={styles.infoLabel}>Course Durations</Text>
                 <View style={styles.card1}>
-                  <Text style={styles.infoValue}>Feedback</Text>
+                  <Text style={styles.infoValue}> {course?.duration ?? ''}</Text>
                 </View>
               </View>
               <View style={styles.infoCard}>
-                <Text style={styles.infoLabel}>Total Hours</Text>
+                <Text style={styles.infoLabel}>Class Type</Text>
                 <View style={styles.card1}>
                   <Text style={styles.infoValue}>
-                    sbxxd-rcfvg...jpeg. <Text style={{ color: 'blue' }}>View</Text>
+                   {course?.class_type[0] ?? ''} 
                   </Text>
                 </View>
               </View>
@@ -217,7 +240,8 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
         {activeTab === 'notes' && (
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>Notes & Materials</Text>
-            {notesData.map((note) => (
+            {course?.notes?.length ? 
+            course?.notes?.map((note:any) => (
               <View key={note.id} style={styles.noteCard}>
                 {/* Name Row */}
                 <View style={styles.textRow}>
@@ -243,7 +267,9 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
                   <Image source={icons.download} style={{ width: 55, height: 55 }} />
                 </TouchableOpacity>
               </View>
-            ))}
+            )) : <View> 
+              <Text style = {{textAlign:"center",marginTop:200,marginBottom:350}}>"No notes and materials available"</Text>
+              </View>}
           </View>
         )}
 
@@ -508,13 +534,16 @@ const styles = StyleSheet.create({
   backButton: { marginBottom: 10 },
 
   tabScroll: { marginBottom: 16 },
-  tabButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    marginRight: 8,
-    borderRadius: 10,
-    backgroundColor: '#fff',
-  },
+ tabButton: {
+  flex: 1,                 
+  minWidth: 130,          
+  justifyContent: 'center',
+  alignItems: 'center',
+  paddingVertical: 10,
+  marginRight: 8,
+  borderRadius: 8,
+  backgroundColor: '#fff',
+},
   activeTab: { backgroundColor: '#7B00FF' },
   tabText: { color: '#374151', fontSize: 14 },
   activeTabText: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
@@ -532,8 +561,9 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   image: { width: '100%', height: 140, borderRadius: 12, marginBottom: 12 },
-  title: { fontSize: 16, fontWeight: 'bold', marginBottom: 8, color: '#2A2A2A' },
-  description: { fontSize: 14, color: '#716F6F', marginBottom: 16 },
+  title: { fontSize: 20, fontWeight: 'bold', marginBottom: 8, color: '#2A2A2A' },
+  description: { fontSize: 16, color: '#716F6F', marginBottom: 16 },
+
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -574,8 +604,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     ...SHADOW,
   },
-  taskText: { fontSize: 14, color: '#374151', marginBottom: 6, width: '50%' },
-  actionRow: { flexDirection: 'row', alignItems: 'center' },
+  taskText: { fontSize: 18, color: '#716F6F', marginBottom: 6, width: '50%' },
+  actionRow: { flexDirection: 'row', alignItems: 'center', },
   statusButton: {
     marginLeft: 8,
     paddingVertical: 4,
@@ -586,7 +616,7 @@ const styles = StyleSheet.create({
   pending: { backgroundColor: '#9CA3AF' },
   statusText: { color: '#fff', fontWeight: 'bold' },
 
-  sectionTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 12 },
+  sectionTitle: { fontSize: 22, fontWeight: 'bold', marginBottom: 12 },
 
   videoCard: {
     height: 200,
@@ -680,8 +710,8 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
   taskValue: {
-    fontSize: 14,
-    color: '#555',
+    fontSize: 18,
+    color: '#716F6F',
   },
   labelText: {
     fontSize: 14,

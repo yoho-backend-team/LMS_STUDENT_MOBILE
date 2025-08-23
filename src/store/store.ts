@@ -1,9 +1,11 @@
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit';
 import tabReducer from './tab/tabSlice';
+import CourseSlice from '../features/Courses/Reducers/courseSlice'
 
 const store = configureStore({
 	reducer: {
 		tabReducer: tabReducer,
+		CourseSlice: CourseSlice,
 	},
 });
 
