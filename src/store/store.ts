@@ -1,9 +1,12 @@
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit';
 import tabReducer from './tab/tabSlice';
+import ProfileSlice from '../features/Profile/reducer/profileSlice';
+
 
 const store = configureStore({
 	reducer: {
 		tabReducer: tabReducer,
+		ProfileSlice: ProfileSlice,
 	},
 });
 

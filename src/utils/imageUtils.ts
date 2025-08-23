@@ -1,4 +1,4 @@
-const BackEndUrl = process.env.EXPO_PUBLIC_URL ?? '';
+const BackEndUrl =  'https://lms-node-backend-v1.onrender.com/';
 
 export const getImageUrl = (imageKey: string | null | undefined): string => {
 	return imageKey ? `${BackEndUrl}${imageKey}` : '';
