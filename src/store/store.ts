@@ -1,10 +1,12 @@
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit';
 import tabReducer from './tab/tabSlice';
+import helpReducer from '../features/HelpCenter/Reducer/HelpSlice';
 
 const store = configureStore({
-	reducer: {
-		tabReducer: tabReducer,
-	},
+  reducer: {
+    tabReducer: tabReducer,
+    helpSlice: helpReducer,
+  },
 });
 
 export { store };
@@ -13,8 +15,8 @@ export { store };
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 export type AppThunk<ReturnType = void> = ThunkAction<
-	ReturnType,
-	RootState,
-	unknown,
-	Action<string>
+  ReturnType,
+  RootState,
+  unknown,
+  Action<string>
 >;
