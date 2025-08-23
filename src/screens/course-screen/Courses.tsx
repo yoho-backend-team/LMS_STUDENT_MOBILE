@@ -61,10 +61,8 @@ const Courses = () => {
     fetchData();
   }, [dispatch]);
 
-  console.log('Redux course data:', coursedata);
 
   const course = coursedata?.data; 
-console.log("course",course?.image)
   return (
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
