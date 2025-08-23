@@ -26,34 +26,37 @@ import {
 } from '../screens';
 import StudentDrawer from '../tabs/StudentDrawer';
 
-const Routes = () => {
-  type RootStackParamList = {
-    AuthStackstudent: undefined;
-    Student: undefined;
-    FAQ: undefined;
-    StudentDrawer: undefined;
-    login: undefined;
-    ForgetPassword: undefined;
-    OtpVerification: undefined;
-    ResetPassword: undefined;
-    Payment: undefined;
-    Helpcenter: undefined;
-    ActivityLog: undefined;
-    TicketsScreen: undefined;
-    TicketViewScreen: undefined;
-    CreateTicket: undefined;
-    ClassesScreen: undefined;
-    ClassViewScreen: undefined;
-    CoursesScreen: undefined;
-    CourseViewScreen: undefined;
-    Notification: undefined;
-    Placement: undefined;
-    Profile: undefined;
-    CommunitiesScreen: undefined;
-    CommunityViewScreen: undefined;
-  };
 
-  const Stack = createNativeStackNavigator<RootStackParamList>();
+// ✅ move outside & export so other files can use it
+export type RootStackParamList = {
+  AuthStackstudent: undefined;
+  Student: undefined;
+  FAQ: undefined;
+  StudentDrawer: undefined;
+  login: undefined;
+  ForgetPassword: undefined;
+  OtpVerification: undefined;
+  ResetPassword: undefined;
+  Payment: undefined;
+  Helpcenter: undefined;
+  ActivityLog: undefined;
+  TicketsScreen: undefined;
+  TicketViewScreen: undefined;
+  CreateTicket: undefined;
+  ClassesScreen: undefined;
+  ClassViewScreen: undefined;
+  CoursesScreen: undefined;
+  CourseViewScreen: undefined;
+  Notification: undefined;
+  Placement: undefined;
+  Profile: undefined;
+  CommunitiesScreen: undefined;
+  CommunityViewScreen: { community: { name: string; message: string; time: string } }; // 👈 add param type
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
+
+const Routes = () => {
   const navigation =
     useNavigation<import('@react-navigation/native').NavigationProp<RootStackParamList>>();
 

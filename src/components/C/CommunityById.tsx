@@ -1,20 +1,8 @@
-import React, { useState, useRef, useEffect } from "react"
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-  SafeAreaView,
-  StatusBar,
-  KeyboardAvoidingView,
-  Platform,
-  Keyboard,
-  TouchableWithoutFeedback,
-} from "react-native"
-import { Ionicons } from "@expo/vector-icons"
-import { useNavigation } from "@react-navigation/native"
+"use client"
+
+import type React from "react"
+import { useState } from "react"
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, SafeAreaView, StatusBar } from "react-native"
 
 interface Message {
   id: string
@@ -22,10 +10,9 @@ interface Message {
   isOutgoing: boolean
 }
 
-const CommunityById: React.FC = () => {
-  const navigation = useNavigation()
+const ChatScreen: React.FC = () => {
   const [message, setMessage] = useState("")
-  const [messages, setMessages] = useState<Message[]>([
+  const [messages] = useState<Message[]>([
     { id: "1", text: "Hey there!", isOutgoing: false },
     { id: "2", text: "Hello! How are you?", isOutgoing: true },
     { id: "3", text: "I'm doing great, thanks for asking", isOutgoing: false },
@@ -37,24 +24,12 @@ const CommunityById: React.FC = () => {
     { id: "9", text: "Let me know if you need any help", isOutgoing: true },
   ])
 
-  const scrollViewRef = useRef<ScrollView>(null)
-
   const handleSend = () => {
     if (message.trim()) {
-      const newMsg: Message = {
-        id: Date.now().toString(),
-        text: message,
-        isOutgoing: true,
-      }
-      setMessages((prev) => [...prev, newMsg])
+      // Handle sending message logic here
       setMessage("")
     }
   }
-
-  useEffect(() => {
-    // Auto scroll to bottom whenever messages update
-    scrollViewRef.current?.scrollToEnd({ animated: true })
-  }, [messages])
 
   const renderMessage = (msg: Message) => (
     <View
@@ -62,9 +37,7 @@ const CommunityById: React.FC = () => {
       style={[styles.messageContainer, msg.isOutgoing ? styles.outgoingMessage : styles.incomingMessage]}
     >
       <View style={[styles.messageBubble, msg.isOutgoing ? styles.outgoingBubble : styles.incomingBubble]}>
-        <Text style={[styles.messageText, msg.isOutgoing ? styles.outgoingText : styles.incomingText]}>
-          {msg.text}
-        </Text>
+        <Text style={[styles.messageText, msg.isOutgoing ? styles.outgoingText : styles.incomingText]}>{msg.text}</Text>
       </View>
     </View>
   )
@@ -73,58 +46,43 @@ const CommunityById: React.FC = () => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#f5f5f5" />
 
-      {/* Dismiss keyboard when tapping outside */}
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 50 : 0}
-        >
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-              <Ionicons name="arrow-back" size={24} color="#333" />
-            </TouchableOpacity>
-            <View style={styles.profileContainer}>
-              <View style={styles.profileIcon} />
-              <View style={styles.headerText}>
-                <Text style={styles.headerTitle}>MERN 2025</Text>
-                <Text style={styles.headerSubtitle}>5 Members</Text>
-              </View>
-            </View>
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.profileContainer}>
+          <View style={styles.profileIcon} />
+          <View style={styles.headerText}>
+            <Text style={styles.headerTitle}>MERN 2025</Text>
+            <Text style={styles.headerSubtitle}>5 Member</Text>
           </View>
+        </View>
+      </View>
 
-          {/* Chat Messages */}
-          <ScrollView
-            ref={scrollViewRef}
-            style={styles.chatContainer}
-            contentContainerStyle={styles.chatContent}
-            showsVerticalScrollIndicator={false}
-          >
-            {messages.map(renderMessage)}
-          </ScrollView>
+      {/* Chat Messages */}
+      <ScrollView
+        style={styles.chatContainer}
+        contentContainerStyle={styles.chatContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {messages.map(renderMessage)}
+      </ScrollView>
 
-          {/* Message Input */}
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Type a Message"
-              placeholderTextColor="#999"
-              value={message}
-              onChangeText={setMessage}
-              multiline
-            />
-            <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
-              <Ionicons name="send" size={20} color="#fff" />
-            </TouchableOpacity>
-          </View>
-        </KeyboardAvoidingView>
-      </TouchableWithoutFeedback>
+      {/* Message Input */}
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.textInput}
+          placeholder="Type a Message"
+          placeholderTextColor="#999"
+          value={message}
+          onChangeText={setMessage}
+          multiline
+        />
+        <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+          <Text style={styles.sendIcon}>➤</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   )
 }
-
-export default CommunityById
 
 const styles = StyleSheet.create({
   container: {
@@ -132,21 +90,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
     backgroundColor: "#f5f5f5",
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: "#e0e0e0",
   },
-  backButton: {
-    marginRight: 12,
-  },
   profileContainer: {
     flexDirection: "row",
     alignItems: "center",
-    flex: 1,
   },
   profileIcon: {
     width: 40,
@@ -231,11 +183,17 @@ const styles = StyleSheet.create({
   },
   sendButton: {
     marginLeft: 8,
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "#1a4a47",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#ddd",
     justifyContent: "center",
     alignItems: "center",
   },
+  sendIcon: {
+    fontSize: 16,
+    color: "#666",
+  },
 })
+
+export default ChatScreen
