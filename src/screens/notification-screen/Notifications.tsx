@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   StatusBar,
   Text,
@@ -10,17 +10,22 @@ import {
   ScrollView,
   StyleSheet,
   Image,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { COLORS, icons } from '~/constants';
 import Header from '~/components/shared/Header';
+import { useDispatch } from 'react-redux';
+import { getAllNotificationsThunk } from '~/features/notification/reducers/thunks';
 
 const Notifications = () => {
   const navigation = useNavigation();
+  const dispatch:any = useDispatch();
   const [activeTab, setActiveTab] = useState('All');
   const [search, setSearch] = useState('');
+  const [selectedNotification, setSelectedNotification] = useState<any>(null);
 
   const [notifications, setNotifications] = useState([
     {
@@ -51,8 +56,20 @@ const Notifications = () => {
     return matchTab && matchSearch;
   });
 
-  const handleNotificationPress = (id: string) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, status: 'read' } : n)));
+  useEffect(() => {
+    dispatch(getAllNotificationsThunk({})); 
+  }, [dispatch]);
+
+  const handleNotificationPress = (item: any) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === item.id ? { ...n, status: 'read' } : n))
+    );
+    setSelectedNotification(item);
+  };
+
+  const handleDelete = (id: string) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+    setSelectedNotification(null);
   };
 
   return (
@@ -60,6 +77,8 @@ const Notifications = () => {
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
       <SafeAreaView edges={['top']} style={styles.container}>
         <Header />
+
+        {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Pressable onPress={() => navigation.goBack()}>
@@ -116,10 +135,10 @@ const Notifications = () => {
             filteredNotifications.map((item) => (
               <Pressable
                 key={item.id}
-                onPress={() => handleNotificationPress(item.id)}
+                onPress={() => handleNotificationPress(item)}
                 style={[styles.card, styles.neumorphicCard]}>
                 <View style={[styles.iconWrapper, styles.neumorphicCard]}>
-                  {/* icon can go here */}
+                  <Text>🔔</Text>
                 </View>
                 <View style={styles.cardContent}>
                   <Text style={[item.status === 'unread' ? styles.unreadTitle : styles.readTitle]}>
@@ -133,6 +152,34 @@ const Notifications = () => {
             ))
           )}
         </ScrollView>
+
+        {/* Modal */}
+        <Modal visible={!!selectedNotification} transparent animationType="slide">
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalBox}>
+              {selectedNotification && (
+                <>
+                  <Text style={styles.modalTitle}>{selectedNotification.title}</Text>
+                  <Text style={styles.modalDesc}>{selectedNotification.desc}</Text>
+
+                  <View style={styles.modalActions}>
+                    <Pressable
+                      style={[styles.modalBtn, { backgroundColor: '#e5e7eb' }]}
+                      onPress={() => setSelectedNotification(null)}>
+                      <Text style={{ color: '#000' }}>Close</Text>
+                    </Pressable>
+
+                    <Pressable
+                      style={[styles.modalBtn, { backgroundColor: '#ef4444' }]}
+                      onPress={() => handleDelete(selectedNotification.id)}>
+                      <Text style={{ color: '#fff', fontWeight: '600' }}>🗑 Delete</Text>
+                    </Pressable>
+                  </View>
+                </>
+              )}
+            </View>
+          </View>
+        </Modal>
       </SafeAreaView>
     </>
   );
@@ -188,12 +235,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 8,
     borderRadius: 12,
-    height: 60, // Fixed height
-    minWidth: 100, // Minimum width
+    height: 60,
+    minWidth: 100,
     justifyContent: 'center',
     alignItems: 'center',
-    flex: 1, // Equal width for all tabs
-    marginHorizontal: 4, //
+    flex: 1,
+    marginHorizontal: 4,
   },
   activeTabText: {
     color: '#fff',
@@ -206,6 +253,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: '#f3f4f6',
     minWidth: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 60,
   },
   inactiveTabText: {
     color: '#374151',
@@ -246,7 +296,7 @@ const styles = StyleSheet.create({
   readTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#6b7280', // Gray color for read messages
+    color: '#6b7280',
     marginBottom: 2,
   },
   cardDesc: {
@@ -254,7 +304,7 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   readDesc: {
-    color: '#6b7280', // Gray color for read message descriptions
+    color: '#6b7280',
   },
   neumorphicBox: {
     shadowColor: '#000',
@@ -278,5 +328,40 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 2, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+
+  },
+  modalBox: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    width: '100%',
+    padding: 20,
+    height:'30%'
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalDesc: {
+    fontSize: 14,
+    color: '#374151',
+    marginBottom: 20,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+     marginTop: 70,
+  },
+  modalBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
   },
 });
