@@ -9,11 +9,12 @@ import {
   Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Auth } from '~/constants';
+import { Auth, icons } from '~/constants';
 import { useNavigation } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const COLORS = {
-  primary: '#8B5FBF', // Purple color from design
+  primary: '#8B5FBF',
   primaryDark: '#7A4FB3',
   white: '#FFFFFF',
   black: '#000000',
@@ -27,41 +28,40 @@ const Login = () => {
   const navigation = useNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
 
   const handleSignIn = () => {
-   
     console.log('Sign in pressed');
   };
 
- const handleForgotPassword = () => {
-    navigation.navigate("ResetPassword");
+  const handleForgotPassword = () => {
+    navigation.navigate('ForgetPassword' as never);
   };
 
   return (
     <>
-      <StatusBar backgroundColor={COLORS.primary} barStyle="light-content" />
+      <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
       <SafeAreaView style={styles.container}>
         {/* Header Section with Icon */}
-        <View style={styles.headerSection}>
-          <Image source={Auth.header} style={styles.headerImage}></Image>
-                 </View>
+        <LinearGradient colors={['#7B00FF', '#B200FF', '#7B00FF']} style={styles.headerSection}>
+          <View style={styles.content}>
+            <Image source={icons.security} style={styles.headerImage} />
+          </View>
+        </LinearGradient>
 
-                 <View >
-                   <Image source={Auth.loading}></Image>
-                   <Text>Join & Connect The Fastest Growing Online Community</Text>
-                 </View>
+        <View style={{ flex: 1, alignItems: 'center' }}>
+          <Image source={Auth.loading} style={{ width: 75, height: 75 }} />
+          <Text style={{}}>Join & Connect The Fastest Growing Online Community</Text>
+        </View>
 
         {/* Form Section */}
         <View style={styles.formSection}>
           {/* Email Input */}
           <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Email Or Username</Text>
+            <Text style={styles.inputLabel}>Email</Text>
             <TextInput
               style={styles.input}
               value={email}
               onChangeText={setEmail}
-             
               placeholderTextColor={COLORS.gray}
               keyboardType="email-address"
               autoCapitalize="none"
@@ -78,7 +78,6 @@ const Login = () => {
               style={styles.input}
               value={password}
               onChangeText={setPassword}
-             
               placeholderTextColor={COLORS.gray}
               secureTextEntry={true}
               autoCapitalize="none"
@@ -90,9 +89,7 @@ const Login = () => {
 
           {/* Remember Me and Forgot Password */}
           <View style={styles.optionsRow}>
-            <View style={styles.rememberMeContainer}>
-             
-            </View>
+            <View style={styles.rememberMeContainer}></View>
             <TouchableOpacity onPress={handleForgotPassword}>
               <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </TouchableOpacity>
@@ -116,12 +113,17 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
   },
   headerSection: {
-    backgroundColor: COLORS.primary,
     paddingHorizontal: 24,
     paddingVertical: 40,
     alignItems: 'center',
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
+    borderBottomLeftRadius: 25,
+    borderBottomRightRadius: 25,
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   iconContainer: {
     position: 'relative',
@@ -235,6 +237,5 @@ const styles = StyleSheet.create({
   },
   headerImage: {
     height: 200,
-    
-  }
+  },
 });

@@ -44,12 +44,13 @@ export const icons = {
   greenCircle: require('../assets/icons/green circle.png'),
   pdf: require('../assets/icons/pdf.png'),
   download: require('../assets/icons/download.png'),
+  security: require('../assets/icons/security.png'),
 };
 
 export const Auth = {
   header: require('../assets/images/login/login 2.png'),
-  loading: require('../assets/images/login/Group 14.png')
-}
+  loading: require('../assets/images/login/Group 14.png'),
+};
 
 export const bottom_tabs = [
   {
