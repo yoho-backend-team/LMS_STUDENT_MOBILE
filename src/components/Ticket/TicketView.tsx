@@ -6,7 +6,6 @@ import Icon from 'react-native-vector-icons/Feather';
 import Header from '../shared/Header';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-
 const TicketView = () => {
   const route = useRoute();
   const navigation = useNavigation();
@@ -14,7 +13,6 @@ const TicketView = () => {
 
   return (
     <ScrollView style={styles.container}>
-
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
       <Header />
 
@@ -30,13 +28,15 @@ const TicketView = () => {
         <Text style={styles.viewValue}>{ticket.Ticket}</Text>
 
         <Text style={styles.viewLabel}>Priority</Text>
-        <Text style={styles.viewValue}>{ticket.priority || "Not set"}</Text>
+        <Text style={styles.viewValue}>{ticket.priority || 'Not set'}</Text>
 
         <Text style={styles.viewLabel}>Status</Text>
         <Text style={styles.viewValue}>{ticket.status}</Text>
 
         <Text style={styles.viewLabel}>Attachment</Text>
-        <Text style={styles.viewValue}>{ticket.attachment ? ticket.attachment.name : "No attachment"}</Text>
+        <Text style={styles.viewValue}>
+          {ticket.attachment ? ticket.attachment.name : 'No attachment'}
+        </Text>
 
         <Text style={styles.viewLabel}>Count</Text>
         <Text style={styles.viewValue}>{ticket.count}</Text>
@@ -45,7 +45,6 @@ const TicketView = () => {
         <Text style={[styles.viewValue, styles.textArea]}>{ticket.discription}</Text>
       </View>
     </ScrollView>
-
   );
 };
 
@@ -54,23 +53,35 @@ export default TicketView;
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 10, backgroundColor: COLORS.white },
   backContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 15,
   },
   backButton: {
-    backgroundColor: "#2B00FF",
+    backgroundColor: '#2B00FF',
     padding: 10,
     borderRadius: 8,
   },
   backText: {
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: '600',
     marginLeft: 10,
   },
-  viewCard: { backgroundColor: "#fff", padding: 15, borderRadius: 8, shadowColor: "#000", elevation: 4 },
-  viewLabel: { fontSize: 16, fontWeight: "600", marginTop: 15 },
-  viewValue: { fontSize: 16, marginTop: 5, backgroundColor: "#f9f9f9", padding: 10, borderRadius: 8 },
-  textArea: { minHeight: 100, textAlignVertical: "top" },
-  iconstyle: { width: 100 }
+  viewCard: {
+    backgroundColor: '#fff',
+    padding: 15,
+    borderRadius: 8,
+    shadowColor: '#000',
+    elevation: 4,
+  },
+  viewLabel: { fontSize: 16, fontWeight: '600', marginTop: 15 },
+  viewValue: {
+    fontSize: 16,
+    marginTop: 5,
+    backgroundColor: '#f9f9f9',
+    padding: 10,
+    borderRadius: 8,
+  },
+  textArea: { minHeight: 100, textAlignVertical: 'top' },
+  iconstyle: { width: 100 },
 });

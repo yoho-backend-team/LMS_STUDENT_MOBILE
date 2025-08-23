@@ -38,6 +38,12 @@ export const icons = {
   user_profile: require('../assets/icons/userprofile.png'),
   notification: require('../assets/icons/notification.png'),
   app_icon: require('../assets/icons/app-icon.png'),
+  back_arrow: require('../assets/icons/backarrow.png'),
+  filter: require('../assets/icons/filter.png'),
+  barLine: require('../assets/icons/barLine.png'),
+  greenCircle: require('../assets/icons/green circle.png'),
+  pdf: require('../assets/icons/pdf.png'),
+  download: require('../assets/icons/download.png'),
 };
 
 export const bottom_tabs = [
