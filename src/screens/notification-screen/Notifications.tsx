@@ -1,5 +1,3 @@
-'use client';
-
 import { useEffect, useState } from 'react';
 import {
   StatusBar,
@@ -17,38 +15,29 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { COLORS, icons } from '~/constants';
 import Header from '~/components/shared/Header';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { getAllNotificationsThunk } from '~/features/notification/reducers/thunks';
+import { selectNotifications } from '~/features/notification/reducers/selectors';
+
 
 const Notifications = () => {
   const navigation = useNavigation();
-  const dispatch:any = useDispatch();
+  const dispatch: any = useDispatch();
+
+  
+  const notifications = useSelector(selectNotifications);
+
   const [activeTab, setActiveTab] = useState('All');
   const [search, setSearch] = useState('');
   const [selectedNotification, setSelectedNotification] = useState<any>(null);
 
-  const [notifications, setNotifications] = useState([
-    {
-      id: '1',
-      title: 'Payment Successfully!',
-      desc: 'Your payment has been processed successfully.',
-      status: 'read',
-    },
-    {
-      id: '2',
-      title: '30% Special Discount!',
-      desc: 'Grab your discount before it expires.',
-      status: 'unread',
-    },
-    {
-      id: '3',
-      title: 'New Message',
-      desc: "You've received a new message from support.",
-      status: 'unread',
-    },
-  ]);
+  useEffect(() => {
+    dispatch(getAllNotificationsThunk({})); 
+  }, [dispatch]);
 
-  const filteredNotifications = notifications.filter((n) => {
+console.log(notifications,'notification')
+
+  const filteredNotifications = notifications.filter((n: any) => {
     const matchTab = activeTab === 'All' ? true : n.status === activeTab.toLowerCase();
     const matchSearch =
       n.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -56,19 +45,13 @@ const Notifications = () => {
     return matchTab && matchSearch;
   });
 
-  useEffect(() => {
-    dispatch(getAllNotificationsThunk({})); 
-  }, [dispatch]);
-
   const handleNotificationPress = (item: any) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === item.id ? { ...n, status: 'read' } : n))
-    );
+   
     setSelectedNotification(item);
   };
 
   const handleDelete = (id: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
+   
     setSelectedNotification(null);
   };
 
@@ -92,7 +75,7 @@ const Notifications = () => {
           </View>
           <Text style={styles.headerCount}>
             {notifications.length} Message /{' '}
-            {notifications.filter((n) => n.status === 'unread').length} Unread
+            {notifications.filter((n: any) => n.status === 'unread').length} Unread
           </Text>
         </View>
 
@@ -132,7 +115,7 @@ const Notifications = () => {
           {filteredNotifications.length === 0 ? (
             <Text style={{ textAlign: 'center', color: '#6b7280' }}>No notifications found</Text>
           ) : (
-            filteredNotifications.map((item) => (
+            filteredNotifications.map((item: any) => (
               <Pressable
                 key={item.id}
                 onPress={() => handleNotificationPress(item)}
@@ -144,9 +127,9 @@ const Notifications = () => {
                   <Text style={[item.status === 'unread' ? styles.unreadTitle : styles.readTitle]}>
                     {item.title}
                   </Text>
-                  <Text style={[styles.cardDesc, item.status === 'read' && styles.readDesc]}>
-                    {item.desc}
-                  </Text>
+                   <Text style={[styles.cardDesc, item.status === 'read' && styles.readDesc]}>
+        {item.body}  
+      </Text>
                 </View>
               </Pressable>
             ))
@@ -160,8 +143,12 @@ const Notifications = () => {
               {selectedNotification && (
                 <>
                   <Text style={styles.modalTitle}>{selectedNotification.title}</Text>
-                  <Text style={styles.modalDesc}>{selectedNotification.desc}</Text>
+                 <Text style={styles.modalDesc}>{selectedNotification.body}</Text>
 
+          {/* ✅ Show Date & Time */}
+          <Text style={{ marginTop: 8, color: '#6b7280', fontSize: 12 }}>
+            {new Date(selectedNotification.createdAt).toLocaleString()}
+          </Text>
                   <View style={styles.modalActions}>
                     <Pressable
                       style={[styles.modalBtn, { backgroundColor: '#e5e7eb' }]}
@@ -186,6 +173,7 @@ const Notifications = () => {
 };
 
 export default Notifications;
+
 
 const styles = StyleSheet.create({
   container: {
@@ -228,7 +216,7 @@ const styles = StyleSheet.create({
   tabWrapper: {
     flexDirection: 'row',
     marginBottom: 20,
-    gap: 10,
+    gap: 5,
     justifyContent: 'space-between',
   },
   activeTab: {
@@ -244,7 +232,7 @@ const styles = StyleSheet.create({
   },
   activeTabText: {
     color: '#fff',
-    fontWeight: '500',
+    fontWeight: '800',
     textAlign: 'center',
   },
   inactiveTab: {
