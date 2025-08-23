@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+
+
+import { useEffect, useState } from "react"
 import {
   StatusBar,
   StyleSheet,
@@ -8,82 +10,287 @@ import {
   TouchableOpacity,
   ScrollView,
   TextInput,
-  FlatList,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Pencil, Download, Eye } from 'lucide-react-native';
-import { useNavigation } from '@react-navigation/native';
+  Alert,
+  ActivityIndicator,
+} from "react-native"
+import { SafeAreaView } from "react-native-safe-area-context"
+import { Pencil, Camera } from "lucide-react-native"
+import { useNavigation } from "@react-navigation/native"
+import { useDispatch, useSelector } from "react-redux"
+import { launchImageLibrary, type ImagePickerResponse, type MediaType } from "react-native-image-picker"
+import { getStudentProfileThunk } from "~/features/Profile/reducer/thunks"
+import { selectProfile } from "~/features/Profile/reducer/selectors"
+import { getImageUrl } from "~/utils/imageUtils"
+import { updateStudentProfile } from "~/features/Profile/services"
 
 const COLORS = {
-  black: '#000000',
-  white: '#ffffff',
-  primary: '#8b5cf6',
-  secondary: '#7c3aed',
-  gray: '#6b7280',
-  lightGray: '#f3f4f6',
-  darkGray: '#374151',
-  background: '#f9fafb',
-};
+  black: "#000000",
+  white: "#ffffff",
+  primary: "#8b5cf6",
+  secondary: "#7c3aed",
+  gray: "#6b7280",
+  lightGray: "#f3f4f6",
+  darkGray: "#374151",
+  background: "#f9fafb",
+}
 
 const Profile = () => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [activeTab, setActiveTab] = useState('profile');
+  const [isEditing, setIsEditing] = useState(false)
+  const [activeTab, setActiveTab] = useState("profile")
+  const [isSaving, setIsSaving] = useState(false)
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
+
   const [profileData, setProfileData] = useState({
-    mailAddress: 'albert@gmail.com',
-    name: 'Albert Einstein',
-    gender: 'Male',
-    contactNumber: '6754789856',
-    dateOfBirth: '12/03/1984',
-    pinCode: '675423',
-    address: 'No.8,Library Road',
-    course: 'React',
-    batch: '2023',
-    rollNumber: '675434567898',
-    studentID: 'LMS173N221',
-  });
+    Contact_info: {
+      pinCode: "",
+      address2: "",
+      phone_number: "",
+    },
+    mailAddress: "",
+    name: "",
+    gender: "",
+    dateOfBirth: "",
+    course: "",
+    batch: "",
+    rollNumber: "",
+    studentID: "",
+  })
+
+  const [originalProfileData, setOriginalProfileData] = useState({ ...profileData })
 
   const tabs = [
     {
-      id: 'profile',
-      label: 'Profile Information',
-      icon: require('../../assets/profile/profile.png'),
+      id: "profile",
+      label: "Profile Information",
+      icon: require("../../assets/profile/profile.png"),
     },
-    { id: 'certificate', label: 'Certificate', icon: require('../../assets/profile/certi.png') },
-    { id: 'idcard', label: 'ID Card', icon: require('../../assets/profile/id.png') },
-  ];
+    { id: "certificate", label: "Certificate", icon: require("../../assets/profile/certi.png") },
+    { id: "idcard", label: "ID Card", icon: require("../../assets/profile/id.png") },
+  ]
+
   const tabTitles: Record<string, string> = {
-    profile: 'Profile',
-    certificate: 'Certificate',
-    idcard: 'ID Card',
-  };
+    profile: "Profile",
+    certificate: "Certificate",
+    idcard: "ID Card",
+  }
 
-  const handleInputChange = (field: any, value: any) => {
-    setProfileData({
-      ...profileData,
-      [field]: value,
-    });
-  };
+  const dispatch = useDispatch<any>()
+  const profileDetails = useSelector(selectProfile)
 
-  const handleSubmit = () => {
-    console.log('Profile data submitted:', profileData);
-    setIsEditing(false);
-  };
+  useEffect(() => {
+    dispatch(getStudentProfileThunk({}))
+  }, [dispatch])
+
+  useEffect(() => {
+    if (profileDetails && profileDetails.data) {
+      const data = profileDetails.data
+      const userDetail = data.userDetail || {}
+      const course = userDetail.course || {}
+
+      const newProfileData = {
+        Contact_info: {
+          pinCode: data.contact_info?.pincode?.toString() || "",
+          address2: data.contact_info?.address2 || "",
+          phone_number: data.contact_info?.phone_number || "",
+        },
+        mailAddress: data.email || "",
+        name: data.full_name || "",
+        gender: data.gender || "",
+        dateOfBirth: data.dob ? new Date(data.dob).toLocaleDateString() : "",
+        course: course.course_name || "",
+        batch: "Batch 2024-25",
+        rollNumber: data.roll_no?.toString() || "",
+        studentID: userDetail.studentId || "",
+      }
+
+      setProfileData(newProfileData)
+      setOriginalProfileData(JSON.parse(JSON.stringify(newProfileData)))
+    }
+  }, [profileDetails])
+
+  const handleImageUpload = () => {
+    const options = {
+      mediaType: "photo" as MediaType,
+      includeBase64: false,
+      maxHeight: 2000,
+      maxWidth: 2000,
+      quality: 0.8,
+    }
+
+    launchImageLibrary(options, (response: ImagePickerResponse) => {
+      if (response.didCancel || response.errorMessage) {
+        return
+      }
+
+      if (response.assets && response.assets[0]) {
+        const imageUri = response.assets[0].uri
+        if (imageUri) {
+          uploadImageToServer(imageUri)
+        }
+      }
+    })
+  }
+
+  const uploadImageToServer = async (imageUri: string) => {
+    setIsUploadingImage(true)
+
+    try {
+      const formData = new FormData()
+      formData.append("image", {
+        uri: imageUri,
+        type: "image/jpeg",
+        name: "profile.jpg",
+      } as any)
+
+      const response = await fetch("YOUR_UPLOAD_ENDPOINT", {
+        method: "POST",
+        body: formData,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        setSelectedImage(imageUri)
+
+        Alert.alert("Success", "Profile picture uploaded successfully!", [
+          {
+            text: "OK",
+            onPress: () => {
+              dispatch(getStudentProfileThunk({}))
+            },
+          },
+        ])
+      } else {
+        throw new Error("Upload failed")
+      }
+    } catch (error) {
+      console.error("Image upload error:", error)
+      Alert.alert("Error", "Failed to upload image. Please try again.")
+    } finally {
+      setIsUploadingImage(false)
+    }
+  }
+
+  const handleInputChange = (field: string, value: any) => {
+    if (field.includes(".")) {
+      const [parent, child] = field.split(".")
+
+      setProfileData((prev) => ({
+        ...prev,
+        [parent]: {
+          ...prev[parent],
+          [child]: value,
+        },
+      }))
+    } else {
+      setProfileData((prev) => ({
+        ...prev,
+        [field]: value,
+      }))
+    }
+  }
+
+  const hasChanges = () => {
+    return JSON.stringify(profileData) !== JSON.stringify(originalProfileData)
+  }
+
+  const showNoChangesToast = () => {
+    Alert.alert("Info", "No changes detected to save.")
+  }
+
+  const showSuccessToast = () => {
+    Alert.alert("Success", "Profile updated successfully!")
+  }
+
+  const showErrorToast = () => {
+    Alert.alert("Error", "Failed to update profile. Please try again.")
+  }
+
+  const handleSubmit = async () => {
+    if (!hasChanges()) {
+      showNoChangesToast()
+      return
+    }
+
+    setIsSaving(true)
+
+    try {
+      const transformedData = {
+        contact_info: {
+          phone_number: profileData.Contact_info.phone_number,
+          alternate_phone_number: profileData.Contact_info.phone_number,
+          address2: profileData.Contact_info.address2,
+          pincode: Number.parseInt(profileData.Contact_info.pinCode) || null,
+        },
+        email: profileData.mailAddress,
+        first_name: profileData.name.split(" ")[0] || "",
+        last_name: profileData.name.split(" ")[1] || "",
+        full_name: profileData.name,
+        gender: profileData.gender,
+        image: profileDetails?.data?.image || "",
+      }
+
+      const response = await updateStudentProfile(transformedData)
+
+      console.log("API Responses update:", response)
+
+      if (response) {
+        dispatch(getStudentProfileThunk({}))
+        showSuccessToast()
+        setIsEditing(false)
+      } else {
+        showErrorToast()
+      }
+    } catch (error) {
+      console.error("Failed to update profile:", error)
+      showErrorToast()
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   const handleCancel = () => {
-    setIsEditing(false);
-  };
+    if (hasChanges()) {
+      Alert.alert("Discard Changes", "You have unsaved changes. Are you sure you want to discard them?", [
+        {
+          text: "Keep Editing",
+          style: "cancel",
+        },
+        {
+          text: "Discard",
+          style: "destructive",
+          onPress: () => {
+            setProfileData(JSON.parse(JSON.stringify(originalProfileData)))
+            setIsEditing(false)
+          },
+        },
+      ])
+      return
+    }
+
+    setIsEditing(false)
+  }
+
+  const handleEditClick = () => {
+    if (!isEditing) {
+      setOriginalProfileData(JSON.parse(JSON.stringify(profileData)))
+    }
+    setIsEditing(!isEditing)
+  }
 
   const renderProfileContent = () => (
     <>
       <View style={styles.certificateContainer}>
-        {/* Personal Info Section */}
         <Text style={styles.sectionTitle}>Personal Information</Text>
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Mail Address</Text>
           <TextInput
             style={styles.input}
             value={profileData.mailAddress}
-            onChangeText={(text) => handleInputChange('mailAddress', text)}
+            onChangeText={(text) => handleInputChange("mailAddress", text)}
             placeholder="Enter here..."
             editable={isEditing}
           />
@@ -94,7 +301,7 @@ const Profile = () => {
           <TextInput
             style={styles.input}
             value={profileData.name}
-            onChangeText={(text) => handleInputChange('name', text)}
+            onChangeText={(text) => handleInputChange("name", text)}
             placeholder="Enter here..."
             editable={isEditing}
           />
@@ -105,7 +312,7 @@ const Profile = () => {
           <TextInput
             style={styles.input}
             value={profileData.gender}
-            onChangeText={(text) => handleInputChange('gender', text)}
+            onChangeText={(text) => handleInputChange("gender", text)}
             placeholder="Enter here..."
             editable={isEditing}
           />
@@ -115,8 +322,8 @@ const Profile = () => {
           <Text style={styles.label}>Contact Number</Text>
           <TextInput
             style={styles.input}
-            value={profileData.contactNumber}
-            onChangeText={(text) => handleInputChange('contactNumber', text)}
+            value={profileData.Contact_info.phone_number}
+            onChangeText={(text) => handleInputChange("Contact_info.phone_number", text)}
             placeholder="Enter here..."
             editable={isEditing}
             keyboardType="phone-pad"
@@ -128,7 +335,7 @@ const Profile = () => {
           <TextInput
             style={styles.input}
             value={profileData.dateOfBirth}
-            onChangeText={(text) => handleInputChange('dateOfBirth', text)}
+            onChangeText={(text) => handleInputChange("dateOfBirth", text)}
             placeholder="Enter here..."
             editable={isEditing}
           />
@@ -138,8 +345,8 @@ const Profile = () => {
           <Text style={styles.label}>Pin Code</Text>
           <TextInput
             style={styles.input}
-            value={profileData.pinCode}
-            onChangeText={(text) => handleInputChange('pinCode', text)}
+            value={profileData.Contact_info.pinCode}
+            onChangeText={(text) => handleInputChange("Contact_info.pinCode", text)}
             placeholder="Enter here..."
             editable={isEditing}
             keyboardType="numeric"
@@ -149,16 +356,15 @@ const Profile = () => {
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Address</Text>
           <TextInput
-            style={[styles.input, { height: 80, textAlignVertical: 'top' }]}
-            value={profileData.address}
-            onChangeText={(text) => handleInputChange('address', text)}
+            style={[styles.input, { height: 80, textAlignVertical: "top" }]}
+            value={profileData.Contact_info.address2}
+            onChangeText={(text) => handleInputChange("Contact_info.address2", text)}
             placeholder="Enter here..."
             editable={isEditing}
             multiline={true}
           />
         </View>
 
-        {/* Institute Info Section */}
         <Text style={styles.sectionTitle}>Institute Information</Text>
 
         <View style={styles.inputGroup}>
@@ -166,7 +372,7 @@ const Profile = () => {
           <TextInput
             style={styles.input}
             value={profileData.course}
-            onChangeText={(text) => handleInputChange('course', text)}
+            onChangeText={(text) => handleInputChange("course", text)}
             placeholder="Enter here..."
             editable={isEditing}
           />
@@ -177,7 +383,7 @@ const Profile = () => {
           <TextInput
             style={styles.input}
             value={profileData.batch}
-            onChangeText={(text) => handleInputChange('batch', text)}
+            onChangeText={(text) => handleInputChange("batch", text)}
             placeholder="Enter here..."
             editable={isEditing}
           />
@@ -188,7 +394,7 @@ const Profile = () => {
           <TextInput
             style={styles.input}
             value={profileData.rollNumber}
-            onChangeText={(text) => handleInputChange('rollNumber', text)}
+            onChangeText={(text) => handleInputChange("rollNumber", text)}
             placeholder="Enter here..."
             editable={isEditing}
           />
@@ -199,171 +405,202 @@ const Profile = () => {
           <TextInput
             style={styles.input}
             value={profileData.studentID}
-            onChangeText={(text) => handleInputChange('studentID', text)}
+            onChangeText={(text) => handleInputChange("studentID", text)}
             placeholder="Enter here..."
             editable={isEditing}
           />
         </View>
       </View>
 
-      {/* Action Buttons - Only show when editing */}
       {isEditing && (
         <View style={styles.btnRow}>
           <TouchableOpacity style={styles.cancelBtn} onPress={handleCancel}>
             <Text style={styles.cancelText}>Cancel</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
-            <Text style={styles.submitText}>Submit</Text>
+          <TouchableOpacity
+            style={[styles.submitBtn, isSaving && styles.disabledBtn]}
+            onPress={handleSubmit}
+            disabled={isSaving}
+          >
+            <Text style={styles.submitText}>{isSaving ? "Saving..." : "Submit"}</Text>
           </TouchableOpacity>
         </View>
       )}
     </>
-  );
+  )
 
-  const renderCertificateContent = () => (
-    <View style={styles.certificateContainer}>
-      {/* Card 1 */}
-      <View style={styles.card}>
-        <Image source={require('../../assets/profile/card1.png')} style={styles.cardImage} />
+  const renderCertificateContent = () => {
+    const completedCourses = profileDetails?.data?.userDetail?.completed_courses || []
+    const currentCourse = profileDetails?.data?.userDetail?.course
 
-        <View style={styles.contentRow}>
-          <View style={styles.textContainer}>
-            <Text style={styles.cardText}>Course Name: HTML, CSS</Text>
-            <Text style={styles.cardText}>Duration: 3 Month</Text>
+    const allCourses = []
+
+    if (currentCourse) {
+      allCourses.push({
+        ...currentCourse,
+        status: "In Progress",
+        cardImage: require("../../assets/profile/card1.png"),
+      })
+    }
+
+    if (completedCourses.length > 0) {
+      completedCourses.forEach((course) => {
+        allCourses.push({
+          ...course,
+          status: "Completed",
+          cardImage: require("../../assets/profile/card2.png"),
+        })
+      })
+    }
+
+    return (
+      <View style={styles.certificateContainer}>
+        {allCourses.length > 0 ? (
+          allCourses.map((course, index) => (
+            <View key={index} style={styles.card}>
+              <Image source={course.cardImage} style={styles.cardImage} />
+              <View style={styles.contentRow}>
+                <View style={styles.textContainer}>
+                  <Text style={styles.cardText}>Course Name: {course.course_name}</Text>
+                  <Text style={styles.cardText}>Duration: {course.duration}</Text>
+                  <Text style={styles.cardText}>Status: {course.status}</Text>
+                </View>
+                <Image source={require("../../assets/profile/down.png")} style={styles.downIcon} />
+              </View>
+            </View>
+          ))
+        ) : (
+          <View style={styles.card}>
+            <Text style={styles.cardText}>No courses available</Text>
           </View>
-
-          <Image source={require('../../assets/profile/down.png')} style={styles.downIcon} />
-        </View>
+        )}
       </View>
-
-      {/* Card 2 */}
-      <View style={styles.card}>
-        <Image source={require('../../assets/profile/card2.png')} style={styles.cardImage} />
-
-        <View style={styles.contentRow}>
-          <View style={styles.textContainer}>
-            <Text style={styles.cardText}>Course Name: Java Script</Text>
-            <Text style={styles.cardText}>Duration: 3 Month</Text>
-          </View>
-
-          <Image source={require('../../assets/profile/down.png')} style={styles.downIcon} />
-        </View>
-      </View>
-    </View>
-  );
+    )
+  }
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'certificate':
-        return renderCertificateContent();
+      case "certificate":
+        return renderCertificateContent()
 
-      case 'idcard':
+      case "idcard":
         return (
           <View style={styles.certificateContainer}>
             <View style={styles.card}>
-              {/* Left side: Profile image */}
-              <Image source={require('../../assets/profile/grl.png')} style={styles.cardImag} />
+              <Image source={require("../../assets/profile/grl.png")} style={styles.cardImag} />
 
-              {/* Middle: Texts + Right: Download icon */}
               <View style={styles.contentRow}>
                 <View style={styles.textContainer}>
-                  <Text style={styles.cardText}>Name: Musk</Text>
-                  <Text style={styles.cardText}>Course Name: HTML, CSS</Text>
-                  <Text style={styles.cardText}>Institute Name: Anna Uni</Text>
+                  <Text style={styles.cardText}>Name: {profileData.name}</Text>
+                  <Text style={styles.cardText}>Course Name: {profileData.course}</Text>
+                  <Text style={styles.cardText}>
+                    Institute Name: {profileDetails?.data?.userDetail?.institute_id?.institute_name || "Anna Uni"}
+                  </Text>
+                  <Text style={styles.cardText}>Student ID: {profileData.studentID}</Text>
                 </View>
 
-                <Image source={require('../../assets/profile/down.png')} style={styles.downIcon} />
+                <Image source={require("../../assets/profile/down.png")} style={styles.downIcon} />
               </View>
             </View>
           </View>
-        );
+        )
 
       default:
-        return renderProfileContent();
+        return renderProfileContent()
     }
-  };
+  }
 
-  // const renderTabItem = ({ item }) => (
-  //   <TouchableOpacity
-  //     style={[styles.tabBtn, activeTab === item.id && styles.activeTab]}
-  //     onPress={() => setActiveTab(item.id)}>
-  //     <Text style={[styles.tabBtnText, activeTab === item.id && styles.activeTabText]}>
-  //       {item.label}
-  //     </Text>
-  //   </TouchableOpacity>
-  // );
-
-  const navigation = useNavigation();
+  const navigation = useNavigation()
 
   return (
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
-      <SafeAreaView edges={['top']} style={styles.container}>
-        {/* Fixed Profile Section */}
+      <SafeAreaView edges={["top"]} style={styles.container}>
         <View style={styles.fixedSection}>
-          {/* Title */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Image source={require('../../assets/profile/back.png')} style={styles.backbutton} />
+              <Image source={require("../../assets/profile/back.png")} style={styles.backbutton} />
             </TouchableOpacity>
             <Text style={styles.title}>{tabTitles[activeTab]}</Text>
           </View>
 
-          {/* Profile Card */}
           <View style={styles.certificateContainer}>
             <View style={styles.card}>
               <View style={styles.profileInfo}>
                 <View style={styles.avatarContainer}>
-                  <Image source={require('../../assets/profile/man.png')} style={styles.avatar} />
-                  {/* Instagram-style edit icon */}
-                  <TouchableOpacity
-                    style={styles.editBtn}
-                    activeOpacity={0.7}
-                    onPress={() => setIsEditing(!isEditing)}>
-                    <Pencil size={16} color="black" />
-                  </TouchableOpacity>
+                  {selectedImage ? (
+                    <Image source={{ uri: selectedImage }} style={styles.avatar} />
+                  ) : profileDetails?.data?.image ? (
+                    <Image source={{ uri: getImageUrl(profileDetails.data.image) }} style={styles.avatar} />
+                  ) : (
+                    <Image source={require("../../assets/profile/man.png")} style={styles.avatar} />
+                  )}
+
+                  {isEditing && (
+                    <TouchableOpacity
+                      style={styles.cameraBtn}
+                      activeOpacity={0.7}
+                      onPress={handleImageUpload}
+                      disabled={isUploadingImage}
+                    >
+                      {isUploadingImage ? (
+                        <ActivityIndicator size="small" color="white" />
+                      ) : (
+                        <Camera size={16} color="white" />
+                      )}
+                    </TouchableOpacity>
+                  )}
+
+                  {!isEditing && (
+                    <TouchableOpacity style={styles.editBtn} activeOpacity={0.7} onPress={handleEditClick}>
+                      <Pencil size={16} color="black" />
+                    </TouchableOpacity>
+                  )}
                 </View>
                 <Text style={styles.name}>{profileData.name}</Text>
                 <Text style={styles.subText}>Trainee ID: {profileData.studentID}</Text>
               </View>
             </View>
 
-            {/* Horizontal Scrollable Tab Buttons */}
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
               style={styles.tabScrollView}
-              contentContainerStyle={styles.tabScrollContent}>
+              contentContainerStyle={styles.tabScrollContent}
+            >
               {tabs.map((tab) => (
                 <TouchableOpacity
                   key={tab.id}
                   style={[styles.tabBtn, activeTab === tab.id && styles.activeTab]}
-                  onPress={() => setActiveTab(tab.id)}>
+                  onPress={() => {
+                    if (isEditing && tab.id !== "profile") {
+                      setIsEditing(false)
+                    }
+                    setActiveTab(tab.id)
+                  }}
+                >
                   <Image source={tab.icon} style={styles.tabIcon} />
-                  <Text style={[styles.tabBtnText, activeTab === tab.id && styles.activeTabText]}>
-                    {tab.label}
-                  </Text>
+                  <Text style={[styles.tabBtnText, activeTab === tab.id && styles.activeTabText]}>{tab.label}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
           </View>
         </View>
 
-        {/* Scrollable Content Section */}
         <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollSection}>
           {renderContent()}
         </ScrollView>
       </SafeAreaView>
     </>
-  );
-};
+  )
+}
 
-export default Profile;
+export default Profile
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ebeff3',
+    backgroundColor: "#ebeff3",
   },
   fixedSection: {
     padding: 16,
@@ -374,128 +611,131 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 22,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.darkGray,
     marginBottom: 16,
   },
   card: {
-    backgroundColor: '#ebeff3',
+    backgroundColor: "#ebeff3",
     borderRadius: 16,
     padding: 16,
-
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 3,
-    position: 'relative',
+    position: "relative",
     marginBottom: 16,
   },
   editBtn: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     right: 0,
-    backgroundColor: '#e5e5e5', // light gray
+    backgroundColor: "#e5e5e5",
     width: 32,
     height: 32,
     borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     borderWidth: 2,
-    borderColor: '#ebeff3', // white border
+    borderColor: "#ebeff3",
   },
-
+  cameraBtn: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    backgroundColor: "#7B00FF",
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "#ebeff3",
+  },
   profileInfo: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   avatar: {
     width: 100,
     height: 100,
     marginBottom: 12,
-    borderRadius: 100 / 2,
-    resizeMode: 'cover',
+    borderRadius: 50,
+    resizeMode: "cover",
   },
   avatarContainer: {
-    position: 'relative',
-    alignItems: 'center',
-    justifyContent: 'center',
+    position: "relative",
+    alignItems: "center",
+    justifyContent: "center",
   },
-
   name: {
     fontSize: 20,
-    fontWeight: '700',
-    color: '#7B00FF',
+    fontWeight: "700",
+    color: "#7B00FF",
     marginBottom: 4,
   },
   subText: {
     fontSize: 16,
-    color: '#716F6F',
-    fontWeight: '500',
+    color: "#716F6F",
+    fontWeight: "500",
   },
-  // Tab Scroll View
   tabScrollView: {},
   tabScrollContent: {
     paddingHorizontal: 4,
   },
   tabBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 12,
     marginHorizontal: 6,
-    backgroundColor: '#ebeff3',
+    backgroundColor: "#ebeff3",
     width: 271,
     height: 72,
-
-    // 👇 Add border
     borderWidth: 1,
-    borderColor: '#d1d5db',
+    borderColor: "#d1d5db",
   },
-
   activeTab: {
-    backgroundColor: '#7B00FF',
+    backgroundColor: "#7B00FF",
   },
   tabBtnText: {
     color: COLORS.gray,
-    fontWeight: '600',
+    fontWeight: "600",
     fontSize: 18,
-    textAlign: 'center',
+    textAlign: "center",
   },
   activeTabText: {
     color: COLORS.white,
   },
-  // Section Titles
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#2A2A2A',
+    fontWeight: "700",
+    color: "#2A2A2A",
     marginBottom: 10,
   },
-  // Input Groups
   inputGroup: {
     marginBottom: 10,
   },
   label: {
     fontSize: 16,
-    color: '#2A2A2A',
-    fontWeight: '700',
+    color: "#2A2A2A",
+    fontWeight: "700",
     marginBottom: 6,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#d1d5db',
+    borderColor: "#d1d5db",
     borderRadius: 10,
     padding: 12,
     fontSize: 16,
-    fontWeight: '500',
-    color: '#716F6F',
-    backgroundColor: '#ebeff3',
+    fontWeight: "500",
+    color: "#716F6F",
+    backgroundColor: "#ebeff3",
   },
-  // Buttons
   btnRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginTop: 24,
     marginBottom: 40,
   },
@@ -505,33 +745,35 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: COLORS.lightGray,
     marginRight: 8,
-    alignItems: 'center',
+    alignItems: "center",
   },
   cancelText: {
     fontSize: 14,
-    fontWeight: '700',
-    color: '#716F6F',
+    fontWeight: "700",
+    color: "#716F6F",
   },
   submitBtn: {
     flex: 1,
     padding: 14,
     borderRadius: 12,
-    backgroundColor: '#7B00FF',
+    backgroundColor: "#7B00FF",
     marginLeft: 8,
-    alignItems: 'center',
+    alignItems: "center",
+  },
+  disabledBtn: {
+    backgroundColor: "#9CA3AF",
   },
   submitText: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.white,
   },
-  // Certificate Styles
   certificateContainer: {
-    backgroundColor: '#ebeff3',
+    backgroundColor: "#ebeff3",
     borderRadius: 16,
     padding: 15,
     marginTop: 10,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -542,11 +784,11 @@ const styles = StyleSheet.create({
     borderBottomColor: COLORS.primary,
     paddingBottom: 16,
     marginBottom: 16,
-    alignItems: 'center',
+    alignItems: "center",
   },
   certificateTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.darkGray,
     marginBottom: 8,
   },
@@ -557,33 +799,33 @@ const styles = StyleSheet.create({
   },
   certificateInstructor: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.primary,
   },
   certificateDetails: {
     marginBottom: 20,
   },
   detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 12,
     paddingHorizontal: 8,
   },
   detailLabel: {
     fontSize: 14,
     color: COLORS.gray,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   detailValue: {
     fontSize: 14,
     color: COLORS.darkGray,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   certificateFooter: {
     borderTopWidth: 1,
     borderTopColor: COLORS.lightGray,
     paddingTop: 16,
-    alignItems: 'center',
+    alignItems: "center",
   },
   footerText: {
     fontSize: 14,
@@ -592,20 +834,20 @@ const styles = StyleSheet.create({
   },
   footerInstructor: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.darkGray,
   },
   certificateActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginTop: 24,
     gap: 12,
   },
   actionButton: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: COLORS.secondary,
     padding: 12,
     borderRadius: 10,
@@ -613,51 +855,50 @@ const styles = StyleSheet.create({
   },
   actionButtonText: {
     color: COLORS.white,
-    fontWeight: '600',
+    fontWeight: "600",
     fontSize: 14,
   },
   comingSoon: {
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 18,
     color: COLORS.gray,
     marginTop: 40,
-    fontWeight: '600',
+    fontWeight: "600",
   },
-
   cardImage: {
-    width: '100%',
+    width: "100%",
     height: 180,
     borderRadius: 8,
-    resizeMode: 'cover',
+    resizeMode: "cover",
   },
   cardText: {
     marginTop: 6,
     fontSize: 16,
-    fontWeight: '700',
-    color: '#716F6F',
+    fontWeight: "700",
+    color: "#716F6F",
   },
   cardImag: {
     width: 250,
     height: 250,
     borderRadius: 8,
-    resizeMode: 'cover',
+    resizeMode: "cover",
     marginBottom: 10,
   },
   backbutton: {
     width: 48,
     height: 48,
-    resizeMode: 'contain',
+    resizeMode: "contain",
   },
   tabIcon: {
     width: 48,
     height: 48,
-    resizeMode: 'contain',
+    resizeMode: "contain",
   },
   contentRow: {
     flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   textContainer: {
     flex: 1,
@@ -666,6 +907,9 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     marginLeft: 12,
-    resizeMode: 'contain',
+    resizeMode: "contain",
   },
-});
+  editBtnActive: {
+    backgroundColor: "#7B00FF",
+  },
+})
