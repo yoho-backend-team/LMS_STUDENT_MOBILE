@@ -31,17 +31,38 @@ const Notifications = () => {
   const [search, setSearch] = useState('');
   const [selectedNotification, setSelectedNotification] = useState<any>(null);
 
+  // 🔽 pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const notificationsPerPage = 5;
+
   useEffect(() => {
     dispatch(getAllNotificationsThunk({}));
   }, [dispatch]);
 
-  const filteredNotifications = notifications?.filter((n: any) => {
-    const matchTab = activeTab === 'All' ? true : n.status === activeTab.toLowerCase();
-    const matchSearch =
-      n.title.toLowerCase().includes(search.toLowerCase()) ||
-      n.body.toLowerCase().includes(search.toLowerCase());
-    return matchTab && matchSearch;
-  });
+  // Reset page on filter/search change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, search]);
+
+  // 🔽 filter notifications safely
+  const filteredNotifications =
+    notifications?.filter((n: any) => {
+      const matchTab = activeTab === 'All' ? true : n.status === activeTab.toLowerCase();
+      const matchSearch =
+        (n.title?.toLowerCase() || '').includes(search.toLowerCase()) ||
+        (n.body?.toLowerCase() || '').includes(search.toLowerCase());
+      return matchTab && matchSearch;
+    }) || [];
+
+  // 🔽 pagination slice
+  const indexOfLast = currentPage * notificationsPerPage;
+  const indexOfFirst = indexOfLast - notificationsPerPage;
+  const currentNotifications = filteredNotifications.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(filteredNotifications.length / notificationsPerPage);
+
+  const paginate = (page: number) => {
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+  };
 
   const handleNotificationPress = async (item: any) => {
     setSelectedNotification(item);
@@ -130,10 +151,10 @@ const Notifications = () => {
         <ScrollView showsVerticalScrollIndicator={false}>
           <Text style={styles.sectionTitle}>Today</Text>
 
-          {filteredNotifications?.length === 0 ? (
+          {currentNotifications?.length === 0 ? (
             <Text style={{ textAlign: 'center', color: '#6b7280' }}>No notifications found</Text>
           ) : (
-            filteredNotifications?.map((item: any) => (
+            currentNotifications?.map((item: any) => (
               <Pressable
                 key={item.uuid}
                 onPress={() => handleNotificationPress(item)}
@@ -167,6 +188,29 @@ const Notifications = () => {
           )}
         </ScrollView>
 
+        {/* Pagination */}
+        {filteredNotifications.length > notificationsPerPage && (
+          <View style={styles.paginationContainer}>
+            <Pressable
+              style={[styles.pageButton, currentPage === 1 && styles.disabledPage]}
+              onPress={() => paginate(currentPage - 1)}
+              disabled={currentPage === 1}>
+              <Text style={styles.pageButtonText}>Previous</Text>
+            </Pressable>
+
+            <Text style={styles.pageInfo}>
+              Page {currentPage} of {totalPages}
+            </Text>
+
+            <Pressable
+              style={[styles.pageButton, currentPage === totalPages && styles.disabledPage]}
+              onPress={() => paginate(currentPage + 1)}
+              disabled={currentPage === totalPages}>
+              <Text style={styles.pageButtonText}>Next</Text>
+            </Pressable>
+          </View>
+        )}
+
         {/* Modal */}
         <Modal visible={!!selectedNotification} transparent animationType="slide">
           <View style={styles.modalOverlay}>
@@ -182,7 +226,7 @@ const Notifications = () => {
                     <Pressable
                       style={[styles.modalBtn, { backgroundColor: '#e5e7eb' }]}
                       onPress={() => setSelectedNotification(null)}>
-                      <Text style={{ color: '#000' }}>Close</Text>
+                      <Text style={{ color: '#000' }}>Cancle</Text>
                     </Pressable>
                     <Pressable
                       style={[styles.modalBtn, { backgroundColor: '#ef4444' }]}
@@ -212,7 +256,7 @@ const styles = StyleSheet.create({
   searchInput: { backgroundColor: '#f3f4f6', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 14, fontSize: 15, color: '#374151' },
   tabWrapper: { flexDirection: 'row', marginBottom: 20, gap: 5, justifyContent: 'space-between' },
   activeTab: { paddingHorizontal: 20, paddingVertical: 6, borderRadius: 12, minWidth: 100, justifyContent: 'center', alignItems: 'center', flex: 1, marginHorizontal: 4 },
-  activeTabText: { color: '#fff', fontWeight: '800', textAlign: 'center' },
+  activeTabText: { color: '#fff', fontWeight: '800', textAlign: 'center', fontSize: 16   },
   inactiveTab: { paddingHorizontal: 20, paddingVertical: 6, borderRadius: 12, backgroundColor: '#f3f4f6', minWidth: 100, justifyContent: 'center', alignItems: 'center', height: 60 },
   inactiveTabText: { color: '#374151', fontWeight: '800', textAlign: 'center' },
   sectionTitle: { fontSize: 14, color: '#6b7280', fontWeight: '500', marginBottom: 12 },
@@ -236,4 +280,10 @@ const styles = StyleSheet.create({
   modalDesc: { fontSize: 14, color: '#374151', marginBottom: 20 },
   modalActions: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 30 },
   modalBtn: { paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8 },
+  // 🔽 pagination styles
+  paginationContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 10 },
+  pageButton: { paddingVertical: 6, paddingHorizontal: 12, backgroundColor: '#7B00FF', borderRadius: 8 },
+  disabledPage: { backgroundColor: '#9ca3af' },
+  pageButtonText: { color: '#fff', fontWeight: '600' },
+  pageInfo: { fontWeight: '600', fontSize: 14 },
 });
