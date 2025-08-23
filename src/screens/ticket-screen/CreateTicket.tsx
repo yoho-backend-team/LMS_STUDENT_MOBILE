@@ -1,3 +1,6 @@
+
+
+
 import React, { useState } from 'react';
 import {
   StatusBar,
@@ -7,6 +10,8 @@ import {
   View,
   TextInput,
   ScrollView,
+  Image,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS, icons } from '~/constants';
@@ -14,11 +19,15 @@ import Header from '~/components/shared/Header';
 import { useNavigation } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 import { Picker } from '@react-native-picker/picker';
-import { Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
+import { useDispatch } from 'react-redux';
+import { CreateTicketThunks } from '../../features/Ticket/reducers/Thunks'; 
+
 
 const CreateTicket = () => {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+
   const [subject, setSubject] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
@@ -36,15 +45,32 @@ const CreateTicket = () => {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!subject || !description) {
-      alert('Please fill all required fields');
+      Alert.alert('Validation', 'Please fill all required fields');
       return;
     }
 
-    console.log({ subject, description, category, attachment, priority });
-    alert('Ticket created successfully!');
-    navigation.goBack();
+ 
+    const ticketData = {
+      subject,
+      description,
+      category,
+      priority,
+      attachment, 
+    };
+
+    try {
+      const result: any = await dispatch(CreateTicketThunks(ticketData, {}) as any);
+
+      if (result) {
+        Alert.alert('Success', 'Ticket created successfully!');
+        navigation.goBack();
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to create ticket');
+      console.error('CreateTicket Error:', error);
+    }
   };
 
   return (
@@ -86,7 +112,6 @@ const CreateTicket = () => {
             multiline
           />
 
-          {/* Priority Dropdown */}
           <Text style={styles.label}>Priority</Text>
           <View style={styles.dropdownContainer}>
             <Picker
@@ -129,11 +154,7 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   title: { fontSize: 20, fontWeight: 'bold' },
-  backButton: {
-    paddingHorizontal: 10,
-    marginTop: 10,
-  },
-  backText: { color: 'white', fontSize: 18, fontWeight: 'bold' },
+  backButton: { paddingHorizontal: 10, marginTop: 10 },
   formContainer: { paddingHorizontal: 15 },
   label: { fontSize: 16, fontWeight: '600', marginBottom: 5, marginTop: 15 },
   input: {
@@ -162,16 +183,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9f9f9',
     marginTop: 10,
   },
-  attachmentContent: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 5,
-  },
-  attachmentText: {
-    fontSize: 16,
-    color: '#333',
-    textAlign: 'center',
-  },
+  attachmentContent: { justifyContent: 'center', alignItems: 'center', gap: 5 },
+  attachmentText: { fontSize: 16, color: '#333', textAlign: 'center' },
   submitButton: {
     marginTop: 30,
     backgroundColor: COLORS.blue_01,
