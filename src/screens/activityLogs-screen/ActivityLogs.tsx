@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FlatList, Image, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '~/components/shared/Header';
@@ -7,6 +7,9 @@ import { COLORS, FONTS, icons } from '~/constants';
 import { formatDateandTime } from '~/utils/formatDate';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { useNavigation } from '@react-navigation/native';
+import { useDispatch, useSelector } from 'react-redux';
+import { getAllActivityData } from '~/features/reducer/activitylog/reducers/Thunks';
+import { ActivitySelector } from '~/features/reducer/activitylog/reducers/Selector';
 
 type Log = {
   id: string;
@@ -75,6 +78,15 @@ const ActivityLogs = () => {
   const navigation = useNavigation();
   const toggleFilter = () => setFilterVisible((prev) => !prev);
 
+  const dispatch = useDispatch<any>();
+  const getActivtiy = useSelector(ActivitySelector)?.data?.data;
+
+  console.log("Activity Data",getActivtiy);
+
+  useEffect (() => {
+   dispatch(getAllActivityData({}))
+  },[])
+
   const handleConfirm = (date: Date) => {
     if (pickerMode === 'from') {
       setFromDate(date);
@@ -89,8 +101,8 @@ const ActivityLogs = () => {
     setToDate(null);
   };
 
-  const filteredLogs = logsData.filter((log) => {
-    const logDate: any = new Date(log.date);
+  const filteredLogs = getActivtiy?.filter((log: any) => {
+    const logDate: any = new Date(log.timestamp);
     if (fromDate && logDate < fromDate) return false;
     if (toDate && logDate > toDate) return false;
     return true;
@@ -107,13 +119,13 @@ const ActivityLogs = () => {
           </View>
           <View style={{ flex: 1 }}>
             <View>
-              <Text style={styles.message}>{item.message}</Text>
+              <Text style={styles.message}>{item.title}</Text>
             </View>
             <View style={styles.logCard}>
               <Text style={styles.email}>
-                {item.message} {item.email}
+                {item.title} {item.user?.email}
               </Text>
-              <Text style={styles.time}>{formatDateandTime(logDate)}</Text>
+              <Text style={styles.time}>{formatDateandTime(item.timestamp)}</Text>
             </View>
           </View>
         </View>
