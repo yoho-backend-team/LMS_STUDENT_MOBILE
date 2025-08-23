@@ -21,12 +21,10 @@ import { selectNotifications } from '~/features/notification/reducers/selectors'
 import { deleteNotification, updateNotificationStatus } from '~/features/notification/services';
 import toast from '~/utils/toasts';
 
-
 const Notifications = () => {
   const navigation = useNavigation();
   const dispatch: any = useDispatch();
 
-  
   const notifications = useSelector(selectNotifications);
 
   const [activeTab, setActiveTab] = useState('All');
@@ -34,62 +32,46 @@ const Notifications = () => {
   const [selectedNotification, setSelectedNotification] = useState<any>(null);
 
   useEffect(() => {
-    dispatch(getAllNotificationsThunk({})); 
+    dispatch(getAllNotificationsThunk({}));
   }, [dispatch]);
 
-console.log(notifications,'notification')
-
-  const filteredNotifications = notifications.filter((n: any) => {
+  const filteredNotifications = notifications?.filter((n: any) => {
     const matchTab = activeTab === 'All' ? true : n.status === activeTab.toLowerCase();
     const matchSearch =
       n.title.toLowerCase().includes(search.toLowerCase()) ||
-      n.desc.toLowerCase().includes(search.toLowerCase());
+      n.body.toLowerCase().includes(search.toLowerCase());
     return matchTab && matchSearch;
   });
 
   const handleNotificationPress = async (item: any) => {
- 
-  setSelectedNotification(item);
+    setSelectedNotification(item);
 
-  
-  if (item.status === "unread") {
-    try {
-      await updateNotificationStatus({
-        uuid: item.uuid,
-        status: "read",
-      });
-
-     
-      dispatch(getAllNotificationsThunk({}));
-    } catch (error) {
-      console.error("Error updating notification status:", error);
+    if (item.status === 'unread') {
+      try {
+        await updateNotificationStatus({
+          uuid: item.uuid,
+          status: 'read',
+        });
+        dispatch(getAllNotificationsThunk({}));
+      } catch (error) {
+        console.error('Error updating notification status:', error);
+      }
     }
-  }
-};
-console.log(handleNotificationPress,'updated status ')
+  };
 
   const handleDelete = async (id: string) => {
-  try {
-    const response = await deleteNotification({ uuid: id });
-    console.log(response, "Response from delete notification");
+    try {
+      const response = await deleteNotification({ uuid: id });
+      console.log(response, 'Response from delete notification');
 
-    toast.success("Success", "Notification deleted successfully!"
-    );
-
-  
-    setSelectedNotification(null);
-
-    
-    dispatch(getAllNotificationsThunk({}));
-  } catch (error) {
-    console.error( "Error deleting notification:", error);
-    toast.error("error","Failed to delete notification.", 
-    
-  );
-  }
-};
-console.log (handleDelete,'delete notification')
-
+      toast.success('Success', 'Notification deleted successfully!');
+      setSelectedNotification(null);
+      dispatch(getAllNotificationsThunk({}));
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+      toast.error('Error', 'Failed to delete notification.');
+    }
+  };
 
   return (
     <>
@@ -110,8 +92,8 @@ console.log (handleDelete,'delete notification')
             <Text style={styles.headerTitle}>Notification</Text>
           </View>
           <Text style={styles.headerCount}>
-            {notifications.length} Message /{' '}
-            {notifications.filter((n: any) => n.status === 'unread').length} Unread
+            {notifications?.length} Message /{' '}
+            {notifications?.filter((n: any) => n.status === 'unread').length} Unread
           </Text>
         </View>
 
@@ -148,24 +130,37 @@ console.log (handleDelete,'delete notification')
         <ScrollView showsVerticalScrollIndicator={false}>
           <Text style={styles.sectionTitle}>Today</Text>
 
-          {filteredNotifications.length === 0 ? (
+          {filteredNotifications?.length === 0 ? (
             <Text style={{ textAlign: 'center', color: '#6b7280' }}>No notifications found</Text>
           ) : (
-            filteredNotifications.map((item: any) => (
+            filteredNotifications?.map((item: any) => (
               <Pressable
                 key={item.uuid}
                 onPress={() => handleNotificationPress(item)}
                 style={[styles.card, styles.neumorphicCard]}>
-                <View style={[styles.iconWrapper, styles.neumorphicCard]}>
-                  <Text>🔔</Text>
+                <View
+                  style={[
+                    styles.iconWrapper,
+                    item.status === 'unread' ? styles.unreadIconWrapper : styles.readIconWrapper,
+                  ]}>
+                  <Text style={item.status === 'unread' ? styles.unreadIcon : styles.readIcon}>
+                    {item.status === 'unread' ? '🔔' : '🔕'}
+                  </Text>
                 </View>
                 <View style={styles.cardContent}>
-                  <Text style={[item.status === 'unread' ? styles.unreadTitle : styles.readTitle]}>
+                  <Text
+                    style={[
+                      item.status === 'unread' ? styles.unreadTitle : styles.readTitle,
+                    ]}>
                     {item.title}
                   </Text>
-                   <Text style={[styles.cardDesc, item.status === 'read' && styles.readDesc]}>
-        {item.body}  
-      </Text>
+                  <Text
+                    style={[
+                      styles.cardDesc,
+                      item.status === 'read' && styles.readDesc,
+                    ]}>
+                    {item.body}
+                  </Text>
                 </View>
               </Pressable>
             ))
@@ -179,23 +174,20 @@ console.log (handleDelete,'delete notification')
               {selectedNotification && (
                 <>
                   <Text style={styles.modalTitle}>{selectedNotification.title}</Text>
-                 <Text style={styles.modalDesc}>{selectedNotification.body}</Text>
-
-          {/* ✅ Show Date & Time */}
-          <Text style={{ marginTop: 8, color: '#6b7280', fontSize: 12 }}>
-            {new Date(selectedNotification.createdAt).toLocaleString()}
-          </Text>
+                  <Text style={styles.modalDesc}>{selectedNotification.body}</Text>
+                  <Text style={{ marginTop: 8, color: '#6b7280', fontSize: 12 }}>
+                    {new Date(selectedNotification.createdAt).toLocaleString()}
+                  </Text>
                   <View style={styles.modalActions}>
                     <Pressable
                       style={[styles.modalBtn, { backgroundColor: '#e5e7eb' }]}
                       onPress={() => setSelectedNotification(null)}>
                       <Text style={{ color: '#000' }}>Close</Text>
                     </Pressable>
-
                     <Pressable
                       style={[styles.modalBtn, { backgroundColor: '#ef4444' }]}
                       onPress={() => handleDelete(selectedNotification.uuid)}>
-                      <Text style={{ color: '#fff', fontWeight: '600' }}>🗑 Delete</Text>
+                      <Text style={{ color: '#fff', fontWeight: '600' }}>Delete</Text>
                     </Pressable>
                   </View>
                 </>
@@ -210,182 +202,38 @@ console.log (handleDelete,'delete notification')
 
 export default Notifications;
 
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 10,
-    paddingHorizontal: 16,
-    backgroundColor: '#f3f4f6',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 15,
-    marginBottom: 15,
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: '600',
-    color: '#000',
-  },
-  headerCount: {
-    fontSize: 12,
-    color: '#6b7280',
-  },
-  searchWrapper: {
-    marginBottom: 16,
-  },
-  searchInput: {
-    backgroundColor: '#f3f4f6',
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-    fontSize: 15,
-    color: '#374151',
-  },
-  tabWrapper: {
-    flexDirection: 'row',
-    marginBottom: 20,
-    gap: 5,
-    justifyContent: 'space-between',
-  },
-  activeTab: {
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    borderRadius: 12,
-    height: 60,
-    minWidth: 100,
-    justifyContent: 'center',
-    alignItems: 'center',
-    flex: 1,
-    marginHorizontal: 4,
-  },
-  activeTabText: {
-    color: '#fff',
-    fontWeight: '800',
-    textAlign: 'center',
-  },
-  inactiveTab: {
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    borderRadius: 12,
-    backgroundColor: '#f3f4f6',
-    minWidth: 100,
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: 60,
-  },
-  inactiveTabText: {
-    color: '#374151',
-    fontWeight: '500',
-    textAlign: 'center',
-  },
-  sectionTitle: {
-    fontSize: 14,
-    color: '#6b7280',
-    fontWeight: '500',
-    marginBottom: 12,
-  },
-  card: {
-    flexDirection: 'row',
-    backgroundColor: '#f3f4f6',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-  },
-  iconWrapper: {
-    width: 40,
-    height: 40,
-    backgroundColor: '#f3f4f6',
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  cardContent: {
-    flex: 1,
-  },
-  unreadTitle: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: 2,
-  },
-  readTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#6b7280',
-    marginBottom: 2,
-  },
-  cardDesc: {
-    fontSize: 13,
-    color: '#000',
-  },
-  readDesc: {
-    color: '#6b7280',
-  },
-  neumorphicBox: {
-    shadowColor: '#000',
-    shadowOffset: { width: -2, height: -2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.8)',
-  },
-  neumorphicCard: {
-    shadowColor: '#000',
-    shadowOffset: { width: -3, height: -3 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.9)',
-  },
-  innerShadow: {
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-
-  },
-  modalBox: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    width: '100%',
-    padding: 20,
-    height:'50%'
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  modalDesc: {
-    fontSize: 14,
-    color: '#374151',
-    marginBottom: 20,
-  },
-  modalActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-     marginTop: 30,
-  },
-  modalBtn: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-  },
+  container: { flex: 1, paddingTop: 10, paddingHorizontal: 16, backgroundColor: '#f3f4f6' },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 15, marginBottom: 15 },
+  headerLeft: { flexDirection: 'row', alignItems: 'center' },
+  headerTitle: { fontSize: 22, fontWeight: '600', color: '#000' },
+  headerCount: { fontSize: 12, color: '#6b7280' },
+  searchWrapper: { marginBottom: 16 },
+  searchInput: { backgroundColor: '#f3f4f6', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 14, fontSize: 15, color: '#374151' },
+  tabWrapper: { flexDirection: 'row', marginBottom: 20, gap: 5, justifyContent: 'space-between' },
+  activeTab: { paddingHorizontal: 20, paddingVertical: 6, borderRadius: 12, minWidth: 100, justifyContent: 'center', alignItems: 'center', flex: 1, marginHorizontal: 4 },
+  activeTabText: { color: '#fff', fontWeight: '800', textAlign: 'center' },
+  inactiveTab: { paddingHorizontal: 20, paddingVertical: 6, borderRadius: 12, backgroundColor: '#f3f4f6', minWidth: 100, justifyContent: 'center', alignItems: 'center', height: 60 },
+  inactiveTabText: { color: '#374151', fontWeight: '800', textAlign: 'center' },
+  sectionTitle: { fontSize: 14, color: '#6b7280', fontWeight: '500', marginBottom: 12 },
+  card: { flexDirection: 'row', backgroundColor: '#f3f4f6', borderRadius: 16, padding: 16, marginBottom: 12 },
+  iconWrapper: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
+  unreadIconWrapper: { backgroundColor: '#E0E7FF' },
+  readIconWrapper: { backgroundColor: '#F3F4F6' },
+  unreadIcon: { fontSize: 20, color: '#4338CA', fontWeight: 'bold' },
+  readIcon: { fontSize: 20, color: '#9CA3AF' },
+  cardContent: { flex: 1 },
+  unreadTitle: { fontSize: 15, fontWeight: 'bold', color: '#000', marginBottom: 2 },
+  readTitle: { fontSize: 15, fontWeight: '600', color: '#6b7280', marginBottom: 2 },
+  cardDesc: { fontSize: 13, color: '#000' },
+  readDesc: { color: '#6b7280' },
+  neumorphicBox: { shadowColor: '#000', shadowOffset: { width: -2, height: -2 }, shadowOpacity: 0.15, shadowRadius: 4, elevation: 6, borderWidth: 1, borderColor: 'rgba(255,255,255,0.8)' },
+  neumorphicCard: { shadowColor: '#000', shadowOffset: { width: -3, height: -3 }, shadowOpacity: 0.1, shadowRadius: 6, elevation: 4, borderWidth: 1, borderColor: 'rgba(255,255,255,0.9)' },
+  innerShadow: { shadowOffset: { width: 2, height: 2 }, shadowOpacity: 0.2, shadowRadius: 3 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 },
+  modalBox: { backgroundColor: '#fff', borderRadius: 16, width: '100%', padding: 20, height: '50%' },
+  modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
+  modalDesc: { fontSize: 14, color: '#374151', marginBottom: 20 },
+  modalActions: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 30 },
+  modalBtn: { paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8 },
 });
