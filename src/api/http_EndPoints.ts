@@ -1,6 +1,9 @@
 import { Endpoints } from './httpTypes';
 
 const getEndpoints = (): Endpoints => {
+  const instituteId = '67f3a26df4b2c530acd16419';
+  const branchId = '67f3a26ef4b2c530acd16425';
+
   return {
     auth: {
       login: '/institutes/auth/student/login',
@@ -11,7 +14,7 @@ const getEndpoints = (): Endpoints => {
       log_out: '/institutes/auth/student/logout',
     },
     course: {
-      get: `/institutes/:instituteuuid/branches/:branchuuid/course/:courseId`,
+      get: `/institutes/${instituteId}/branches/${branchId}/course/:courseId`,
       // getwithclass: `/institutes/${institute}/branches/${branch}/course/${course}/classes`
     },
     class: {
