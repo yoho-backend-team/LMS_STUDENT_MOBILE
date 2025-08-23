@@ -18,6 +18,8 @@ import Header from '~/components/shared/Header';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllNotificationsThunk } from '~/features/notification/reducers/thunks';
 import { selectNotifications } from '~/features/notification/reducers/selectors';
+import { deleteNotification, updateNotificationStatus } from '~/features/notification/services';
+import toast from '~/utils/toasts';
 
 
 const Notifications = () => {
@@ -45,15 +47,49 @@ console.log(notifications,'notification')
     return matchTab && matchSearch;
   });
 
-  const handleNotificationPress = (item: any) => {
-   
-    setSelectedNotification(item);
-  };
+  const handleNotificationPress = async (item: any) => {
+ 
+  setSelectedNotification(item);
 
-  const handleDelete = (id: string) => {
-   
+  
+  if (item.status === "unread") {
+    try {
+      await updateNotificationStatus({
+        uuid: item.uuid,
+        status: "read",
+      });
+
+     
+      dispatch(getAllNotificationsThunk({}));
+    } catch (error) {
+      console.error("Error updating notification status:", error);
+    }
+  }
+};
+console.log(handleNotificationPress,'updated status ')
+
+  const handleDelete = async (id: string) => {
+  try {
+    const response = await deleteNotification({ uuid: id });
+    console.log(response, "Response from delete notification");
+
+    toast.success("Success", "Notification deleted successfully!"
+    );
+
+  
     setSelectedNotification(null);
-  };
+
+    
+    dispatch(getAllNotificationsThunk({}));
+  } catch (error) {
+    console.error( "Error deleting notification:", error);
+    toast.error("error","Failed to delete notification.", 
+    
+  );
+  }
+};
+console.log (handleDelete,'delete notification')
+
 
   return (
     <>
@@ -117,7 +153,7 @@ console.log(notifications,'notification')
           ) : (
             filteredNotifications.map((item: any) => (
               <Pressable
-                key={item.id}
+                key={item.uuid}
                 onPress={() => handleNotificationPress(item)}
                 style={[styles.card, styles.neumorphicCard]}>
                 <View style={[styles.iconWrapper, styles.neumorphicCard]}>
@@ -158,7 +194,7 @@ console.log(notifications,'notification')
 
                     <Pressable
                       style={[styles.modalBtn, { backgroundColor: '#ef4444' }]}
-                      onPress={() => handleDelete(selectedNotification.id)}>
+                      onPress={() => handleDelete(selectedNotification.uuid)}>
                       <Text style={{ color: '#fff', fontWeight: '600' }}>🗑 Delete</Text>
                     </Pressable>
                   </View>
@@ -330,7 +366,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     width: '100%',
     padding: 20,
-    height:'30%'
+    height:'50%'
   },
   modalTitle: {
     fontSize: 18,
@@ -345,7 +381,7 @@ const styles = StyleSheet.create({
   modalActions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-     marginTop: 70,
+     marginTop: 30,
   },
   modalBtn: {
     paddingVertical: 10,
