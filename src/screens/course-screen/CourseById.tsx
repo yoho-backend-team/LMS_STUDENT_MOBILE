@@ -5,7 +5,9 @@ import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { COLORS, icons } from '~/constants';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { WebView } from 'react-native-webview';
-import { getImageUrl } from '~/utils/imageUtils';
+import { getFileUrl, getImageUrl } from '~/utils/imageUtils';
+import { formatDateMonthandYear } from '~/utils/formatDate';
+import {  Linking, Alert } from "react-native";
 
 type RootStackParamList = {
   Courses: undefined;
@@ -38,12 +40,20 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
   const { course } = route.params;
   const [activeTab, setActiveTab] = useState<'about' | 'notes' | 'tasks' | 'track'>('about');
 
-  const notesData = [
-    { id: 1, name: 'File', date: '12-06-2025', chapter: 'Chapter 1' },
-    { id: 2, name: 'File', date: '13-06-2025', chapter: 'Chapter 2' },
-    { id: 3, name: 'File', date: '14-06-2025', chapter: 'Chapter 3' },
-    { id: 4, name: 'File', date: '15-06-2025', chapter: 'Chapter 4' },
-  ];
+  
+  const downloadPdf = async (fileUrl: string) => {
+  const PDF_URL = getFileUrl(fileUrl)
+  try {
+    const supported = await Linking.canOpenURL(PDF_URL);
+    if (supported) {
+      await Linking.openURL(PDF_URL); 
+    } else {
+      Alert.alert("Error", "Cannot open this PDF URL");
+    }
+  } catch (error) {
+    console.error("Linking error:", error);
+  }
+};
 
   const tasksData = [
     {
@@ -252,20 +262,20 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
                 {/* Date Row */}
                 <View style={styles.textRow}>
                   <Text style={styles.labelText}>Date</Text>
-                  <Text style={styles.valueText}>{note.date}</Text>
+                  <Text style={styles.valueText}>{formatDateMonthandYear(note?.createdAt)}</Text>
                 </View>
 
                 {/* Chapter Row */}
                 <View style={styles.textRow}>
                   <Text style={styles.labelText}>Chapter</Text>
-                  <Text style={styles.valueText}>{note.chapter}</Text>
+                  <Text style={styles.valueText}>{note?.title}</Text>
                 </View>
 
                 {/* Download Row */}
-                <TouchableOpacity style={styles.downloadRow}>
-                  <Text style={styles.labelText}>PDF Download</Text>
-                  <Image source={icons.download} style={{ width: 55, height: 55 }} />
-                </TouchableOpacity>
+               <TouchableOpacity style={styles.downloadRow} onPress={()=>downloadPdf(note?.file)}>
+      <Text style={styles.labelText}>PDF Download</Text>
+      <Image source={icons.download} style={{ width: 55, height: 55 }} />
+    </TouchableOpacity>
               </View>
             )) : <View> 
               <Text style = {{textAlign:"center",marginTop:200,marginBottom:350}}>"No notes and materials available"</Text>
@@ -714,12 +724,12 @@ const styles = StyleSheet.create({
     color: '#716F6F',
   },
   labelText: {
-    fontSize: 14,
-    color: '#333',
+    fontSize: 18,
+    color: '#716F6F',
     width: '50%',
   },
   valueText: {
-    fontSize: 14,
-    color: '#555',
+    fontSize: 18,
+    color: '#716F6F',
   },
 });

@@ -50,7 +50,7 @@ const Courses = () => {
     const fetchData = async () => {
       try {
         const params = {
-          courseId: '67a0bd83a0af9570a36c499d', // sample id
+          courseId: "67f3b7fcb8d2634300cc87b6",
         };
         await dispatch(getStudentcourse(params));
       } catch (error) {
