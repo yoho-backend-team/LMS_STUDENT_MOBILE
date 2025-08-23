@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StatusBar, StyleSheet, Text, View, Image, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '~/components/shared/Header';
@@ -6,6 +6,9 @@ import { COLORS } from '~/constants';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '~/store/store';
+import { getStudentcourse } from '~/features/Courses/Reducers/thunks';
 
 
 // 1. Define your stack params
@@ -32,6 +35,7 @@ type CoursesScreenNavigationProp = NativeStackNavigationProp<
 
 const Courses = () => {
   const navigation = useNavigation<CoursesScreenNavigationProp>();
+  const dispatch = useDispatch<AppDispatch>();
 
   const courses: Course[] = [
     {
@@ -53,6 +57,28 @@ const Courses = () => {
       image: require('../../assets/courses/course grp.png'),
     },
   ];
+
+
+
+
+  useEffect(() => {
+		const fetchData = async () => {
+			const instituteId = GetLocalStorage('instituteId');
+			const branchId = GetLocalStorage('branchId');
+			try {
+				const params = {
+					instituteuuid: instituteId,
+					branchuuid: branchId,
+					courseId: '67a0bd83a0af9570a36c499d',
+				};
+				await dispatch(getStudentcourse(params));
+			} catch (error) {
+				console.error('Course fetch error:', error);
+			}
+		};
+
+		fetchData();
+	}, [dispatch]);
 
   return (
     <>
