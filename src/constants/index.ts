@@ -46,6 +46,11 @@ export const icons = {
   download: require('../assets/icons/download.png'),
 };
 
+export const Auth = {
+  header: require('../assets/images/login/login 2.png'),
+  loading: require('../assets/images/login/Group 14.png')
+}
+
 export const bottom_tabs = [
   {
     id: 0,
