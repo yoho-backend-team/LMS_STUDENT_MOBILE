@@ -50,7 +50,7 @@ const CreateTicketComponent = () => {
         <View style={styles.headerRow}>
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Text style={styles.backText}>←</Text>
-           <Image/>
+           {/* <Image source={icons.}/> */}
           </TouchableOpacity>
           <Text style={styles.title}>Create Ticket Screen</Text>
         </View>

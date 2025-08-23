@@ -1,5 +1,5 @@
 {
-  "name": "LMS_Student_MobileApp",
+  "name": "lms-student-mobileapp",
   "version": "1.0.0",
   "scripts": {
     "android": "expo start --android",
@@ -15,6 +15,7 @@
     "@expo/vector-icons": "^15.0.0",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-community/datetimepicker": "^8.4.1",
+    "@react-native-picker/picker": "^2.11.1",
     "@react-navigation/bottom-tabs": "^7.4.6",
     "@react-navigation/drawer": "^7.5.7",
     "@react-navigation/native": "^7.1.17",
@@ -22,6 +23,7 @@
     "@reduxjs/toolkit": "^2.8.2",
     "dotenv": "^17.2.1",
     "expo": "^53.0.20",
+    "expo-document-picker": "~13.1.6",
     "expo-linear-gradient": "^14.1.5",
     "expo-status-bar": "~2.2.3",
     "nativewind": "latest",
@@ -42,6 +44,7 @@
   "devDependencies": {
     "@babel/core": "^7.20.0",
     "@types/react": "~19.0.10",
+    "@types/react-native-vector-icons": "^6.4.18",
     "eslint": "^9.25.1",
     "eslint-config-expo": "^9.2.0",
     "eslint-config-prettier": "^10.1.2",
