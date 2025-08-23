@@ -19,8 +19,6 @@ class Client {
       get: (params: any) =>
         httpClient.get(
           HTTP_END_POINTS.course.get
-            .replace(':instituteuuid', params.instituteuuid)
-            .replace(':branchuuid', params.branchuuid)
             .replace(':courseId', params.courseId),
           {},
           'student'
