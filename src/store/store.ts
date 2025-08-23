@@ -9,6 +9,9 @@ import ProfileSlice from '../features/Profile/reducer/profileSlice';
 const store = configureStore({
 	reducer: {
 		tabReducer: tabReducer,
+		CourseSlice: CourseSlice,
+		AuthSlice: AuthSlice,
+		ProfileSlice: ProfileSlice,
 	},
 });
 

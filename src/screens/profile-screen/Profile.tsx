@@ -22,6 +22,7 @@ import { getStudentProfileThunk } from "~/features/Profile/reducer/thunks"
 import { selectProfile } from "~/features/Profile/reducer/selectors"
 import { getImageUrl } from "~/utils/imageUtils"
 import { updateStudentProfile } from "~/features/Profile/services"
+import * as ImagePicker from "expo-image-picker";
 
 const COLORS = {
   black: "#000000",
@@ -109,7 +110,34 @@ const Profile = () => {
     }
   }, [profileDetails])
 
-  const handleImageUpload = () => {
+const handleImageUpload = async () => {
+  try {
+    // ask for permission
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (permissionResult.status !== "granted") {
+      Alert.alert("Permission Denied", "You need to allow access to your gallery!");
+      return;
+    }
+
+    // open gallery
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images, // only images
+      allowsEditing: true, // enable crop
+      aspect: [1, 1],      // square crop (profile style)
+      quality: 1,          // best quality
+    });
+
+    if (!result.canceled) {
+      const selectedImage = result.assets[0].uri;
+      console.log("Picked image:", selectedImage);
+      // 👉 now you can upload this image to your backend
+    }
+  } catch (error) {
+    console.error("Image pick error:", error);
+  }
+};
+
+  const handleImageUpload1 = () => {
     const options = {
       mediaType: "photo" as MediaType,
       includeBase64: false,

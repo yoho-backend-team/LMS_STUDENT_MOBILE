@@ -1,4 +1,4 @@
-import { getStudentLoginClient, getStudentLogoutClient } from "../services";
+ import { getStudentLoginClient, getStudentLogoutClient } from "../services";
 
 
 export const getStudentLogin =
@@ -10,7 +10,7 @@ export const getStudentLogin =
 			return response;
 		} catch (error) {
 			console.log(error);
-		}
+		} 
 	};
 
 export const getStudentLogout = (params: any) => async () => {
