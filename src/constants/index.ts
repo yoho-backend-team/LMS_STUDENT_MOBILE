@@ -45,6 +45,7 @@ export const icons = {
   pdf: require('../assets/icons/pdf.png'),
   download: require('../assets/icons/download.png'),
   security: require('../assets/icons/security.png'),
+  security2: require('../assets/icons/security2.png'),
 };
 
 export const Auth = {

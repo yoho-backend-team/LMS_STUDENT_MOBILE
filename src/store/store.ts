@@ -1,11 +1,11 @@
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit';
 import tabReducer from './tab/tabSlice';
-import ActivitySlice from '../features/reducer/activitylog/reducers/ActivitySlice'
+import Ticket from "../features/Ticket/reducers/ModuleSlice"
 
 const store = configureStore({
 	reducer: {
 		tabReducer: tabReducer,
-		ActivitySlice : ActivitySlice,
+		Ticket:Ticket
 	},
 });
 
