@@ -90,7 +90,7 @@ class Client {
 
   common = {
     file: {
-      upload: (data: any) => httpClient.uploadFile(HTTP_END_POINTS.common.file.upload, data),
+      upload: (data: any) => httpClient.uploadFile(HTTP_END_POINTS.common.file.upload, data, 'student'),
       get: (url: any) => httpClient.fileGet(url),
     },
   };
