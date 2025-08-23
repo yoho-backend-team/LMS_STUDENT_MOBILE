@@ -1,0 +1,315 @@
+{
+    "status": "success",
+    "message": "reports retrived successfully",
+    "data": {
+        "tickets": {
+            "total": 24,
+            "opened": 11,
+            "closed": 13
+        },
+        "_id": "67f3bb04b8d2634300cc88cc",
+        "user": {
+            "contact_info": {
+                "phone_number": "+91 9597630235",
+                "pincode": 198910,
+                "address2": "Texas town, near the SpaceX ",
+                "alternate_phone_number": "+91 9597630235"
+            },
+            "_id": "67f3b8feb8d2634300cc8819",
+            "first_name": "Elon",
+            "last_name": "M",
+            "email": "musk@gmail.com",
+            "full_name": "musk",
+            "institute_id": "67f3a26df4b2c530acd16419",
+            "branch_id": "67f3a26ef4b2c530acd16425",
+            "dob": "2025-03-07",
+            "gender": "Male",
+            "qualification": "physics",
+            "is_super_user": false,
+            "role": "67a06885400ffae2d206abfd",
+            "is_active": true,
+            "is_delete": false,
+            "is_two_auth_completed": true,
+            "is_email_verified": true,
+            "userModel": "Student_Login",
+            "image": "staticfiles/lms/b843bb34-5e17-4462-8f42-b8b13496af5e.jpg",
+            "welcome_mail_sent": true,
+            "welcome_mail_sent_at": "2025-08-04T08:00:03.893Z",
+            "first_time_login": true,
+            "roll_no": 14,
+            "uuid": "60d59242-f922-4c34-8974-ea207acadeec",
+            "id": 46,
+            "__v": 0,
+            "userDetail": "67f3b8ffb8d2634300cc8823",
+            "two_auth_completed_at": "2025-08-22T10:49:08.482Z"
+        },
+        "institute": {
+            "contact_info": {
+                "address": {
+                    "address1": "No 3, Salman Complex",
+                    "address2": " Pudukottai Main Rd",
+                    "state": "Tamil Nadu",
+                    "city": "Tiruchirappalli",
+                    "pincode": "620024"
+                },
+                "phone_no": "914392407946",
+                "alternate_no": "914392407946"
+            },
+            "social_media": {
+                "twitter_id": "www.twitter.com",
+                "facebook_id": "www.fbk.com",
+                "instagram_id": "www.instagram.comm",
+                "linkedin_id": "www.linkedn.com"
+            },
+            "docs": {
+                "gst": {
+                    "number": "",
+                    "file": ""
+                },
+                "pan": {
+                    "number": "",
+                    "file": ""
+                }
+            },
+            "_id": "67f3a26df4b2c530acd16419",
+            "institute_name": "Anna University RO Tiruchirappalli",
+            "email": "info@aubit.edu.in",
+            "subscription": "67f36dab9fd2c413b096271e",
+            "registered_date": "4/7/2025",
+            "branches": [],
+            "website": "https://www.aubit.in",
+            "description": "University College of Engineering (BIT Campus), Anna University Tiruchirappalli otherwise Anna University Chennai – Regional Office, Tiruchirappalli (AUC-ROT), erstwhile Anna University of Technology, Tiruchirappalli, is a technical university department of Anna University, It is located on Tiruchirappalli–Pudukkottai National Highway 336, Tamil Nadu, India. It was established on 1999 as a part of Bharathidasan University with five departments vizzz",
+            "logo": "staticfiles/lms/a9637f3b-ec21-42ea-80f5-578e1e751b5c.png",
+            "image": "staticfiles/lms/b7477f43-a8b4-432f-8b15-b4c2c99ead7b.jpg",
+            "gallery_images": [
+                "staticfiles/lms/f3c79757-af84-4a1b-ac16-971ccf532711.jpeg",
+                "staticfiles/lms/5ab8f653-3504-420b-95a5-618bfa157153.jpg",
+                "staticfiles/lms/fa2b6c3c-294a-463a-9953-615fc19e8fe3.jpg"
+            ],
+            "is_subscription_expired": false,
+            "institute_active_status": "Active",
+            "Institute_Status": "active",
+            "is_active": true,
+            "is_deleted": false,
+            "welocme_mail_sent": false,
+            "welocme_mail_sent_at": null,
+            "slug": "anna-university-ro-tiruchirappalli",
+            "createdAt": "2025-04-07T10:01:18.006Z",
+            "updatedAt": "2025-05-18T01:57:14.693Z",
+            "uuid": "973195c0-66ed-47c2-b098-d8989d3e4529",
+            "id": 106,
+            "__v": 0
+        },
+        "branch": {
+            "contact_info": {
+                "phone_no": 4884848833,
+                "address": "No 3, Salman Complex,",
+                "landmark": " Pudukottai Main Rd",
+                "state": "Tamil Nadu",
+                "city": "Tiruchirappalli",
+                "pincode": 621014
+            },
+            "_id": "67f3a26ef4b2c530acd16425",
+            "institute_id": "67f3a26df4b2c530acd16419",
+            "branch_identity": "Tiruchirappalliii",
+            "is_active": true,
+            "is_deleted": false,
+            "is_primary": true,
+            "createdAt": "2025-04-07T10:01:18.499Z",
+            "updatedAt": "2025-08-11T07:23:47.068Z",
+            "uuid": "90c93163-01cf-4f80-b88b-4bc5a5dd8ee4",
+            "id": 84,
+            "__v": 0
+        },
+        "courses": [
+            {
+                "course": {
+                    "_id": "67f3b7fcb8d2634300cc87b6",
+                    "institute_id": "67f3a26df4b2c530acd16419",
+                    "branch_id": "67f3a26ef4b2c530acd16425",
+                    "batches": [],
+                    "category": {
+                        "_id": "67f3b4e5c8078119185e3ebe",
+                        "institute_id": "67f3a26df4b2c530acd16419",
+                        "branch_id": null,
+                        "courses": [
+                            "67f3b7fcb8d2634300cc87b6",
+                            "6894a7a2c27fc7117ffb4923",
+                            "68a59223de2c5ced3b0b92c9",
+                            "68a59261de2c5ced3b0b947d",
+                            "68a59f7cde2c5ced3b0bccd7"
+                        ],
+                        "category_name": "Web development",
+                        "slug": "web-development",
+                        "image": "staticfiles/lms/36f684dc-5450-4b0c-9bf6-0b8ce5c0aa31.jpg",
+                        "is_active": false,
+                        "is_deleted": false,
+                        "createdAt": "2025-04-07T11:20:05.235Z",
+                        "updatedAt": "2025-08-20T10:12:13.497Z",
+                        "uuid": "79f02efe-00a7-4334-a82d-350dbcf60716",
+                        "id": 4,
+                        "__v": 0
+                    },
+                    "coursemodules": [
+                        "6852590ce1e401e36a047d76",
+                        "68957f833a63647f7b960c50",
+                        "6895eae938059bc8d7b8bdc3",
+                        "6895eb0938059bc8d7b8bdf2",
+                        "68a5a071de2c5ced3b0bcec1"
+                    ],
+                    "notes": [
+                        "6878efeacdf934ca72070b8c",
+                        "688c941ed23351f690bb83b6",
+                        "688cad35d23351f690bb9d79",
+                        "6892e7013f2cd29029a405fd",
+                        "6892f08f3f2cd29029a42106",
+                        "6892f0923f2cd29029a4212d"
+                    ],
+                    "studymaterials": [
+                        "688db0757bc27f663d1dfe10",
+                        "688dd9b26f788de6b9235a4b",
+                        "688de3386f788de6b9236f0a",
+                        "6890b34d143aaf97088d5a58",
+                        "6890cb76143aaf97088d8217",
+                        "6890e373d4abfffc031e3c89",
+                        "6890e374d4abfffc031e3c96",
+                        "6890e379d4abfffc031e3cae",
+                        "6890e379d4abfffc031e3cb4",
+                        "6892f1803f2cd29029a426ca"
+                    ],
+                    "videos": [],
+                    "course_templates": [],
+                    "course_name": "MEAN STACK 2024",
+                    "slug": "mean-stack-2024",
+                    "duration": "6 months",
+                    "durationInYears": 0.5,
+                    "durationInMonths": 6,
+                    "durationInWeeks": 26.071440000000003,
+                    "durationInDays": 180,
+                    "actual_price": 500000,
+                    "current_price": 100000,
+                    "rating": 5,
+                    "reviews": 200,
+                    "class_type": [
+                        "online"
+                    ],
+                    "overview": "The MERN stack is a collection of technologies for building web applications using JavaScript. It's made up of MongoDB, Express.js, React, and Node.js. MERN is a popular, pre-built, and versatile technology stack. ",
+                    "description": "The MERN stack is a collection of technologies for building web applications using JavaScript. It's made up of MongoDB, Express.js, React, and Node.js. MERN is a popular, pre-built, and versatile technology stack. ",
+                    "image": "staticfiles/lms/1096c6d3-5f98-4878-b78f-c2d0d5360d0b.jpg",
+                    "thumbnail": "staticfiles/lms/f9d0b3e6-d440-4b9d-b664-9fcf8bc74497.jpg",
+                    "is_active": false,
+                    "is_deleted": false,
+                    "createdAt": "2025-04-07T11:33:16.670Z",
+                    "updatedAt": "2025-08-20T10:16:17.753Z",
+                    "uuid": "1958e331-84ce-464b-8865-eb06c6189414",
+                    "id": 4,
+                    "__v": 0
+                },
+                "_id": "67f3bb04b8d2634300cc88cd"
+            }
+        ],
+        "batches": [
+            {
+                "_id": "67f3bb04b8d2634300cc88ce"
+            }
+        ],
+        "is_active": true,
+        "is_deleted": false,
+       
+        "attendance": [
+            {
+                "date": "2025-04-30T12:32:23.207Z",
+                "month": 3,
+                "year": 2025,
+                "total": {
+                    "percentage": 7,
+                    "count": 2
+                },
+                "present": {
+                    "percentage": 3,
+                    "count": 1
+                },
+                "absent": {
+                    "percentage": 0,
+                    "count": 0
+                },
+                "_id": "67f3bb06b8d2634300cc88f4"
+            },
+            {
+                "date": "2025-05-27T12:07:05.186Z",
+                "month": 4,
+                "year": 2025,
+                "total": {
+                    "percentage": 0,
+                    "count": 0
+                },
+                "present": {
+                    "percentage": 0,
+                    "count": 0
+                },
+                "absent": {
+                    "percentage": 0,
+                    "count": 0
+                },
+                "_id": "6814519c5152e437f4f4b07b"
+            },
+            {
+                "date": "2025-06-30T14:48:13.256Z",
+                "month": 5,
+                "year": 2025,
+                "total": {
+                    "percentage": 0,
+                    "count": 0
+                },
+                "present": {
+                    "percentage": 0,
+                    "count": 0
+                },
+                "absent": {
+                    "percentage": 0,
+                    "count": 0
+                },
+                "_id": "683d8f1842f570c6cc379fb2"
+            },
+            {
+                "date": "2025-07-31T06:53:08.760Z",
+                "month": 6,
+                "year": 2025,
+                "total": {
+                    "percentage": 0,
+                    "count": 0
+                },
+                "present": {
+                    "percentage": 0,
+                    "count": 0
+                },
+                "absent": {
+                    "percentage": 0,
+                    "count": 0
+                },
+                "_id": "68636cc5f1911fba4443a4b3"
+            },
+            {
+                "date": "2025-08-23T05:13:08.333Z",
+                "month": 7,
+                "year": 2025,
+                "total": {
+                    "percentage": 73,
+                    "count": 19
+                },
+                "present": {
+                    "percentage": 7,
+                    "count": 2
+                },
+                "absent": {
+                    "percentage": 0,
+                    "count": 0
+                },
+                "_id": "688c4fbf4710a49176a5867b"
+            }
+        ],
+        "id": 8,
+        "uuid": "ab4732b8-3948-4937-9810-6c6746aeb313",
+        "__v": 0
+    }
+}

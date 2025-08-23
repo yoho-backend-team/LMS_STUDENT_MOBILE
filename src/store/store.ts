@@ -1,9 +1,11 @@
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit';
 import tabReducer from './tab/tabSlice';
+import DashboardSlice from '../features/home/reducer/DashboardSlice';
 
 const store = configureStore({
 	reducer: {
 		tabReducer: tabReducer,
+		DashboardSlice: DashboardSlice,
 	},
 });
 
