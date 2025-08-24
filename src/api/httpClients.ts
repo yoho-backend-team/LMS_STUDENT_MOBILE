@@ -93,7 +93,7 @@ class HttpClient {
     return response;
   }
 
-  async uploadFile(url: string, data?: any, userType?: undefined) {
+  async uploadFile(url: string, data?: any, userType?: string) {
     const response = await Axios.post(url, data, {
       headers: {
         'Content-Type': 'multipart/form-data',

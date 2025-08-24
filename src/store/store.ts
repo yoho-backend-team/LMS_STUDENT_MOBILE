@@ -7,6 +7,7 @@ import ProfileSlice from '../features/Profile/reducer/profileSlice';
 import DashboardSlice from '../features/home/reducer/DashboardSlice';
 import helpReducer from '../features/HelpCenter/Reducer/HelpSlice';
 import NotificationSlice from '../features/notification/reducers/notificationSlice';
+import ActivitySlice from "../features/reducer/activitylog/reducers/ActivitySlice"
 
 const store = configureStore({
   reducer: {
@@ -18,7 +19,8 @@ const store = configureStore({
     DashboardSlice: DashboardSlice,
     helpSlice: helpReducer,
     NotificationSlice: NotificationSlice,
-  },
+		ActivitySlice: ActivitySlice,
+	},
 });
 
 export { store };
