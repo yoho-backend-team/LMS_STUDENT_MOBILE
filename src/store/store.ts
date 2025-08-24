@@ -4,7 +4,7 @@ import Ticket from '../features/Ticket/reducers/ModuleSlice';
 import CourseSlice from '../features/Courses/Reducers/courseSlice';
 import AuthSlice from '../features/Authentication/reducers/authSlice';
 import ProfileSlice from '../features/Profile/reducer/profileSlice';
-
+import DashboardSlice from '../features/home/reducer/DashboardSlice';
 
 const store = configureStore({
   reducer: {
@@ -12,8 +12,9 @@ const store = configureStore({
     Ticket: Ticket,
     CourseSlice: CourseSlice,
     AuthSlice: AuthSlice,
-		ProfileSlice: ProfileSlice,
-	},
+    ProfileSlice: ProfileSlice,
+    DashboardSlice: DashboardSlice,
+  },
 });
 
 export { store };
