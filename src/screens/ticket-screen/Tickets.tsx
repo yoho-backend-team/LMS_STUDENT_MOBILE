@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Header from '~/components/shared/Header';
 import { COLORS } from '~/constants';
 import Icon from 'react-native-vector-icons/Feather';
-import { GetallTicketThunks } from "../../features/Ticket/reducers/Thunks";
+import { GetallTicketThunks } from '../../features/Ticket/reducers/Thunks';
 import { GetTicketSelector } from '~/features/Ticket/reducers/Selectors';
 import { formatDateandmonth } from '../../utils/formatDate';
 
@@ -14,11 +14,7 @@ const Tickets = () => {
   const [filter, setFilter] = useState('All');
   const navigation = useNavigation();
   const dispatch = useDispatch<any>();
-
-
   const tickets = useSelector(GetTicketSelector);
-
-  console.log(tickets, "asdfghjkllkjhgfdsa")
 
   const fetchTickets = () => {
     dispatch(GetallTicketThunks({}));
@@ -29,10 +25,19 @@ const Tickets = () => {
   }, []);
 
   const months = [
-    'january', 'february', 'march', 'april', 'may', 'june', 'july',
-    'august', 'september', 'october', 'november', 'december',
+    'january',
+    'february',
+    'march',
+    'april',
+    'may',
+    'june',
+    'july',
+    'august',
+    'september',
+    'october',
+    'november',
+    'december',
   ];
-
 
   const filteredTickets = tickets?.tickets?.filter((ticket: any) =>
     filter === 'All' ? true : ticket?.status?.toLowerCase() === filter.toLowerCase()
@@ -48,8 +53,7 @@ const Tickets = () => {
           <Text style={styles.contain}>Ticket</Text>
           <TouchableOpacity
             style={styles.creatbutton}
-            onPress={() => navigation.navigate('CreateTicket' as never)}
-          >
+            onPress={() => navigation.navigate('CreateTicket' as never)}>
             <Text style={styles.creatbuttonText}>Create Ticket</Text>
           </TouchableOpacity>
         </View>
@@ -59,12 +63,10 @@ const Tickets = () => {
             <TouchableOpacity
               key={option}
               style={[styles.button, filter === option && styles.activeButton]}
-              onPress={() => setFilter(option)}
-            >
+              onPress={() => setFilter(option)}>
               <Text style={[styles.text, filter === option && styles.activeText]}>{option}</Text>
             </TouchableOpacity>
           ))}
-
         </View>
 
         <ScrollView style={styles.cards}>
@@ -72,13 +74,12 @@ const Tickets = () => {
             <TouchableOpacity
               key={ticket.id}
               style={styles.card}
-              onPress={() =>
-                navigation.navigate('TicketViewScreen' as never, { ticket } as never)
-              }
-            >
+              onPress={() => navigation.navigate('TicketViewScreen' as never, { ticket } as never)}>
               <View style={styles.ticketRow}>
                 <Text style={styles.cardTiCKET}>Ticket ID: {ticket?.ticket_id}</Text>
-                <Text style={styles.cardDate}>{ticket?.createdAt ? formatDateandmonth(ticket?.createdAt) : ''}</Text>
+                <Text style={styles.cardDate}>
+                  {ticket?.createdAt ? formatDateandmonth(ticket?.createdAt) : ''}
+                </Text>
               </View>
               <Text style={styles.cardTitle}>{ticket?.query}</Text>
               <Text style={styles.cardDiscription}>{ticket?.description}</Text>
@@ -88,8 +89,7 @@ const Tickets = () => {
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   marginTop: 5,
-                }}
-              >
+                }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Icon name="link" size={18} color="gray" />
                   <Text style={{ marginLeft: 5, color: 'gray' }}>ID : {ticket.id}</Text>
@@ -99,7 +99,6 @@ const Tickets = () => {
             </TouchableOpacity>
           ))}
         </ScrollView>
-
       </SafeAreaView>
     </>
   );

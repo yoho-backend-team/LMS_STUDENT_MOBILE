@@ -17,37 +17,29 @@ import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
 import toast from '~/utils/toasts';
+import { resetpasswordClient } from '~/features/Authentication/services';
+import { RouteProp } from '@react-navigation/native';
 
-const ResetPassword = () => {
+type ResetPasswordRouteProp = RouteProp<{ params: { email: string } }, 'params'>;
+
+const ResetPassword = ({ route }: { route: ResetPasswordRouteProp }) => {
   const navigation = useNavigation();
-  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({
-    currentPassword: '',
     newPassword: '',
     confirmPassword: '',
   });
+  const { email } = route?.params;
 
   const validateForm = () => {
     let valid = true;
     const newErrors = {
-      currentPassword: '',
       newPassword: '',
       confirmPassword: '',
     };
-
-    // Current Password validation
-    if (!currentPassword.trim()) {
-      newErrors.currentPassword = 'Current password is required';
-      valid = false;
-    } else if (currentPassword.length < 6) {
-      newErrors.currentPassword = 'Password must be at least 6 characters';
-      valid = false;
-    }
 
     // New Password validation
     if (!newPassword.trim()) {
@@ -71,19 +63,28 @@ const ResetPassword = () => {
     return valid;
   };
 
-  const handleResetPassword = () => {
+  const handleResetPassword = async () => {
     if (validateForm()) {
-      console.log('Reset password pressed', { currentPassword, newPassword, confirmPassword });
-      toast.success('Success', 'Password reset successfully!');
-      navigation.navigate('login' as never);
+      try {
+        const response = await resetpasswordClient({
+          email,
+          new_password: newPassword,
+          confirm_password: confirmPassword,
+        });
+        if (response) {
+          toast.success('Success', 'Password reset successfully!');
+          navigation.navigate('login' as never);
+        } else {
+          toast.error('Error', 'Failed to change password');
+        }
+      } catch (error) {
+        toast.error('Error', 'Failed to change password');
+      }
     }
   };
 
-  const togglePasswordVisibility = (field: 'current' | 'new' | 'confirm') => {
+  const togglePasswordVisibility = (field: 'new' | 'confirm') => {
     switch (field) {
-      case 'current':
-        setShowCurrentPassword(!showCurrentPassword);
-        break;
       case 'new':
         setShowNewPassword(!showNewPassword);
         break;
@@ -125,42 +126,6 @@ const ResetPassword = () => {
 
               {/* Form Section */}
               <View style={styles.formSection}>
-                {/* Current Password Input */}
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Current Password</Text>
-                  <View
-                    style={[styles.passwordContainer, errors.currentPassword && styles.inputError]}>
-                    <TextInput
-                      style={styles.passwordInput}
-                      value={currentPassword}
-                      onChangeText={(text) => {
-                        setCurrentPassword(text);
-                        clearError('currentPassword');
-                      }}
-                      placeholder="Enter your current password"
-                      placeholderTextColor={COLORS.shadow_01}
-                      secureTextEntry={!showCurrentPassword}
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      editable={true}
-                      selectTextOnFocus={true}
-                      returnKeyType="next"
-                    />
-                    <TouchableOpacity
-                      style={styles.eyeIcon}
-                      onPress={() => togglePasswordVisibility('current')}>
-                      <MaterialIcons
-                        name={showCurrentPassword ? 'visibility' : 'visibility-off'}
-                        size={24}
-                        color={COLORS.text_desc}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                  {errors.currentPassword ? (
-                    <Text style={styles.errorText}>{errors.currentPassword}</Text>
-                  ) : null}
-                </View>
-
                 {/* New Password Input */}
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>New Password</Text>

@@ -18,9 +18,11 @@ import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { EvilIcons, MaterialIcons } from '@expo/vector-icons';
 import toast from '~/utils/toasts';
+import { getStudentLoginClient } from '~/features/Authentication/services';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Login = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -58,10 +60,29 @@ const Login = () => {
     return valid;
   };
 
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
     if (validateForm()) {
-      console.log('Sign in pressed', email, password);
-      toast.success('Success', 'Login successful!');
+      try {
+        const data = { email, password };
+        const response = await getStudentLoginClient(data, {});
+        if (response && response?.status === 'success') {
+          if (response?.data?.step === 'otp') {
+            navigation.navigate('OtpVerification' as never, { data: response?.data, email });
+          } else {
+            await AsyncStorage.setItem('AuthStudentToken', response?.data?.token);
+            await AsyncStorage.setItem('StudentData', JSON.stringify(response?.data?.user));
+            toast.success('Success', 'Login successful!');
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'Student' }],
+            });
+          }
+        } else {
+          toast.error('Error', 'Failed to login');
+        }
+      } catch (error) {
+        toast.error('Error', 'Failed to login');
+      }
     }
   };
 

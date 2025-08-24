@@ -1,4 +1,3 @@
-
 import {
   StatusBar,
   Text,
@@ -32,7 +31,6 @@ const TicketById = () => {
     }
   };
 
-  
   const getFileName = (filePath: string) => {
     if (!filePath) return '';
     return filePath.split('/').pop() || filePath;
@@ -55,7 +53,7 @@ const TicketById = () => {
         <Text style={styles.viewValue}>{ticket.ticket_id}</Text>
 
         <Text style={styles.viewLabel}>Priority</Text>
-        <Text style={styles.viewValue}>{ticket.priority || 'Not set'}</Text>
+        <Text style={styles.viewValue}>{ticket.priority}</Text>
 
         <Text style={styles.viewLabel}>Status</Text>
         <Text style={styles.viewValue}>{ticket.status}</Text>
@@ -64,10 +62,7 @@ const TicketById = () => {
         {ticket?.file ? (
           <View style={styles.attachmentRow}>
             <Text style={styles.fileName}>{getFileName(ticket.file)}</Text>
-            <TouchableOpacity
-              style={styles.viewButton}
-              onPress={() => handleOpenFile(ticket.file)}
-            >
+            <TouchableOpacity style={styles.viewButton} onPress={() => handleOpenFile(ticket.file)}>
               <Text style={styles.viewButtonText}>View</Text>
             </TouchableOpacity>
           </View>
@@ -79,9 +74,7 @@ const TicketById = () => {
         <Text style={styles.viewValue}>{ticket.id}</Text>
 
         <Text style={styles.viewLabel}>Description</Text>
-        <Text style={[styles.viewValue, styles.textArea]}>
-          {ticket.description}
-        </Text>
+        <Text style={[styles.viewValue, styles.textArea]}>{ticket.description}</Text>
       </View>
     </ScrollView>
   );

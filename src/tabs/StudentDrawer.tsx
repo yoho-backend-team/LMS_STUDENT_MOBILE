@@ -75,8 +75,8 @@ const ServiceDrawerContent: React.FC<DrawerContentProps> = ({ navigation }) => {
           text: 'OK',
           onPress: async () => {
             try {
-              await AsyncStorage.removeItem('authToken');
-              toast.success('', 'Logout Successfully.');
+              await AsyncStorage.removeItem('AuthStudentToken');
+              toast.success('Success', 'Logout Successfully.');
               navigation.reset({ index: 0, routes: [{ name: 'AuthStackstudent' }] });
             } catch (error) {
               toast.error('Error', 'An error occurred during logout. Please try again later.');
@@ -209,15 +209,8 @@ const ServiceDrawerContent: React.FC<DrawerContentProps> = ({ navigation }) => {
             icon={icons.course_filled}
             onPress={() => navigation.navigate('FAQ')}
           />
-          <View
-            style={{
-              height: 1,
-              marginVertical: SIZES.radius,
-              marginLeft: SIZES.radius,
-              backgroundColor: COLORS.blue_02,
-            }}
-          />
-          <View style={{ marginTop: SIZES.radius }}>
+
+          <View style={{}}>
             <CustomDrawerItem label="Logout" icon={icons.logout} onPress={handleLogout} />
           </View>
         </View>
