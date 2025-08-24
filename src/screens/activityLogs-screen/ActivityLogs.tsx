@@ -129,12 +129,11 @@ const ActivityLogs = () => {
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
       <SafeAreaView edges={['top']} style={styles.container}>
-        <Header />
         <View style={styles.container1}>
           {/* Header */}
           <View style={styles.headerRow}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Image source={icons.back_arrow} style={{ width: 25, height: 25 }} />
+              <Image source={require('../../assets/profile/back.png')} style={styles.backbutton} />
             </TouchableOpacity>
             <Text style={styles.header}>Activity Log</Text>
           </View>
@@ -237,9 +236,14 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     backgroundColor: COLORS.bg_Colour,
   },
-  container1: { flex: 1, padding: 15 },
-  headerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
+  container1: { flex: 1, paddingHorizontal: 15 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   header: { fontSize: 20, fontWeight: 'bold', marginLeft: 10 },
+  backbutton: {
+    width: 48,
+    height: 48,
+    resizeMode: 'contain',
+  },
   filterBtn: {
     flexDirection: 'row',
     alignItems: 'center',

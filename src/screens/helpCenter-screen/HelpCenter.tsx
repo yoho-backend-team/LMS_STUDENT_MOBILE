@@ -16,11 +16,11 @@ import PagerView from 'react-native-pager-view';
 import { LinearGradient } from 'expo-linear-gradient';
 import { WebView } from 'react-native-webview';
 import { Entypo } from '@expo/vector-icons';
-import Header from '~/components/shared/Header';
 import { COLORS, FONTS } from '~/constants';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectHelpCenterData } from '~/features/HelpCenter/Reducer/Selector';
 import { fetchHelpCenterThunk } from '~/features/HelpCenter/Reducer/HelpThunk';
+import { useNavigation } from '@react-navigation/native';
 
 type HelpItem = {
   id: string;
@@ -40,6 +40,7 @@ const HelpCenter = () => {
   const scrollViewRef = useRef<ScrollView>(null);
   const dispatch = useDispatch<any>();
   const helpData = useSelector(selectHelpCenterData);
+  const navigation = useNavigation<any>();
 
   useEffect(() => {
     const instituteid = '973195c0-66ed-47c2-b098-d8989d3e4529';
@@ -146,10 +147,21 @@ const HelpCenter = () => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
-      <Header />
-
       <View>
-        <Text style={styles.headerText}>Help Centre</Text>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 3,
+            paddingHorizontal: 15,
+            paddingVertical: 10,
+          }}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Image source={require('../../assets/profile/back.png')} style={styles.backbutton} />
+          </TouchableOpacity>
+
+          <Text style={styles.headerText}>Help Centre</Text>
+        </View>
 
         <ScrollView
           ref={scrollViewRef}
@@ -260,7 +272,12 @@ export default HelpCenter;
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 15, backgroundColor: '#F8FAFC' },
-  headerText: { paddingHorizontal: 20, paddingVertical: 10, fontSize: 22, fontWeight: 'bold' },
+  backbutton: {
+    width: 48,
+    height: 48,
+    resizeMode: 'contain',
+  },
+  headerText: { fontSize: 22, fontWeight: 'bold' },
   scrollContent: { paddingHorizontal: 10, gap: 10 },
   box: {
     flexDirection: 'row',
