@@ -5,6 +5,7 @@ import CourseSlice from '../features/Courses/Reducers/courseSlice';
 import AuthSlice from '../features/Authentication/reducers/authSlice';
 import ProfileSlice from '../features/Profile/reducer/profileSlice';
 import DashboardSlice from '../features/home/reducer/DashboardSlice';
+import helpReducer from '../features/HelpCenter/Reducer/HelpSlice';
 
 const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ const store = configureStore({
     AuthSlice: AuthSlice,
     ProfileSlice: ProfileSlice,
     DashboardSlice: DashboardSlice,
+    helpSlice: helpReducer,
   },
 });
 
