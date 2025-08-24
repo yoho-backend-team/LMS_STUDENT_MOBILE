@@ -6,6 +6,7 @@ import AuthSlice from '../features/Authentication/reducers/authSlice';
 import ProfileSlice from '../features/Profile/reducer/profileSlice';
 import DashboardSlice from '../features/home/reducer/DashboardSlice';
 import helpReducer from '../features/HelpCenter/Reducer/HelpSlice';
+import NotificationSlice from '../features/notification/reducers/notificationSlice';
 
 const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ const store = configureStore({
     ProfileSlice: ProfileSlice,
     DashboardSlice: DashboardSlice,
     helpSlice: helpReducer,
+    NotificationSlice: NotificationSlice,
   },
 });
 

@@ -82,7 +82,7 @@ const Routes = () => {
 
   const StudentAuthStack = () => {
     return (
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator screenOptions={{ headerShown: true }}>
         <Stack.Screen name="login" component={LoginScreen} />
         <Stack.Screen name="ForgetPassword" component={EmailVerificationScreen} />
         <Stack.Screen name="OtpVerification" component={OtpVerificationScreen} />
