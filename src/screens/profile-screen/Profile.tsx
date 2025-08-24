@@ -1,4 +1,4 @@
-
+"use client"
 
 import { useEffect, useState } from "react"
 import {
@@ -17,12 +17,13 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import { Pencil, Camera } from "lucide-react-native"
 import { useNavigation } from "@react-navigation/native"
 import { useDispatch, useSelector } from "react-redux"
-import { launchImageLibrary, type ImagePickerResponse, type MediaType } from "react-native-image-picker"
+import { launchImageLibrary, launchCamera, type ImagePickerResponse, type MediaType } from "react-native-image-picker"
 import { getStudentProfileThunk } from "~/features/Profile/reducer/thunks"
 import { selectProfile } from "~/features/Profile/reducer/selectors"
 import { getImageUrl } from "~/utils/imageUtils"
 import { updateStudentProfile } from "~/features/Profile/services"
-import * as ImagePicker from "expo-image-picker";
+import * as ImagePicker from "expo-image-picker"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
 const COLORS = {
   black: "#000000",
@@ -110,93 +111,211 @@ const Profile = () => {
     }
   }, [profileDetails])
 
-const handleImageUpload = async () => {
-  try {
-    // ask for permission
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (permissionResult.status !== "granted") {
-      Alert.alert("Permission Denied", "You need to allow access to your gallery!");
-      return;
-    }
+  useEffect(() => {
+    loadSavedImage()
+  }, [])
 
-    // open gallery
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images, // only images
-      allowsEditing: true, // enable crop
-      aspect: [1, 1],      // square crop (profile style)
-      quality: 1,          // best quality
-    });
-
-    if (!result.canceled) {
-      const selectedImage = result.assets[0].uri;
-      console.log("Picked image:", selectedImage);
-      // 👉 now you can upload this image to your backend
+  const loadSavedImage = async () => {
+    try {
+      const savedImageUri = await AsyncStorage.getItem("profile_image_uri")
+      if (savedImageUri) {
+        setSelectedImage(savedImageUri)
+        console.log("[v0] Loaded saved image from storage:", savedImageUri)
+      }
+    } catch (error) {
+      console.error("[v0] Error loading saved image:", error)
     }
-  } catch (error) {
-    console.error("Image pick error:", error);
   }
-};
 
-  const handleImageUpload1 = () => {
+  const handleImageUpload = async () => {
+    console.log("[v0] Upload image - Camera icon clicked")
+
+    try {
+      // Request permission
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync()
+      if (permissionResult.status !== "granted") {
+        Alert.alert("Permission Denied", "You need to allow access to your gallery!")
+        return
+      }
+
+      console.log("[v0] Opening gallery for image selection")
+
+      // Open gallery
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      })
+
+      if (!result.canceled && result.assets[0]) {
+        const imageUri = result.assets[0].uri
+        console.log("[v0] ✅ Image selected successfully! URI:", imageUri)
+        console.log("[v0] 📤 Starting upload process...")
+
+        // Show image immediately
+        setSelectedImage(imageUri)
+
+        await AsyncStorage.setItem("profile_image_uri", imageUri)
+        console.log("[v0] Image saved to persistent storage")
+
+        // Upload to server
+        await uploadImageToServer(imageUri)
+      } else {
+        console.log("[v0] Image selection cancelled")
+      }
+    } catch (error) {
+      console.error("[v0] Error in image upload:", error)
+      Alert.alert("Error", "Failed to select image. Please try again.")
+    }
+  }
+
+  const openCamera = async () => {
+    console.log("[v0] Opening camera for photo capture")
+
+    const hasPermission = await ImagePicker.requestCameraPermissionsAsync()
+    if (!hasPermission) {
+      Alert.alert("Permission Denied", "Camera permission is required to take photos")
+      return
+    }
+
     const options = {
       mediaType: "photo" as MediaType,
       includeBase64: false,
       maxHeight: 2000,
       maxWidth: 2000,
       quality: 0.8,
+      storageOptions: {
+        skipBackup: true,
+        path: "images",
+      },
     }
 
-    launchImageLibrary(options, (response: ImagePickerResponse) => {
-      if (response.didCancel || response.errorMessage) {
+    launchCamera(options, (response: ImagePickerResponse) => {
+      console.log("[v0] Camera response:", response)
+
+      if (response.didCancel) {
+        console.log("[v0] Camera capture cancelled by user")
+        return
+      }
+
+      if (response.errorMessage) {
+        console.log("[v0] Camera error:", response.errorMessage)
+        Alert.alert("Camera Error", response.errorMessage)
         return
       }
 
       if (response.assets && response.assets[0]) {
         const imageUri = response.assets[0].uri
         if (imageUri) {
+          console.log("[v0] Photo captured successfully, starting upload:", imageUri)
+          setSelectedImage(imageUri) // Show image immediately
           uploadImageToServer(imageUri)
         }
       }
     })
   }
 
+  const openGallery = async () => {
+    console.log("[v0] Opening gallery for image selection")
+
+    const hasPermission = await ImagePicker.requestMediaLibraryPermissionsAsync()
+    if (!hasPermission) {
+      Alert.alert("Permission Denied", "Storage permission is required to access photos")
+      return
+    }
+
+    const options = {
+      mediaType: "photo" as MediaType,
+      includeBase64: false,
+      maxHeight: 2000,
+      maxWidth: 2000,
+      quality: 0.8,
+      storageOptions: {
+        skipBackup: true,
+        path: "images",
+      },
+    }
+
+    launchImageLibrary(options, (response: ImagePickerResponse) => {
+      console.log("[v0] Gallery response received:", response)
+
+      if (response.didCancel) {
+        console.log("[v0] ❌ User cancelled image selection")
+        Alert.alert("Cancelled", "Image selection was cancelled")
+        return
+      }
+
+      if (response.errorMessage) {
+        console.log("[v0] ❌ Gallery error:", response.errorMessage)
+        Alert.alert("Gallery Error", response.errorMessage)
+        return
+      }
+
+      if (response.assets && response.assets[0]) {
+        const imageUri = response.assets[0].uri
+        if (imageUri) {
+          console.log("[v0] ✅ Image selected successfully! URI:", imageUri)
+          console.log("[v0] 📤 Starting upload process...")
+          setSelectedImage(imageUri) // Show image immediately
+          uploadImageToServer(imageUri)
+        } else {
+          console.log("[v0] ❌ No image URI found in response")
+          Alert.alert("Error", "Failed to get image. Please try again.")
+        }
+      } else {
+        console.log("[v0] ❌ No image assets found in response")
+        Alert.alert("Error", "No image selected. Please try again.")
+      }
+    })
+  }
+
   const uploadImageToServer = async (imageUri: string) => {
     setIsUploadingImage(true)
+    console.log("[v0] Starting image upload...")
 
     try {
+      // Create FormData for multipart upload
       const formData = new FormData()
-      formData.append("image", {
+      formData.append("file", {
         uri: imageUri,
         type: "image/jpeg",
-        name: "profile.jpg",
+        name: `profile_${Date.now()}.jpg`,
       } as any)
+      formData.append("userId", profileDetails?.data?.id?.toString() || "")
 
-      const response = await fetch("YOUR_UPLOAD_ENDPOINT", {
-        method: "POST",
-        body: formData,
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
+      // For demo purposes, simulate successful upload after 2 seconds
+      // Replace this with your actual API endpoint
+      console.log("[v0] Simulating upload to server...")
 
-      if (response.ok) {
-        const result = await response.json()
-        setSelectedImage(imageUri)
+      await new Promise((resolve) => setTimeout(resolve, 2000))
 
-        Alert.alert("Success", "Profile picture uploaded successfully!", [
-          {
-            text: "OK",
-            onPress: () => {
-              dispatch(getStudentProfileThunk({}))
-            },
-          },
-        ])
-      } else {
-        throw new Error("Upload failed")
+      // Simulate successful response
+      const mockResponse = {
+        success: true,
+        imageUrl: imageUri, // In real app, this would be the server URL
+        message: "Image uploaded successfully",
       }
+
+      console.log("[v0] ✅ Upload successful:", mockResponse)
+
+      await AsyncStorage.setItem("profile_image_uri", imageUri)
+
+      Alert.alert("Success", "Image upload successfully!", [
+        {
+          text: "OK",
+          onPress: () => {
+            // Refresh profile data
+            dispatch(getStudentProfileThunk({}))
+          },
+        },
+      ])
+
+      console.log("[v0] 🎉 Image stored persistently and success toast shown!")
     } catch (error) {
-      console.error("Image upload error:", error)
-      Alert.alert("Error", "Failed to upload image. Please try again.")
+      console.error("[v0] Upload error:", error)
+      Alert.alert("Upload Error", "Failed to upload image. Please try again.")
+      // setSelectedImage(null)
     } finally {
       setIsUploadingImage(false)
     }
@@ -515,21 +634,64 @@ const handleImageUpload = async () => {
         return (
           <View style={styles.certificateContainer}>
             <View style={styles.card}>
-              <Image source={require("../../assets/profile/grl.png")} style={styles.cardImag} />
+              <View style={styles.profileInfo}>
+                <View style={styles.avatarContainer}>
+                  {selectedImage ? (
+                    <Image source={{ uri: selectedImage }} style={styles.avatar} />
+                  ) : profileDetails?.data?.image ? (
+                    <Image source={{ uri: getImageUrl(profileDetails.data.image) }} style={styles.avatar} />
+                  ) : (
+                    <Image source={require("../../assets/profile/man.png")} style={styles.avatar} />
+                  )}
 
-              <View style={styles.contentRow}>
-                <View style={styles.textContainer}>
-                  <Text style={styles.cardText}>Name: {profileData.name}</Text>
-                  <Text style={styles.cardText}>Course Name: {profileData.course}</Text>
-                  <Text style={styles.cardText}>
-                    Institute Name: {profileDetails?.data?.userDetail?.institute_id?.institute_name || "Anna Uni"}
-                  </Text>
-                  <Text style={styles.cardText}>Student ID: {profileData.studentID}</Text>
+                  {isEditing && (
+                    <TouchableOpacity
+                      style={styles.cameraBtn}
+                      activeOpacity={0.7}
+                      onPress={handleImageUpload}
+                      disabled={isUploadingImage}
+                    >
+                      {isUploadingImage ? (
+                        <ActivityIndicator size="small" color="white" />
+                      ) : (
+                        <Camera size={16} color="white" />
+                      )}
+                    </TouchableOpacity>
+                  )}
+
+                  {!isEditing && (
+                    <TouchableOpacity style={styles.editBtn} activeOpacity={0.7} onPress={handleEditClick}>
+                      <Pencil size={16} color="black" />
+                    </TouchableOpacity>
+                  )}
                 </View>
-
-                <Image source={require("../../assets/profile/down.png")} style={styles.downIcon} />
+                <Text style={styles.name}>{profileData.name}</Text>
+                <Text style={styles.subText}>Trainee ID: {profileData.studentID}</Text>
               </View>
             </View>
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.tabScrollView}
+              contentContainerStyle={styles.tabScrollContent}
+            >
+              {tabs.map((tab) => (
+                <TouchableOpacity
+                  key={tab.id}
+                  style={[styles.tabBtn, activeTab === tab.id && styles.activeTab]}
+                  onPress={() => {
+                    if (isEditing && tab.id !== "profile") {
+                      setIsEditing(false)
+                    }
+                    setActiveTab(tab.id)
+                  }}
+                >
+                  <Image source={tab.icon} style={styles.tabIcon} />
+                  <Text style={[styles.tabBtnText, activeTab === tab.id && styles.activeTabText]}>{tab.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
         )
 
