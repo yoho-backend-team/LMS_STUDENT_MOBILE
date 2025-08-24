@@ -122,7 +122,8 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flex: 1,
     backgroundColor: '#ebeff3',
-    padding: 16,
+    padding: 18,
+    marginTop: 10,
   },
   heading: {
     fontSize: 22,
