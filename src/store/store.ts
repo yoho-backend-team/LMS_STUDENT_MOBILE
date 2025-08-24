@@ -3,6 +3,8 @@ import tabReducer from './tab/tabSlice';
 import Ticket from '../features/Ticket/reducers/ModuleSlice';
 import CourseSlice from '../features/Courses/Reducers/courseSlice';
 import AuthSlice from '../features/Authentication/reducers/authSlice';
+import ProfileSlice from '../features/Profile/reducer/profileSlice';
+
 
 const store = configureStore({
   reducer: {
@@ -10,7 +12,8 @@ const store = configureStore({
     Ticket: Ticket,
     CourseSlice: CourseSlice,
     AuthSlice: AuthSlice,
-  },
+		ProfileSlice: ProfileSlice,
+	},
 });
 
 export { store };
