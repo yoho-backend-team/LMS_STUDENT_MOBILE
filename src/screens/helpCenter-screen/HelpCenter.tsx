@@ -36,10 +36,8 @@ const HelpCenter = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedItem, setSelectedItem] = useState<HelpItem | null>(null);
   const [showVideo, setShowVideo] = useState(false);
-
   const pagerRef = useRef<PagerView>(null);
   const scrollViewRef = useRef<ScrollView>(null);
-
   const dispatch = useDispatch<any>();
   const helpData = useSelector(selectHelpCenterData);
 
@@ -109,7 +107,11 @@ const HelpCenter = () => {
 
           {/* Additional Info */}
           <Text style={styles.sectionTitle}>Additional Information</Text>
-          <Text style={styles.subtitle}>This section contains some dummy content. You can replace this with any relevant information you want to display above the video link. You can replace this with any relevant information you want to display above the video link</Text>
+          <Text style={styles.subtitle}>
+            This section contains some dummy content. You can replace this with any relevant
+            information you want to display above the video link. You can replace this with any
+            relevant information you want to display above the video link
+          </Text>
 
           {/* Video */}
           {selectedItem.videolink && (
@@ -141,7 +143,6 @@ const HelpCenter = () => {
     );
   }
 
-  // === Main list with tabs ===
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
@@ -155,7 +156,7 @@ const HelpCenter = () => {
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}>
-          {tabData.map(({ key, category, data }, index) => {
+          {tabData?.map(({ key, category, data }, index) => {
             const count = data.length;
             const isActive = selectedTab === index;
             return (
@@ -212,7 +213,7 @@ const HelpCenter = () => {
           setSelectedTab(index);
           scrollToTab(index);
         }}>
-        {tabData.map((tab, index) => {
+        {tabData?.map((tab, index) => {
           const filteredData = tab.data.filter(
             (item) =>
               item.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -224,14 +225,14 @@ const HelpCenter = () => {
               key={index}
               style={styles.contentArea}
               refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-              {filteredData.map((item) => (
+              {filteredData?.map((item) => (
                 <View key={item.id} style={styles.card}>
                   <View style={styles.tag}>
-                    <Text style={styles.tagText}>{item.category}</Text>
+                    <Text style={styles.tagText}>{item?.category}</Text>
                   </View>
 
                   <Text style={styles.title}>{item.question}</Text>
-                  {item.answer && <Text style={styles.subtitle}>{item.answer}</Text>}
+                  {item.answer && <Text style={styles.subtitle}>{item?.answer}</Text>}
 
                   <TouchableOpacity
                     activeOpacity={0.8}
@@ -261,13 +262,46 @@ const styles = StyleSheet.create({
   container: { flex: 1, padding: 15, backgroundColor: '#F8FAFC' },
   headerText: { paddingHorizontal: 20, paddingVertical: 10, fontSize: 22, fontWeight: 'bold' },
   scrollContent: { paddingHorizontal: 10, gap: 10 },
-  box: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 15, height: 45, width: 200, justifyContent: 'space-between', borderRadius: 8 },
-  activeBoxGradient: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 15, height: 45, width: 200, justifyContent: 'space-between', borderRadius: 8 },
-  inactiveBox: { backgroundColor: '#EBEFF3', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height: 45, width: 200, paddingHorizontal: 15, borderRadius: 8 },
+  box: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 15,
+    height: 45,
+    width: 200,
+    justifyContent: 'space-between',
+    borderRadius: 8,
+  },
+  activeBoxGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 15,
+    height: 45,
+    width: 200,
+    justifyContent: 'space-between',
+    borderRadius: 8,
+  },
+  inactiveBox: {
+    backgroundColor: '#EBEFF3',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    height: 45,
+    width: 200,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+  },
   boxText: { fontSize: 16, fontWeight: '600' },
   activeBoxText: { color: '#FFF' },
   inactiveBoxText: { color: '#333' },
-  countBadge: { marginLeft: 8, minWidth: 22, height: 22, borderRadius: 6, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 6 },
+  countBadge: {
+    marginLeft: 8,
+    minWidth: 22,
+    height: 22,
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+  },
   activeBadge: { backgroundColor: '#FFF' },
   inactiveBadge: { backgroundColor: '#EBEFF3' },
   countText: { fontSize: 12, fontWeight: 'bold' },
@@ -275,20 +309,57 @@ const styles = StyleSheet.create({
   inactiveCountText: { color: '#333' },
   contentArea: { flex: 1, padding: 15 },
   searchContainer: { paddingHorizontal: 15, marginVertical: 10 },
-  searchInput: { borderWidth: 1, borderColor: '#ccc', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 8, fontSize: 16, backgroundColor: '#fff' },
-  card: { backgroundColor: '#fff', borderRadius: 12, padding: 16, marginBottom: 15, shadowColor: '#000', shadowOpacity: 0.05, shadowOffset: { width: 0, height: 2 }, shadowRadius: 6, elevation: 3 },
-  tag: { alignSelf: 'flex-start', backgroundColor: '#F0F0F0', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8, marginBottom: 10 },
+  searchInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    fontSize: 16,
+    backgroundColor: '#fff',
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  tag: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#F0F0F0',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
   tagText: { fontSize: 13, color: '#333', fontWeight: '500' },
   title: { fontSize: 16, fontWeight: 'bold', marginBottom: 4, color: '#111' },
   subtitle: { fontSize: 14, color: '#666', marginBottom: 15 },
   buttonContainer: { alignSelf: 'flex-end' },
-  button: { paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, justifyContent: 'center', alignItems: 'center' },
+  button: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   buttonText: { color: '#fff', fontWeight: '600', fontSize: 14 },
   headerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 15 },
   backIcon: { marginRight: 10, padding: 5 },
   headerTitle: { fontSize: 20, fontWeight: '700', color: '#000' },
   sectionTitle: { fontSize: 16, fontWeight: '600', marginBottom: 10, color: '#111' },
-  videoCard: { marginTop: 10, height: 220, borderRadius: 12, overflow: 'hidden', backgroundColor: '#000' },
+  videoCard: {
+    marginTop: 10,
+    height: 220,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#000',
+  },
   videoImage: { width: '100%', height: '100%' },
   playBtn: { position: 'absolute', top: '40%', left: '45%' },
   webview: { width: '100%', height: '100%' },
