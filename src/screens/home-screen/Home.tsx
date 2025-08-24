@@ -1,5 +1,14 @@
-import React, { useEffect } from 'react';
-import { Image, Pressable, StatusBar, StyleSheet, Text, View, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  Image,
+  Pressable,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  RefreshControl,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '../../components/shared/Header';
 import { COLORS, FONTS } from '../../constants';
@@ -72,8 +81,22 @@ const Home = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const dashboardData = useSelector(selectDashboardData);
+  const [refreshing, setRefreshing] = useState(false);
+
   useEffect(() => {
     dispatch(getDashboardthunks({}) as any);
+  }, [dispatch]);
+
+  // Refresh function
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    dispatch(getDashboardthunks({}) as any)
+      .then(() => {
+        setRefreshing(false);
+      })
+      .catch(() => {
+        setRefreshing(false);
+      });
   }, [dispatch]);
 
   const classStats = dashboardData?.classes?.[0] || {};
@@ -137,7 +160,17 @@ const Home = () => {
       <SafeAreaView edges={['top']} style={styles.container}>
         <Header />
 
-        <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          style={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[COLORS.black]}
+              tintColor={COLORS.black}
+            />
+          }>
           <View style={styles.headerBox}>
             <Text style={styles.header}>Classes</Text>
 

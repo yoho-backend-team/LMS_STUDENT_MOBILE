@@ -19,13 +19,11 @@ import { getStudentcourse } from '~/features/Courses/Reducers/thunks';
 import { selectCourse } from '~/features/Courses/Reducers/selectors';
 import { getImageUrl } from '~/utils/imageUtils';
 
-// 1. Define your stack params
 type RootStackParamList = {
   Courses: undefined;
   CourseViewScreen: { course: Course };
 };
 
-// 2. Define course type
 type Course = {
   id: number;
   title: string;
@@ -35,11 +33,7 @@ type Course = {
   image: any;
 };
 
-// 3. Navigation type
-type CoursesScreenNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  'Courses'
->;
+type CoursesScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Courses'>;
 
 const Courses = () => {
   const navigation = useNavigation<CoursesScreenNavigationProp>();
@@ -50,7 +44,7 @@ const Courses = () => {
     const fetchData = async () => {
       try {
         const params = {
-          courseId: "67f3b7fcb8d2634300cc87b6",
+          courseId: '67f3b7fcb8d2634300cc87b6',
         };
         await dispatch(getStudentcourse(params));
       } catch (error) {
@@ -61,8 +55,7 @@ const Courses = () => {
     fetchData();
   }, [dispatch]);
 
-
-  const course = coursedata?.data; 
+  const course = coursedata?.data;
   return (
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
@@ -75,13 +68,10 @@ const Courses = () => {
           {course && (
             <TouchableOpacity
               style={styles.card}
-              onPress={() => navigation.navigate('CourseViewScreen', { course })}
-            >
+              onPress={() => navigation.navigate('CourseViewScreen', { course })}>
               <View style={styles.card}>
                 <Image
-                  source={
-                   { uri: getImageUrl(course?.image)  }
-                  }
+                  source={{ uri: getImageUrl(course?.image) }}
                   style={styles.courseImage}
                   resizeMode="contain"
                 />
@@ -108,9 +98,7 @@ const Courses = () => {
                     source={require('../../assets/courses/Alarm.png')}
                     style={{ width: 24, height: 24 }}
                   />
-                  <Text style={styles.footerText}>
-                    {course.duration ?? 'N/A'}
-                  </Text>
+                  <Text style={styles.footerText}>{course.duration ?? 'N/A'}</Text>
                 </View>
               </View>
             </TouchableOpacity>

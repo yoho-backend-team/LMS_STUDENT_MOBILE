@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StatusBar,
   Text,
@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Image,
   Modal,
+  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -29,12 +30,27 @@ const Notifications = () => {
   const [activeTab, setActiveTab] = useState('All');
   const [search, setSearch] = useState('');
   const [selectedNotification, setSelectedNotification] = useState<any>(null);
-
+  const [refreshing, setRefreshing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const notificationsPerPage = 5;
 
   useEffect(() => {
+    loadNotifications();
+  }, [dispatch]);
+
+  const loadNotifications = () => {
     dispatch(getAllNotificationsThunk({}));
+  };
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    dispatch(getAllNotificationsThunk({}))
+      .then(() => {
+        setRefreshing(false);
+      })
+      .catch(() => {
+        setRefreshing(false);
+      });
   }, [dispatch]);
 
   useEffect(() => {
@@ -68,7 +84,7 @@ const Notifications = () => {
           uuid: item.uuid,
           status: 'read',
         });
-        dispatch(getAllNotificationsThunk({}));
+        loadNotifications();
       } catch (error) {
         console.error('Error updating notification status:', error);
       }
@@ -80,7 +96,7 @@ const Notifications = () => {
       await deleteNotification({ uuid: id });
       toast.success('Success', 'Notification deleted successfully!');
       setSelectedNotification(null);
-      dispatch(getAllNotificationsThunk({}));
+      loadNotifications();
     } catch (error) {
       toast.error('Error', 'Failed to delete notification.');
     }
@@ -104,11 +120,12 @@ const Notifications = () => {
             </Pressable>
             <Text style={styles.headerTitle}>Notification</Text>
           </View>
-          <Text style={styles.headerCount}>
-            {notifications?.length} Messages /{' '}
-            {notifications?.filter((n: any) => n.status === 'unread').length} Unread
-          </Text>
         </View>
+
+        <Text style={styles.headerCount}>
+          {notifications?.length} Messages /{' '}
+          {notifications?.filter((n: any) => n.status === 'unread').length} Unread
+        </Text>
 
         {/* Search */}
         <View style={styles.searchWrapper}>
@@ -139,8 +156,17 @@ const Notifications = () => {
           ))}
         </View>
 
-        {/* Notifications List */}
-        <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Notifications List with RefreshControl */}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[COLORS.black]}
+              tintColor={COLORS.black}
+            />
+          }>
           {currentNotifications?.length === 0 ? (
             <Text
               style={{
@@ -249,11 +275,24 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 15,
-    marginBottom: 15,
+    marginBottom: 5,
   },
   headerLeft: { flexDirection: 'row', alignItems: 'center' },
   headerTitle: { fontSize: 22, fontWeight: '600', color: '#000' },
-  headerCount: { fontSize: 12, color: '#6b7280' },
+  headerCount: {
+    fontSize: 12,
+    color: '#6b7280',
+    textAlign: 'right',
+    marginBottom: 15,
+    marginRight: 10,
+  },
+  reloadButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: '#f3f4f6',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   searchWrapper: { marginBottom: 16 },
   searchInput: {
     backgroundColor: '#f3f4f6',
