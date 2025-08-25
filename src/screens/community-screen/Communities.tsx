@@ -1,4 +1,3 @@
-import React from 'react';
 import { StatusBar, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '~/components/shared/Header';
@@ -12,9 +11,7 @@ const Communities = () => {
         <Header />
 
         {/* code inside the view section*/}
-        <View>
-			
-		</View>
+        <View></View>
       </SafeAreaView>
     </>
   );

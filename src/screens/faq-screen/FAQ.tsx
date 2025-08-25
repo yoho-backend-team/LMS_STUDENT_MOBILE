@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+// src/screens/FAQ.tsx
+import React, { useEffect, useMemo, useState } from "react";
 import {
   StatusBar,
   Text,
@@ -13,37 +14,34 @@ import {
   UIManager,
   ViewStyle,
   TextStyle,
-  ImageStyle,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch } from "../../store/store";
+import {
+  fetchFaqs,
+  selectFaqItems,
+  selectFaqLoading,
+  selectFaqError,
+} from "../../features/faq/reducer/faqslice";
+import type { FaqItem } from "../../features/faq/reducer/faqslice";
 
-/* 🎨 Neumorphism palette tuned for punchy look */
+
 const UI = {
-  bg: "#EAEFF5",          // page background
-  surface: "#F2F5F9",     // main surface (cards/rows)
-  chip: "#EDF2F7",        // inner chips
+  bg: "#EAEFF5",
+  surface: "#F2F5F9",
+  chip: "#EDF2F7",
   text: "#1F2937",
   sub: "#6B7280",
   primary: "#5B84F8",
-  dark: "#C1CADC",        // dark rim (bottom/right)
-  light: "#FFFFFF",       // light rim (top/left)
+  dark: "#C1CADC",
+  light: "#FFFFFF",
 };
 
-const faqs = [
-  { question: "Introduction", answer: "This is the introduction answer." },
-  { question: "How To Access Payil?", answer: "You can access Payil from the dashboard." },
-  { question: "About Payil Dashboard", answer: "The dashboard shows all courses and progress." },
-  { question: "About Payil Courses", answer: "Courses include video, notes, and exercises." },
-  { question: "How To Access Payil Subject", answer: "Click on a subject to view its content." },
-  { question: "How to add a new course?", answer: "Go to the add course section." },
-];
-
-// Enable LayoutAnimation on Android
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-/* ⭕️ Plus → Minus icon (built with views; no images) */
 const PlusMinusIcon = ({ open }: { open: boolean }) => (
   <View style={[styles.pmWrap, styles.insetBox]}>
     <View style={styles.hBar} />
@@ -51,7 +49,6 @@ const PlusMinusIcon = ({ open }: { open: boolean }) => (
   </View>
 );
 
-/* 📖 Introduction inline content (exact: big raised + two inset chips) */
 const IntroContent = () => (
   <View style={{ marginTop: 10, marginBottom: 14 }}>
     <View style={[styles.bigCard, styles.raisedBoxStrong]}>
@@ -75,8 +72,33 @@ const IntroContent = () => (
 );
 
 const FAQ = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const items = useSelector(selectFaqItems);
+  const loading = useSelector(selectFaqLoading);
+  const error = useSelector(selectFaqError);
+
   const [search, setSearch] = useState("");
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    console.log("📡 Dispatching fetchFaqs...");
+    dispatch(fetchFaqs())
+      .unwrap()
+      .then((res) => {
+        console.log("✅ API Success:", res); // API success log
+      })
+      .catch((err) => {
+        console.log("❌ API Error:", err); // API error log
+      });
+    dispatch(fetchFaqs());
+  }, [dispatch]);
+
+  const filtered = useMemo(() => {
+    const s = search.trim().toLowerCase();
+    if (!s) return items;
+    return items.filter((i: FaqItem) =>
+  i.question?.toLowerCase().includes(s)
+); }, [items, search]); 
 
   const toggleExpand = (index: number) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -88,10 +110,8 @@ const FAQ = () => {
       <StatusBar backgroundColor={"#000"} barStyle="light-content" />
       <ImageBackground style={styles.background} resizeMode="cover">
         <SafeAreaView style={styles.container}>
-          {/* Header */}
           <Text style={styles.header}>FAQ - Frequently Asked Questions</Text>
 
-          {/* Search – INSET (sunken look) */}
           <View style={[styles.searchBox, styles.insetBox]}>
             <TextInput
               placeholder="Search"
@@ -102,49 +122,49 @@ const FAQ = () => {
             />
           </View>
 
-          {/* FAQ List */}
+          {loading ? (
+            <Text style={{ color: UI.sub, marginBottom: 12 }}>Loading...</Text>
+          ) : error ? (
+            <Text style={{ color: "red", marginBottom: 12 }}>{error}</Text>
+          ) : null}
+
           <ScrollView
             style={{ marginBottom: 20 }}
             contentContainerStyle={{ paddingBottom: 20 }}
             showsVerticalScrollIndicator={false}
           >
-            {faqs
-              .filter((i) => i.question.toLowerCase().includes(search.toLowerCase()))
-              .map((item, index) => {
-                const open = expandedIndex === index;
-                return (
-                  <React.Fragment key={index}>
-                    {/* Row – RAISED (popped-out) */}
-                    <View style={[styles.card, styles.insetBox]}>
-                      <View style={{ flex: 1 }}>
-                        <Text style={styles.cardText}>{item.question}</Text>
-                      </View>
-                      <TouchableOpacity activeOpacity={0.8} onPress={() => toggleExpand(index)}>
-                        <PlusMinusIcon open={open} />
-                      </TouchableOpacity>
+            {filtered.map((item: FaqItem, index: number) => {
+              const open = expandedIndex === index;
+              const isIntro = item.question?.trim().toLowerCase() === "introduction";
+              return (
+                <React.Fragment key={`${item?.id ?? index}-${item.question}`}>
+                  <View style={[styles.card, styles.insetBox]}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.cardText}>{item.question}</Text>
                     </View>
+                    <TouchableOpacity activeOpacity={0.8} onPress={() => toggleExpand(index)}>
+                      <PlusMinusIcon open={open} />
+                    </TouchableOpacity>
+                  </View>
 
-                    {/* Inline expanded content (same page) */}
-                    {open &&
-                      (item.question === "Introduction" ? (
-                        <IntroContent />
-                      ) : (
-                        <View style={[styles.answerWrap, styles.insetBox]}>
-                          <Text style={styles.answerText}>{item.answer}</Text>
-                        </View>
-                      ))}
-                  </React.Fragment>
-                );
-              })}
+                  {open &&
+                    (isIntro ? (
+                      <IntroContent />
+                    ) : (
+                      <View style={[styles.answerWrap, styles.insetBox]}>
+                        <Text style={styles.answerText}>{item.answer}</Text>
+                      </View>
+                    ))}
+                </React.Fragment>
+              );
+            })}
           </ScrollView>
 
-          {/* Help + CTA */}
           <Text style={styles.helpTitle}>Need More Help?</Text>
           <Text style={styles.helpText}>
             If You Have Any Further Questions, Feel Free To Reach Out To Our Support Team.
           </Text>
 
-          {/* CTA – RAISED */}
           <TouchableOpacity style={[styles.supportBtn, styles.insetBox]} activeOpacity={0.9}>
             <Text style={styles.supportBtnText}>Contact Support</Text>
           </TouchableOpacity>
@@ -156,7 +176,6 @@ const FAQ = () => {
 
 export default FAQ;
 
-/* ---------------- Typesafe Styles ---------------- */
 type Styles = {
   background: ViewStyle;
   container: ViewStyle;
@@ -188,7 +207,6 @@ type Styles = {
   smallCard: ViewStyle;
   smallCardText: TextStyle;
 
-  /* helpers */
   insetBox: ViewStyle;
   raisedBox: ViewStyle;
   raisedBoxStrong: ViewStyle;
@@ -203,7 +221,7 @@ const commonRaisedShadow = {
 };
 const commonLightRim = {
   borderWidth: 1,
-  borderColor: UI.light, // light rim (top/left)
+  borderColor: UI.light,
 };
 
 const styles = StyleSheet.create<Styles>({
@@ -218,11 +236,9 @@ const styles = StyleSheet.create<Styles>({
     marginBottom: 16,
   },
 
-  /* INSET helper (sunken look) */
   insetBox: {
     backgroundColor: UI.surface,
     borderRadius: 16,
-    // fake inner shadow by opposing borders
     borderTopWidth: 2,
     borderLeftWidth: 2,
     borderBottomWidth: 2,
@@ -233,7 +249,6 @@ const styles = StyleSheet.create<Styles>({
     borderRightColor: UI.light,
   },
 
-  /* RAISED helper (popped-out) */
   raisedBox: {
     backgroundColor: UI.surface,
     borderRadius: 16,
@@ -241,7 +256,6 @@ const styles = StyleSheet.create<Styles>({
     ...commonLightRim,
   },
 
-  /* stronger lift for big intro card */
   raisedBoxStrong: {
     backgroundColor: UI.surface,
     borderRadius: 18,
@@ -253,7 +267,6 @@ const styles = StyleSheet.create<Styles>({
     ...commonLightRim,
   },
 
-  /* Search */
   searchBox: {
     borderRadius: 16,
     paddingHorizontal: 16,
@@ -262,7 +275,6 @@ const styles = StyleSheet.create<Styles>({
   },
   searchInput: { fontSize: 14, color: UI.text },
 
-  /* Row */
   card: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -275,7 +287,6 @@ const styles = StyleSheet.create<Styles>({
   },
   cardText: { fontSize: 14, color: UI.text, fontWeight: "600" },
 
-  /* Expanded */
   answerWrap: {
     borderRadius: 16,
     paddingVertical: 12,
@@ -285,7 +296,6 @@ const styles = StyleSheet.create<Styles>({
   },
   answerText: { fontSize: 13, color: UI.sub },
 
-  /* Plus/Minus */
   pmWrap: {
     width: 40,
     height: 40,
@@ -297,13 +307,11 @@ const styles = StyleSheet.create<Styles>({
   hBar: { position: "absolute", width: 16, height: 2.6, borderRadius: 2, backgroundColor: "#6B7280" },
   vBar: { position: "absolute", width: 2.6, height: 16, borderRadius: 2, backgroundColor: "#6B7280" },
 
-  /* Help + CTA */
   helpTitle: { fontSize: 14, fontWeight: "800", color: UI.primary, textAlign: "center", marginTop: 6, marginBottom: 6 },
   helpText: { fontSize: 12, color: UI.sub, textAlign: "center", marginBottom: 14, paddingHorizontal: 20 },
   supportBtn: { borderRadius: 16, paddingVertical: 14, alignItems: "center", marginBottom: 20 },
   supportBtnText: { color: UI.text, fontSize: 14, fontWeight: "700" },
 
-  /* Intro content */
   bigCard: { padding: 16, marginBottom: 12, borderRadius: 18, backgroundColor: UI.surface },
   bigCardText: { fontSize: 16, lineHeight: 22, color: UI.sub, fontWeight: "800" },
   smallCard: { paddingVertical: 14, paddingHorizontal: 14, marginBottom: 12, borderRadius: 14 },
