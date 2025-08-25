@@ -106,17 +106,11 @@ const Notifications = () => {
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
       <SafeAreaView edges={['top']} style={styles.container}>
-        <Header />
-
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Pressable onPress={() => navigation.goBack()}>
-              <Image
-                source={icons.back_arrow}
-                style={{ width: 25, height: 25, marginRight: 15 }}
-                resizeMode="contain"
-              />
+              <Image source={require('../../assets/profile/back.png')} style={styles.backbutton} />
             </Pressable>
             <Text style={styles.headerTitle}>Notification</Text>
           </View>
@@ -274,8 +268,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 15,
     marginBottom: 5,
+    gap: 3,
+  },
+  backbutton: {
+    width: 48,
+    height: 48,
+    resizeMode: 'contain',
   },
   headerLeft: { flexDirection: 'row', alignItems: 'center' },
   headerTitle: { fontSize: 22, fontWeight: '600', color: '#000' },
