@@ -1,9 +1,10 @@
 import { useNavigation } from '@react-navigation/native';
 import { View, Image, TouchableOpacity, Text } from 'react-native';
 import { icons, SIZES } from '~/constants';
-import notificationIcon from '../../assets/icons/notification.png';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { selectNotifications } from '~/features/notification/reducers/selectors';
+import { useEffect } from 'react';
+import { getAllNotificationsThunk } from '~/features/notification/reducers/thunks';
 
 interface HeaderProps {
   containerStyle?: object;
@@ -13,17 +14,23 @@ interface HeaderProps {
   rightComponent?: React.ReactNode;
 }
 
-const Header: React.FC<HeaderProps> = ({
-  containerStyle,
-}) => {
-  const navigation = useNavigation();
+const Header: React.FC<HeaderProps> = ({ containerStyle }) => {
+  const navigation = useNavigation<any>();
   const notifications = useSelector(selectNotifications);
+  const dispatch = useDispatch<any>();
 
+  useEffect(() => {
+    loadNotifications();
+  }, [dispatch]);
+
+  const loadNotifications = () => {
+    dispatch(getAllNotificationsThunk({}));
+  };
 
   const unreadCount = notifications?.filter((n: any) => n.status === 'unread').length || 0;
 
   const handleNotificationPress = () => {
-    navigation.navigate('Notification' as never); 
+    navigation.navigate('Notification' as never);
   };
 
   return (
@@ -35,24 +42,18 @@ const Header: React.FC<HeaderProps> = ({
         alignItems: 'center',
         justifyContent: 'space-between',
         ...containerStyle,
-      }}
-    >
-     
+      }}>
       <TouchableOpacity onPress={() => navigation.openDrawer()}>
         <Image source={icons.menu} style={{ height: 25, width: 25 }} />
       </TouchableOpacity>
 
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }} />
 
-      
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
         {/* Notifications */}
-        <TouchableOpacity
-          onPress={handleNotificationPress}
-          style={{ position: 'relative' }}
-        >
+        <TouchableOpacity onPress={handleNotificationPress} style={{ position: 'relative' }}>
           <Image
-            source={notificationIcon}
+            source={icons.notification}
             style={{ width: 26, height: 26, resizeMode: 'contain' }}
           />
           {unreadCount > 0 && (
@@ -68,15 +69,13 @@ const Header: React.FC<HeaderProps> = ({
                 justifyContent: 'center',
                 alignItems: 'center',
                 paddingHorizontal: 3,
-              }}
-            >
+              }}>
               <Text
                 style={{
                   color: 'white',
                   fontSize: 10,
                   fontWeight: 'bold',
-                }}
-              >
+                }}>
                 {unreadCount}
               </Text>
             </View>
@@ -87,13 +86,12 @@ const Header: React.FC<HeaderProps> = ({
         <TouchableOpacity
           onPress={() => {
             navigation.navigate('Profile' as never);
-          }}
-        >
+          }}>
           <Image
             source={icons.user_profile}
             style={{
-              width: 32,
-              height: 32,
+              width: 50,
+              height: 50,
               borderRadius: 16,
               resizeMode: 'cover',
             }}
