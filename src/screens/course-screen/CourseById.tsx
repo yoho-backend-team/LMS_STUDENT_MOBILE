@@ -287,7 +287,7 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
         {activeTab === 'tasks' && (
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>Tasks & Projects</Text>
-            {tasksData.map((task) => (
+            {tasksData?.map((task) => (
               <TouchableOpacity
                 key={task.id}
                 style={styles.taskCard}
