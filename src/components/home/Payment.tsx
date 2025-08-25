@@ -8,12 +8,12 @@ import { getPaymentthunks } from '~/features/payments/reducer/thunks';
 
 const PaymentCard = () => {
   const navigation = useNavigation();
-    const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const paymentData = useSelector(selectPaymentData);
-  console.log('data', paymentData)
-    useEffect(() => {
-      dispatch(getPaymentthunks({}) as any);
-    }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(getPaymentthunks({}) as any);
+  }, [dispatch]);
   return (
     <View style={styles.card}>
       {/* Title */}
