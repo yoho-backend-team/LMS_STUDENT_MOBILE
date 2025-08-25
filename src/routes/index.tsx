@@ -20,6 +20,7 @@ import {
   PlacementScreen,
   ProfileScreen,
   ResetPasswordScreen,
+  SpokenEnglishScreen,
   TicketByIdScreen,
   TicketsScreen,
 } from '../screens';
@@ -43,6 +44,7 @@ const Routes = () => {
     TicketViewScreen: undefined;
     CreateTicket: undefined;
     ClassesScreen: undefined;
+    ClassByIdScreen: undefined;
     ClassViewScreen: undefined;
     CoursesScreen: undefined;
     CourseViewScreen: undefined;
@@ -51,6 +53,7 @@ const Routes = () => {
     Profile: undefined;
     CommunitiesScreen: undefined;
     CommunityViewScreen: undefined;
+    SpokenEnglish: undefined;
   };
 
   const Stack: any = createNativeStackNavigator<RootStackParamList>();
@@ -102,6 +105,7 @@ const Routes = () => {
         <Stack.Screen name="TicketViewScreen" component={TicketByIdScreen} />
         <Stack.Screen name="CreateTicket" component={CreateTicketScreen} />
         <Stack.Screen name="ClassesScreen" component={ClassesScreen} />
+        <Stack.Screen name="ClassByIdScreen" component={ClassByIdScreen} />
         <Stack.Screen name="ClassViewScreen" component={ClassByIdScreen} />
         <Stack.Screen name="CoursesScreen" component={CouresScreen} />
         <Stack.Screen name="CourseViewScreen" component={CourseByIdScreen} />
@@ -111,6 +115,7 @@ const Routes = () => {
         <Stack.Screen name="FAQ" component={FAQScreen} />
         <Stack.Screen name="CommunitiesScreen" component={CommunitiesScreen} />
         <Stack.Screen name="CommunityViewScreen" component={CommunityByIdScreen} />
+        <Stack.Screen name="SpokenEnglish" component={SpokenEnglishScreen} />
       </Stack.Navigator>
     );
   };

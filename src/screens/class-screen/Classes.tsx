@@ -4,58 +4,27 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'react-native';
 import { COLORS } from '~/constants';
+import Classcards from '~/components/Classes/Onlineclasses';
+import ClassById from './ClassById';
 
-const { width } = Dimensions.get('window');
 
-const Classes = () => {
-  const [activeTab, setActiveTab] = useState('task');
 
+
+function Classes() {
   return (
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
-      <SafeAreaView edges={['top']} style={styles.screen}>
-        
-        {/* Header */}
-        <Text style={styles.headerTitle}>Learning Path</Text>
+      <SafeAreaView edges={['top']} style={styles.container}>
+        <Header />
 
-        {/* Tabs */}
-        <View style={styles.tabContainer}>
-          <TouchableOpacity onPress={() => setActiveTab('task')} style={{ flex: 1 }}>
-            {activeTab === 'task' ? (
-              <LinearGradient colors={['#a259ff', '#7209b7']} style={styles.activeTab}>
-                <Text style={styles.activeTabText}>Task & Projects</Text>
-              </LinearGradient>
-            ) : (
-              <View style={styles.inactiveTab}>
-                <Text style={styles.inactiveTabText}>Task & Projects</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => setActiveTab('course')} style={{ flex: 1 }}>
-            {activeTab === 'course' ? (
-              <LinearGradient colors={['#a259ff', '#7209b7']} style={styles.activeTab}>
-                <Text style={styles.activeTabText}>Course Track</Text>
-              </LinearGradient>
-            ) : (
-              <View style={styles.inactiveTab}>
-                <Text style={styles.inactiveTabText}>Course Track</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-        </View>
-
-        {/* Card */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>English Mastery Challenge</Text>
-          <Text style={styles.cardSubtitle}>
-            Classic Style Grammar And Speaking Practice
-          </Text>
+        {/* code inside the view section*/}
+        <View>
+     <Classcards />
         </View>
       </SafeAreaView>
     </>
   );
-};
+}
 
 export default Classes;
 
