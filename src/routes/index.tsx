@@ -27,6 +27,7 @@ import {
 import StudentDrawer from '../tabs/StudentDrawer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ChatbotScreen from '~/screens/ChatbotScreen/chatbot';
+import TaskCard from '~/components/courses/TaskCard';
 
 const Routes = () => {
   type RootStackParamList = {
@@ -111,14 +112,14 @@ const Routes = () => {
         <Stack.Screen name="CoursesScreen" component={CouresScreen} />
         <Stack.Screen name="CourseViewScreen" component={CourseByIdScreen} />
         <Stack.Screen name="Notification" component={NotificationsScreen} />
-        
         <Stack.Screen name="Placement" component={PlacementScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="FAQ" component={FAQScreen} />
         <Stack.Screen name="CommunitiesScreen" component={CommunitiesScreen} />
         <Stack.Screen name="CommunityViewScreen" component={CommunityByIdScreen} />
         <Stack.Screen name="SpokenEnglish" component={SpokenEnglishScreen} />
-         <Stack.Screen name="ChatbotScreen" component={ChatbotScreen} />
+        <Stack.Screen name="ChatbotScreen" component={ChatbotScreen} />
+        <Stack.Screen name="TaskCard" component={TaskCard} />
       </Stack.Navigator>
     );
   };
