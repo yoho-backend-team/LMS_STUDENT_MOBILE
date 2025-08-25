@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityLogsScreen,
   ClassByIdScreen,
@@ -28,6 +28,7 @@ import StudentDrawer from '../tabs/StudentDrawer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ChatbotScreen from '~/screens/ChatbotScreen/chatbot';
 import TaskCard from '~/components/courses/TaskCard';
+import SessionExpiredModal from '~/components/Sessionexpired/sessionexpire';
 
 const Routes = () => {
   type RootStackParamList = {
@@ -60,6 +61,32 @@ const Routes = () => {
   const Stack: any = createNativeStackNavigator<RootStackParamList>();
   const navigation =
     useNavigation<import('@react-navigation/native').NavigationProp<RootStackParamList>>();
+
+  const [showSessionModal, setShowSessionModal] = useState(false);
+
+  const handleSessionExpired = async () => {
+    console.log('pressed')
+    try {
+      await AsyncStorage.removeItem('AuthStudentToken');
+      setShowSessionModal(false);
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'AuthStackstudent' }],
+      });
+    } catch (error) {
+      console.error('Error clearing auth token:', error);
+    }
+  };
+
+  useEffect(() => {
+    global.handleSessionExpired = () => {
+      setShowSessionModal(true);
+    };
+    
+    return () => {
+      delete global.handleSessionExpired;
+    };
+  }, []);
 
   useEffect(() => {
     const checkAuthState = async () => {
@@ -124,10 +151,17 @@ const Routes = () => {
   };
 
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="AuthStackstudent" component={StudentAuthStack} />
-      <Stack.Screen name="Student" component={StudentStack} />
-    </Stack.Navigator>
+    <>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="AuthStackstudent" component={StudentAuthStack} />
+        <Stack.Screen name="Student" component={StudentStack} />
+      </Stack.Navigator>
+      
+      <SessionExpiredModal
+        visible={showSessionModal}
+        onConfirm={handleSessionExpired}
+      />
+    </>
   );
 };
 
