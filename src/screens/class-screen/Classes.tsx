@@ -3,8 +3,13 @@ import { StatusBar, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '~/components/shared/Header';
 import { COLORS } from '~/constants';
+import Classcards from '~/components/Classes/Onlineclasses';
+import ClassById from './ClassById';
 
-const Classes = () => {
+
+
+
+function Classes() {
   return (
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
@@ -13,12 +18,12 @@ const Classes = () => {
 
         {/* code inside the view section*/}
         <View>
-          
+     <Classcards />
         </View>
       </SafeAreaView>
     </>
   );
-};
+}
 
 export default Classes;
 
