@@ -196,10 +196,17 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
             }}
           />
           <CustomDrawerItem
+            label={screens.attendance}
+            icon={sidebaricon.attendance}
+            isFocused={selectedTab === screens.attendance}
+            onPress={() => {
+              dispatch(setSelectedTab(screens.course));
+              navigation.navigate('MainLayout');
+            }}
+          />
+          <CustomDrawerItem
             label={screens.community}
-            icon={
-              selectedTab === screens.community ? icons.community_filled : icons.community_outlined
-            }
+            icon={sidebaricon.community}
             isFocused={selectedTab === screens.community}
             onPress={() => {
               dispatch(setSelectedTab(screens.community));

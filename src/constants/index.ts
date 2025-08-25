@@ -58,7 +58,9 @@ export const sidebaricon={
   activity:require('../assets/sidebar/activity.png'),
   notification:require('../assets/sidebar/notification.png'),
   payment:require('../assets/sidebar/payment.png'),
-  ticket:require('../assets/sidebar/ticket.png')
+  ticket:require('../assets/sidebar/ticket.png'),
+  attendance:require('../assets/sidebar/attence.png'),
+  community:require('../assets/sidebar/community.png')
 }
 
 export const Auth = {
