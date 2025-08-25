@@ -26,6 +26,7 @@ import {
 } from '../screens';
 import StudentDrawer from '../tabs/StudentDrawer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ChatbotScreen from '~/screens/ChatbotScreen/chatbot';
 
 const Routes = () => {
   type RootStackParamList = {
@@ -116,6 +117,7 @@ const Routes = () => {
         <Stack.Screen name="CommunitiesScreen" component={CommunitiesScreen} />
         <Stack.Screen name="CommunityViewScreen" component={CommunityByIdScreen} />
         <Stack.Screen name="SpokenEnglish" component={SpokenEnglishScreen} />
+         <Stack.Screen name="ChatbotScreen" component={ChatbotScreen} />
       </Stack.Navigator>
     );
   };

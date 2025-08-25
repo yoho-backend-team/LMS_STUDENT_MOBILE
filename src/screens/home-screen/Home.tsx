@@ -8,6 +8,7 @@ import {
   View,
   ScrollView,
   RefreshControl,
+  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '../../components/shared/Header';
@@ -24,6 +25,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectDashboardData } from '~/features/home/reducer/selectors';
 import { getDashboardthunks } from '~/features/home/reducer/thunks';
 import { getImageUrl } from '~/utils/imageUtils';
+import { Ionicons } from '@expo/vector-icons';
 
 // Custom Progress Circle Component
 type ProgressCircleProps = {
@@ -78,7 +80,7 @@ const ProgressCircle = ({
 };
 
 const Home = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const dispatch = useDispatch();
   const dashboardData = useSelector(selectDashboardData);
   const [refreshing, setRefreshing] = useState(false);
@@ -237,6 +239,12 @@ const Home = () => {
           <UpdatesScreen />
           <View style={{ marginBottom: 30 }}></View>
         </ScrollView>
+        <TouchableOpacity
+                  style={styles.chatbotBtn}
+                  onPress={() => navigation.navigate("ChatbotScreen")}
+                >
+                  <Ionicons name="chatbubble-ellipses" size={28} color="#fff" />
+                </TouchableOpacity>
       </SafeAreaView>
     </>
   );
@@ -373,4 +381,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  chatbotBtn: {
+  position: "absolute",
+  bottom: 80,
+  right: 20,
+  backgroundColor: "#7B00FF",
+  padding: 16,
+  borderRadius: 50,
+  shadowColor: "#000",
+  shadowOpacity: 0.2,
+  shadowRadius: 4,
+  shadowOffset: { width: 0, height: 2 },
+  elevation: 5, 
+},
 });

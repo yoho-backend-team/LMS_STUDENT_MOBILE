@@ -142,7 +142,7 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
         <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
           <Image
             source={require('../../assets/courses/arrow.png')}
-            style={{ width: 24, height: 24 }}
+            style={{ width: 24, height: 24 ,}}
           />
         </TouchableOpacity>
 
