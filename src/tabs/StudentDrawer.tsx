@@ -57,7 +57,6 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
   const selectedTab = useSelector((state: RootState) => state.tabReducer.selectedTab);
   const [error, setError] = useState(false);
   const profileDetails = useSelector(selectProfile);
-  console.log(profileDetails, 'profile details');
   const userDetail = profileDetails?.data;
 
   useEffect(() => {
