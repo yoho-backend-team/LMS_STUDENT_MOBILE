@@ -1,9 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createDrawerNavigator, DrawerContentScrollView } from '@react-navigation/drawer';
 import React, { useEffect, useState } from 'react';
-import { Alert, Image, ImageSourcePropType, Text, TouchableOpacity, View } from 'react-native';
+import { Modal, Image, ImageSourcePropType, Text, TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { COLORS, FONTS, icons, screens, SIZES } from '../constants';
+import { COLORS, FONTS, icons, screens, sidebaricon } from '../constants';
 import MainLayout from '../layout';
 import { RootState } from '../store/store';
 import { setSelectedTab } from '../store/tab/tabSlice';
@@ -11,6 +11,7 @@ import toast from '../utils/toasts';
 import { getStudentProfileThunk } from '~/features/Profile/reducer/thunks';
 import { selectProfile } from '~/features/Profile/reducer/selectors';
 import { getImageUrl } from '~/utils/imageUtils';
+import { LinearGradient } from 'expo-linear-gradient';
 
 type CustomDrawerItemProps = {
   label: string;
@@ -22,32 +23,70 @@ type CustomDrawerItemProps = {
 const CustomDrawerItem: React.FC<CustomDrawerItemProps> = ({ label, icon, isFocused, onPress }) => {
   return (
     <TouchableOpacity
+      onPress={onPress}
       style={{
-        flexDirection: 'row',
-        height: 40,
-        marginBottom: SIZES.base,
-        alignItems: 'center',
-        paddingLeft: SIZES.radius,
-        borderRadius: SIZES.small,
-        backgroundColor: isFocused ? COLORS.shadow_01 : undefined,
-      }}
-      onPress={onPress}>
-      <Image
-        source={icon}
-        style={{
-          width: 20,
-          height: 20,
-          tintColor: COLORS.blue_01,
-        }}
-      />
-      <Text
-        style={{
-          marginLeft: SIZES.radius,
-          color: COLORS.blue_01,
-          ...FONTS.h4,
-        }}>
-        {label}
-      </Text>
+        marginBottom: 12,
+        borderRadius: 12,
+        overflow: 'hidden',
+        elevation: isFocused ? 5 : 0,
+      }}>
+      {isFocused ? (
+        <LinearGradient
+          colors={['#7B00FF', '#B200FF']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={{
+            flexDirection: 'row',
+            height: 50,
+            alignItems: 'center',
+            paddingHorizontal: 15,
+            borderRadius: 12,
+          }}>
+          <Image
+            source={icon}
+            style={{
+              width: 20,
+              height: 20,
+              tintColor: '#fff',
+            }}
+          />
+          <Text
+            style={{
+              marginLeft: 15,
+              color: '#fff',
+              ...FONTS.h4,
+            }}>
+            {label}
+          </Text>
+        </LinearGradient>
+      ) : (
+        <View
+          style={{
+            flexDirection: 'row',
+            height: 50,
+            alignItems: 'center',
+            paddingHorizontal: 15,
+            borderRadius: 12,
+            backgroundColor: '#F5F5F5',
+          }}>
+          <Image
+            source={icon}
+            style={{
+              width: 20,
+              height: 20,
+              tintColor: '#777',
+            }}
+          />
+          <Text
+            style={{
+              marginLeft: 15,
+              color: '#777',
+              ...FONTS.h4,
+            }}>
+            {label}
+          </Text>
+        </View>
+      )}
     </TouchableOpacity>
   );
 };
@@ -59,89 +98,76 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
   const profileDetails = useSelector(selectProfile);
   const userDetail = profileDetails?.data;
 
+  const [logoutModalVisible, setLogoutModalVisible] = useState(false);
+
   useEffect(() => {
     dispatch(getStudentProfileThunk({}));
   }, [dispatch]);
 
-  const handleLogout = () => {
-    Alert.alert(
-      'Confirm Logout',
-      'Are you sure, you want to log out?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'OK',
-          onPress: async () => {
-            try {
-              await AsyncStorage.removeItem('AuthStudentToken');
-              toast.success('Success', 'Logout Successfully.');
-              navigation.reset({ index: 0, routes: [{ name: 'AuthStackstudent' }] });
-            } catch (error) {
-              toast.error('Error', 'An error occurred during logout. Please try again later.');
-            }
-          },
-        },
-      ],
-      { cancelable: false }
-    );
+  const confirmLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('AuthStudentToken');
+      toast.success('Success', 'Logout Successfully.');
+      setLogoutModalVisible(false);
+      navigation.reset({ index: 0, routes: [{ name: 'AuthStackstudent' }] });
+    } catch (error) {
+      toast.error('Error', 'An error occurred during logout. Please try again later.');
+    }
   };
 
   return (
-    <DrawerContentScrollView scrollEnabled contentContainerStyle={{ flex: 1 }}>
-      <View style={{ flex: 1, paddingHorizontal: SIZES.radius }}>
-        <View style={{ alignItems: 'flex-start', justifyContent: 'center' }}>
+    <View style={{ flex: 1 }}>
+      {/* Scrollable Content */}
+      <DrawerContentScrollView
+        scrollEnabled
+        contentContainerStyle={{ paddingHorizontal: 15, paddingBottom: 20 }}>
+        
+        {/* Close Button */}
+        <View style={{ alignItems: 'flex-end' }}>
           <TouchableOpacity
             style={{
+              padding: 8,
+              borderRadius: 20,
+              backgroundColor: '#7B00FF',
+              justifyContent: 'center',
               alignItems: 'center',
-              justifyContent: 'flex-end',
-              flexDirection: 'row',
-              width: '100%',
-              paddingTop: SIZES.small,
             }}
             onPress={() => navigation.closeDrawer()}>
             <Image
               source={icons.cross}
-              style={{ height: 20, width: 20, tintColor: COLORS.blue_01 }}
+              style={{
+                height: 12,
+                width: 12,
+                tintColor: '#fff',
+              }}
             />
           </TouchableOpacity>
         </View>
 
+        {/* Profile */}
         <TouchableOpacity
-          style={{
-            flexDirection: 'row',
-            marginTop: SIZES.radius,
-            alignItems: 'center',
-          }}
-          onPress={() => {
-            navigation.navigate('Profile');
-          }}>
+          style={{ flexDirection: 'row', alignItems: 'center', marginTop: 15 }}
+          onPress={() => navigation.navigate('Profile')}>
           <Image
             source={{ uri: getImageUrl(userDetail?.image) }}
             onError={() => setError(true)}
-            style={{ width: 50, height: 50, borderRadius: 12 }}
+            style={{ width: 55, height: 55, borderRadius: 40 }}
           />
-          <View style={{ marginLeft: SIZES.radius, flex: 1 }}>
-            <Text
-              style={{
-                color: COLORS.blue_01,
-                ...FONTS.h2_01,
-                flexShrink: 1,
-              }}>
+          <View style={{ marginLeft: 12, flex: 1 }}>
+            <Text style={{ color: '#333', ...FONTS.h2_01, fontWeight: '600' }}>
               {userDetail?.full_name}
             </Text>
-            <Text style={{ color: COLORS.blue_01, ...FONTS.h5 }}>
-              ID: {userDetail?.userDetail?.studentId}
+            <Text style={{ color: '#777', ...FONTS.h5 }}>
+              ID : {userDetail?.userDetail?.studentId}
             </Text>
           </View>
         </TouchableOpacity>
 
-        <View style={{ flex: 1, marginTop: SIZES.padding }}>
+        {/* Drawer Items */}
+        <View style={{ marginTop: 20 }}>
           <CustomDrawerItem
             label={screens.home}
-            icon={selectedTab === screens.home ? icons.home_filled : icons.home_outlined}
+            icon={sidebaricon.home}
             isFocused={selectedTab === screens.home}
             onPress={() => {
               dispatch(setSelectedTab(screens.home));
@@ -150,7 +176,7 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
           />
           <CustomDrawerItem
             label={screens.classes}
-            icon={selectedTab === screens.classes ? icons.classes_filled : icons.classes_outlined}
+            icon={sidebaricon.classes}
             isFocused={selectedTab === screens.classes}
             onPress={() => {
               dispatch(setSelectedTab(screens.classes));
@@ -159,14 +185,14 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
           />
           <CustomDrawerItem
             label={screens.course}
-            icon={selectedTab === screens.course ? icons.course_filled : icons.course_outlined}
+            icon={sidebaricon.course}
             isFocused={selectedTab === screens.course}
             onPress={() => {
               dispatch(setSelectedTab(screens.course));
               navigation.navigate('MainLayout');
             }}
           />
-          <CustomDrawerItem
+           <CustomDrawerItem
             label={screens.community}
             icon={
               selectedTab === screens.community ? icons.community_filled : icons.community_outlined
@@ -179,63 +205,148 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
           />
           <CustomDrawerItem
             label="Tickets"
-            icon={icons.course_filled}
+            icon={sidebaricon.ticket}
             onPress={() => navigation.navigate('TicketsScreen')}
           />
           <CustomDrawerItem
             label="Payments"
-            icon={icons.course_filled}
+            icon={sidebaricon.payment}
             onPress={() => navigation.navigate('Payment')}
           />
+          <CustomDrawerItem
+            label="Notifications"
+            icon={sidebaricon.notification}
+            onPress={() => navigation.navigate('Notification')}
+          />
+          <CustomDrawerItem
+            label="Activity Logs"
+            icon={sidebaricon.activity}
+            onPress={() => navigation.navigate('ActivityLog')}
+          />
+          
           <CustomDrawerItem
             label="Placement"
             icon={icons.course_filled}
             onPress={() => navigation.navigate('Placement')}
           />
           <CustomDrawerItem
-            label="Notifications"
+            label="Spoken English"
             icon={icons.course_filled}
-            onPress={() => navigation.navigate('Notification')}
-          />
-          <CustomDrawerItem
-            label="Activity Logs"
-            icon={icons.course_filled}
-            onPress={() => navigation.navigate('ActivityLog')}
+            onPress={() => navigation.navigate('')}
           />
           <CustomDrawerItem
             label="Help Center"
-            icon={icons.course_filled}
+            icon={sidebaricon.helpcenter}
             onPress={() => navigation.navigate('Helpcenter')}
           />
           <CustomDrawerItem
             label="FAQs"
-            icon={icons.course_filled}
+            icon={sidebaricon.fag}
             onPress={() => navigation.navigate('FAQ')}
           />
+        </View>
+      </DrawerContentScrollView>
 
-          <View style={{}}>
-            <CustomDrawerItem label="Logout" icon={icons.logout} onPress={handleLogout} />
+      {/* Fixed Logout at Bottom */}
+      <View style={{ paddingHorizontal: 15, paddingBottom: 20 }}>
+        <TouchableOpacity
+          style={{
+            flexDirection: 'row',
+            height: 50,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 12,
+            backgroundColor: '#fff',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            elevation: 3,
+          }}
+          onPress={() => setLogoutModalVisible(true)}>
+          <Image source={sidebaricon.logout} style={{ width: 20, height: 20 }} />
+          <Text style={{ marginLeft: 10, color: 'red', fontWeight: '600', ...FONTS.h4 }}>
+            Logout
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Custom Logout Modal */}
+      <Modal
+        visible={logoutModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setLogoutModalVisible(false)}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <View
+            style={{
+              width: '80%',
+              backgroundColor: '#fff',
+              borderRadius: 15,
+              padding: 20,
+              alignItems: 'center',
+            }}>
+            <Text style={{ ...FONTS.h2, marginBottom: 10 }}>Confirm Logout</Text>
+            <Text style={{ ...FONTS.body3, color: '#666', textAlign: 'center', marginBottom: 20 }}>
+              Are you sure you want to log out?
+            </Text>
+
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  marginRight: 10,
+                  padding: 12,
+                  borderRadius: 10,
+                  backgroundColor: '#E0E0E0',
+                  alignItems: 'center',
+                }}
+                onPress={() => setLogoutModalVisible(false)}>
+                <Text style={{ ...FONTS.h4, color: '#333' }}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  marginLeft: 10,
+                  padding: 12,
+                  borderRadius: 10,
+                  backgroundColor: '#B200FF',
+                  alignItems: 'center',
+                }}
+                onPress={confirmLogout}>
+                <Text style={{ ...FONTS.h4, color: '#fff' }}>Logout</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
-    </DrawerContentScrollView>
+      </Modal>
+    </View>
   );
 };
+  
 
 const ServiceDrawer: React.FC = () => {
   const Drawer = createDrawerNavigator();
 
   return (
-    <View style={{ flex: 1, backgroundColor: COLORS.blue_02 }}>
+    <View style={{ flex: 1, backgroundColor: '#EDEDED' }}>
       <Drawer.Navigator
         screenOptions={{
           overlayColor: 'transparent',
           drawerType: 'back',
           drawerStyle: {
             flex: 1,
-            width: '100%',
-            paddingRight: 20,
-            backgroundColor: COLORS.blue_02,
+            width: '80%',
+            backgroundColor: '#fff',
+            borderTopRightRadius: 20,
+            borderBottomRightRadius: 20,
           },
           headerShown: false,
         }}
