@@ -1,0 +1,1 @@
+export const selectDashboardData = (state: any) => state.DashboardSlice?.data;

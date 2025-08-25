@@ -1,7 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useEffect } from 'react';
-
 import {
   ActivityLogsScreen,
   ClassByIdScreen,
@@ -25,6 +24,7 @@ import {
   TicketsScreen,
 } from '../screens';
 import StudentDrawer from '../tabs/StudentDrawer';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Routes = () => {
   type RootStackParamList = {
@@ -53,14 +53,15 @@ const Routes = () => {
     CommunityViewScreen: undefined;
   };
 
-  const Stack = createNativeStackNavigator<RootStackParamList>();
+  const Stack: any = createNativeStackNavigator<RootStackParamList>();
   const navigation =
     useNavigation<import('@react-navigation/native').NavigationProp<RootStackParamList>>();
 
   useEffect(() => {
     const checkAuthState = async () => {
       try {
-        const isLoggedIn = true;
+        const token = await AsyncStorage.getItem('AuthStudentToken');
+        const isLoggedIn = token ? true : false;
         if (isLoggedIn) {
           navigation.reset({
             index: 0,

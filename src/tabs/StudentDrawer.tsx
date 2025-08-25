@@ -1,10 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  createDrawerNavigator,
-  DrawerContentScrollView,
-  DrawerNavigationProp,
-} from '@react-navigation/drawer';
-import React, { useState } from 'react';
+import { createDrawerNavigator, DrawerContentScrollView } from '@react-navigation/drawer';
+import React, { useEffect, useState } from 'react';
 import { Alert, Image, ImageSourcePropType, Text, TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { COLORS, FONTS, icons, screens, SIZES } from '../constants';
@@ -12,6 +8,9 @@ import MainLayout from '../layout';
 import { RootState } from '../store/store';
 import { setSelectedTab } from '../store/tab/tabSlice';
 import toast from '../utils/toasts';
+import { getStudentProfileThunk } from '~/features/Profile/reducer/thunks';
+import { selectProfile } from '~/features/Profile/reducer/selectors';
+import { getImageUrl } from '~/utils/imageUtils';
 
 type CustomDrawerItemProps = {
   label: string;
@@ -53,14 +52,16 @@ const CustomDrawerItem: React.FC<CustomDrawerItemProps> = ({ label, icon, isFocu
   );
 };
 
-type DrawerContentProps = {
-  navigation: DrawerNavigationProp<any>;
-};
-
-const ServiceDrawerContent: React.FC<DrawerContentProps> = ({ navigation }) => {
-  const dispatch = useDispatch();
+const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
+  const dispatch = useDispatch<any>();
   const selectedTab = useSelector((state: RootState) => state.tabReducer.selectedTab);
   const [error, setError] = useState(false);
+  const profileDetails = useSelector(selectProfile);
+  const userDetail = profileDetails?.data;
+
+  useEffect(() => {
+    dispatch(getStudentProfileThunk({}));
+  }, [dispatch]);
 
   const handleLogout = () => {
     Alert.alert(
@@ -75,8 +76,8 @@ const ServiceDrawerContent: React.FC<DrawerContentProps> = ({ navigation }) => {
           text: 'OK',
           onPress: async () => {
             try {
-              await AsyncStorage.removeItem('authToken');
-              toast.success('', 'Logout Successfully.');
+              await AsyncStorage.removeItem('AuthStudentToken');
+              toast.success('Success', 'Logout Successfully.');
               navigation.reset({ index: 0, routes: [{ name: 'AuthStackstudent' }] });
             } catch (error) {
               toast.error('Error', 'An error occurred during logout. Please try again later.');
@@ -118,9 +119,9 @@ const ServiceDrawerContent: React.FC<DrawerContentProps> = ({ navigation }) => {
             navigation.navigate('Profile');
           }}>
           <Image
-            source={require('../assets/icons/userprofile.png')}
+            source={{ uri: getImageUrl(userDetail?.image) }}
             onError={() => setError(true)}
-            style={{ width: 50, height: 50, borderRadius: 25 }}
+            style={{ width: 50, height: 50, borderRadius: 12 }}
           />
           <View style={{ marginLeft: SIZES.radius, flex: 1 }}>
             <Text
@@ -129,9 +130,11 @@ const ServiceDrawerContent: React.FC<DrawerContentProps> = ({ navigation }) => {
                 ...FONTS.h2_01,
                 flexShrink: 1,
               }}>
-              YM User
+              {userDetail?.full_name}
             </Text>
-            <Text style={{ color: COLORS.blue_01, ...FONTS.h5 }}>ID: #YMU_1234</Text>
+            <Text style={{ color: COLORS.blue_01, ...FONTS.h5 }}>
+              ID: {userDetail?.userDetail?.studentId}
+            </Text>
           </View>
         </TouchableOpacity>
 
@@ -209,15 +212,8 @@ const ServiceDrawerContent: React.FC<DrawerContentProps> = ({ navigation }) => {
             icon={icons.course_filled}
             onPress={() => navigation.navigate('FAQ')}
           />
-          <View
-            style={{
-              height: 1,
-              marginVertical: SIZES.radius,
-              marginLeft: SIZES.radius,
-              backgroundColor: COLORS.blue_02,
-            }}
-          />
-          <View style={{ marginTop: SIZES.radius }}>
+
+          <View style={{}}>
             <CustomDrawerItem label="Logout" icon={icons.logout} onPress={handleLogout} />
           </View>
         </View>
