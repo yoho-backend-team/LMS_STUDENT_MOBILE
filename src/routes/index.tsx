@@ -65,9 +65,9 @@ const Routes = () => {
   const [showSessionModal, setShowSessionModal] = useState(false);
 
   const handleSessionExpired = async () => {
-    console.log('pressed')
     try {
       await AsyncStorage.removeItem('AuthStudentToken');
+      await AsyncStorage.removeItem('StudentData');
       setShowSessionModal(false);
       navigation.reset({
         index: 0,
@@ -82,7 +82,7 @@ const Routes = () => {
     global.handleSessionExpired = () => {
       setShowSessionModal(true);
     };
-    
+
     return () => {
       delete global.handleSessionExpired;
     };
@@ -156,13 +156,10 @@ const Routes = () => {
         <Stack.Screen name="AuthStackstudent" component={StudentAuthStack} />
         <Stack.Screen name="Student" component={StudentStack} />
       </Stack.Navigator>
-      
-      <SessionExpiredModal
-        visible={showSessionModal}
-        onConfirm={handleSessionExpired}
-      />
+
+      <SessionExpiredModal visible={showSessionModal} onConfirm={handleSessionExpired} />
     </>
   );
 };
 
-export default Routes;``
+export default Routes;

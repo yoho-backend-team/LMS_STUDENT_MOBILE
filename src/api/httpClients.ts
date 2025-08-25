@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { Alert } from 'react-native';
 
 const backendUrl = 'https://lms-node-backend-v1.onrender.com/api';
 // const backendUrl = 'https://10.29.248.157:3001/api';
@@ -26,14 +27,13 @@ Axios.interceptors.response.use(
   async (error) => {
     console.log('HTTP Error:', error.response);
     if (
-      error?.response 
-      // error?.response.status == 403 &&
-      // error?.response?.data?.status === 'session_expired'
+      error?.response &&
+      error?.response.status == 401 &&
+      error?.response?.data?.status === 'session_expired'
     ) {
-       if (global.handleSessionExpired) {
+      if (global.handleSessionExpired) {
         global.handleSessionExpired();
       }
-      console.log("Helo world");
       // Alert.alert('Session expired', 'Please login');
       await AsyncStorage.removeItem('AuthStudentToken');
       await AsyncStorage.removeItem('StudentData');

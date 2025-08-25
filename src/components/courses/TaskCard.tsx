@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS, icons } from '~/constants';
 import * as DocumentPicker from 'expo-document-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import toast from '~/utils/toasts';
 
 type RootStackParamList = {
   TaskCard: { task: any };
@@ -119,16 +120,12 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
                   style={[styles.submitButton, !selectedFile && styles.submitButtonDisabled]}
                   onPress={() => {
                     if (!selectedFile) {
-                      Alert.alert('Missing File', 'Please upload a file before submitting.');
+                      toast.error('Missing File', 'Please upload a file before submitting.');
                       return;
+                    } else {
+                      toast.success('Success', 'File uploaded successfully!');
+                      navigation.goBack();
                     }
-                    Alert.alert('Success', 'File uploaded successfully!', [
-                      {
-                        text: 'OK',
-                        onPress: () => navigation.goBack(),
-                      },
-                    ]);
-                    console.log('Submitted with file:', selectedFile);
                   }}>
                   <Text style={styles.submitText}>Submit</Text>
                 </TouchableOpacity>

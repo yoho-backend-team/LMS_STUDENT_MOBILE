@@ -1,28 +1,14 @@
 import React from 'react';
-import {
-  Modal,
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-} from 'react-native';
+import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 interface SessionExpiredModalProps {
   visible: boolean;
   onConfirm: () => void;
 }
 
-const SessionExpiredModal: React.FC<SessionExpiredModalProps> = ({
-  visible,
-  onConfirm,
-}) => {
+const SessionExpiredModal: React.FC<SessionExpiredModalProps> = ({ visible, onConfirm }) => {
   return (
-    <Modal
-      animationType="fade"
-      transparent={true}
-      visible={visible}
-      onRequestClose={() => {}}
-    >
+    <Modal animationType="fade" transparent={true} visible={visible} onRequestClose={() => {}}>
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
           <Text style={styles.title}>Session Expired</Text>
@@ -44,8 +30,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 0,
-    marginLeft: 0,
+    marginTop: 420,
+    marginLeft: 180,
   },
   modalContainer: {
     backgroundColor: 'white',
