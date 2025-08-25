@@ -118,7 +118,7 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
   return (
     <View style={{ flex: 1 }}>
       {/* Close Button */}
-      <View style={{ alignItems: 'flex-end', padding: 15 }}>
+      <View style={{ alignItems: 'flex-end', padding: 10 }}>
         <TouchableOpacity
           style={{
             padding: 8,
@@ -139,7 +139,7 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {/* 🔒 Pinned Profile */}
+      {/* Pinned Profile */}
       <TouchableOpacity
         style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 15 }}
         onPress={() => navigation.navigate('Profile')}>
@@ -159,13 +159,13 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
       </TouchableOpacity>
 
       {/* Divider */}
-      <View style={{ height: 1, backgroundColor: '#E0E0E0', marginVertical: 15 }} />
+      <View style={{ height: 1, backgroundColor: '#E0E0E0', marginVertical: 10 }} />
 
-      {/* 🔄 Scrollable Middle Section */}
+      {/* Scrollable Middle Section */}
       <DrawerContentScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingHorizontal: 15, paddingBottom: 20 }}
-        showsVerticalScrollIndicator={false} // 🚫 Hide Scrollbar
+        showsVerticalScrollIndicator={false} 
       >
         <View>
           <CustomDrawerItem
@@ -200,7 +200,7 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
             icon={sidebaricon.attendance}
             isFocused={selectedTab === screens.attendance}
             onPress={() => {
-              dispatch(setSelectedTab(screens.course));
+              dispatch(setSelectedTab(screens.attendance));
               navigation.navigate('MainLayout');
             }}
           />
