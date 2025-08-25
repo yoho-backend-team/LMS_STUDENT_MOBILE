@@ -3,7 +3,7 @@ import { createDrawerNavigator, DrawerContentScrollView } from '@react-navigatio
 import React, { useEffect, useState } from 'react';
 import { Modal, Image, ImageSourcePropType, Text, TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { COLORS, FONTS, icons, screens, sidebaricon } from '../constants';
+import { COLORS, FONTS, icons, screens, sidebaricon, SIZES } from '../constants';
 import MainLayout from '../layout';
 import { RootState } from '../store/store';
 import { setSelectedTab } from '../store/tab/tabSlice';
@@ -116,9 +116,9 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, marginTop: SIZES.padding }}>
       {/* Close Button */}
-      <View style={{ alignItems: 'flex-end', padding: 10 }}>
+      <View style={{ alignItems: 'flex-end', padding: 20 }}>
         <TouchableOpacity
           style={{
             padding: 8,
@@ -164,9 +164,9 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
       {/* Scrollable Middle Section */}
       <DrawerContentScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ paddingHorizontal: 15, paddingBottom: 20 }}
-        showsVerticalScrollIndicator={false} 
-      >
+        contentContainerStyle={{ paddingTop: 0, paddingHorizontal: 10, paddingBottom: 25 }}
+        showsVerticalScrollIndicator={false}
+        automaticallyAdjustContentInsets={false}>
         <View>
           <CustomDrawerItem
             label={screens.home}
