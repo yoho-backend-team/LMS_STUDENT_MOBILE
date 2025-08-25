@@ -41,7 +41,7 @@ const TicketById = () => {
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
       <SafeAreaView edges={['top']} style={styles.container}>
-        <Header />
+        {/* <Header /> */}
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.backContainer}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
