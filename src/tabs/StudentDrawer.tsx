@@ -259,7 +259,7 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
       {/* Divider */}
       <View style={{ height: 1, backgroundColor: '#E0E0E0', marginBottom: 15 }} />
 
-      {/* 🔒 Fixed Logout at Bottom */}
+      {/* Fixed Logout at Bottom */}
       <View style={{ paddingHorizontal: 15, paddingBottom: 20 }}>
         <TouchableOpacity
           style={{
