@@ -1,7 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useEffect } from 'react';
-
 import {
   ActivityLogsScreen,
   ClassByIdScreen,
@@ -21,10 +20,12 @@ import {
   PlacementScreen,
   ProfileScreen,
   ResetPasswordScreen,
+  SpokenEnglishScreen,
   TicketByIdScreen,
   TicketsScreen,
 } from '../screens';
 import StudentDrawer from '../tabs/StudentDrawer';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Routes = () => {
   type RootStackParamList = {
@@ -43,6 +44,7 @@ const Routes = () => {
     TicketViewScreen: undefined;
     CreateTicket: undefined;
     ClassesScreen: undefined;
+    ClassByIdScreen: undefined;
     ClassViewScreen: undefined;
     CoursesScreen: undefined;
     CourseViewScreen: undefined;
@@ -51,16 +53,18 @@ const Routes = () => {
     Profile: undefined;
     CommunitiesScreen: undefined;
     CommunityViewScreen: undefined;
+    SpokenEnglish: undefined;
   };
 
-  const Stack = createNativeStackNavigator<RootStackParamList>();
+  const Stack: any = createNativeStackNavigator<RootStackParamList>();
   const navigation =
     useNavigation<import('@react-navigation/native').NavigationProp<RootStackParamList>>();
 
   useEffect(() => {
     const checkAuthState = async () => {
       try {
-        const isLoggedIn = true;
+        const token = await AsyncStorage.getItem('AuthStudentToken');
+        const isLoggedIn = token ? true : false;
         if (isLoggedIn) {
           navigation.reset({
             index: 0,
@@ -101,6 +105,7 @@ const Routes = () => {
         <Stack.Screen name="TicketViewScreen" component={TicketByIdScreen} />
         <Stack.Screen name="CreateTicket" component={CreateTicketScreen} />
         <Stack.Screen name="ClassesScreen" component={ClassesScreen} />
+        <Stack.Screen name="ClassByIdScreen" component={ClassByIdScreen} />
         <Stack.Screen name="ClassViewScreen" component={ClassByIdScreen} />
         <Stack.Screen name="CoursesScreen" component={CouresScreen} />
         <Stack.Screen name="CourseViewScreen" component={CourseByIdScreen} />
@@ -110,6 +115,7 @@ const Routes = () => {
         <Stack.Screen name="FAQ" component={FAQScreen} />
         <Stack.Screen name="CommunitiesScreen" component={CommunitiesScreen} />
         <Stack.Screen name="CommunityViewScreen" component={CommunityByIdScreen} />
+        <Stack.Screen name="SpokenEnglish" component={SpokenEnglishScreen} />
       </Stack.Navigator>
     );
   };

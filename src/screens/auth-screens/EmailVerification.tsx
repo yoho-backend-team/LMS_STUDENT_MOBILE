@@ -16,11 +16,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Auth, COLORS, FONTS, icons } from '~/constants';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { EvilIcons, MaterialIcons } from '@expo/vector-icons';
+import { EvilIcons } from '@expo/vector-icons';
 import toast from '~/utils/toasts';
+import { forgotPasswordClient } from '~/features/Authentication/services';
 
 const EmailVerification = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const [email, setEmail] = useState('');
   const [errors, setErrors] = useState({
     email: '',
@@ -47,11 +48,19 @@ const EmailVerification = () => {
     return valid;
   };
 
-  const handleEmailVerify = () => {
+  const handleEmailVerify = async () => {
     if (validateForm()) {
-      console.log('verify pressed', email);
-      toast.success('Success', 'Email verified successful!');
-      navigation.navigate('OtpVerification' as never);
+      try {
+        const response = await forgotPasswordClient({ email }, {});
+        if (response) {
+          toast.success('Success', 'Email verified successful!');
+          navigation.navigate('OtpVerification' as never, { email, data: response?.data?.data });
+        } else {
+          toast.error('Error', 'User not found with this email');
+        }
+      } catch (error) {
+        toast.error('Error', 'Failed to verify email');
+      }
     }
   };
 

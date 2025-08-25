@@ -1,3 +1,5 @@
+
+
 import { Dimensions } from 'react-native';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
@@ -228,5 +230,5 @@ export const SPACING = {
 export const ELEVATION = {
   low: wp('1%'), // Responsive low elevation
   medium: wp('2%'), // Responsive medium elevation
-  high: wp('4%'), // Responsive high elevation
+  high: wp('4%'), // Responsive high elevation
 };

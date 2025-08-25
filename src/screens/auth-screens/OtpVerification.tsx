@@ -21,12 +21,23 @@ import { Auth, COLORS, FONTS, icons } from '~/constants';
 import toast from '~/utils/toasts';
 import { useNavigation } from '@react-navigation/native';
 
-const OTPVerification = () => {
+import type { RouteProp } from '@react-navigation/native';
+import { updateVerifyOtpClient } from '~/features/Authentication/services';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+type OtpVerificationRouteProp = RouteProp<{ params: { data: any; email: any } }, 'params'>;
+
+interface OTPVerificationProps {
+  route: OtpVerificationRouteProp;
+}
+
+const OTPVerification: React.FC<OTPVerificationProps> = ({ route }) => {
   const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '']);
   const inputRefs = useRef<Array<TextInput | null>>([]);
-  const [timer, setTimer] = useState(60);
+  const [timer, setTimer] = useState(90);
   const [canResend, setCanResend] = useState(false);
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
+  const { data, email } = route?.params;
 
   useEffect(() => {
     if (inputRefs.current[0]) {
@@ -99,11 +110,30 @@ const OTPVerification = () => {
     }
   };
 
-  const handleVerify = () => {
+  const handleVerify = async () => {
     const otpString = otp.join('');
     if (otpString.length === 6) {
-      toast.success('Success', `OTP Verified: ${otpString}`);
-      navigation.navigate('ResetPassword' as never);
+      try {
+        const response = await updateVerifyOtpClient({ email, token: data?.token, otp: otpString });
+        if (response) {
+          toast.success('Success', `OTP Verified successfully!`);
+          if (data?.step === 'otp') {
+            await AsyncStorage.setItem('AuthStudentToken', response?.data?.token);
+            await AsyncStorage.setItem('StudentData', JSON.stringify(response?.data?.user));
+            toast.success('Success', 'OTP verified & Login successful!');
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'Student' }],
+            });
+          } else {
+            navigation.navigate('ResetPassword' as never, { email });
+          }
+        } else {
+          toast.error('Error', 'Failed to verify OTP');
+        }
+      } catch (error) {
+        toast.error('Error', 'Failed to verify OTP');
+      }
     } else {
       toast.error('Error', 'Please enter complete OTP');
     }
@@ -111,7 +141,7 @@ const OTPVerification = () => {
 
   const handleResendOtp = () => {
     if (canResend) {
-      setTimer(60);
+      setTimer(90);
       setCanResend(false);
       setOtp(['', '', '', '', '', '']);
       inputRefs.current.forEach((ref) => ref?.clear());
@@ -164,6 +194,14 @@ const OTPVerification = () => {
                     Enter the 6 digit OTP sent to your Email Address
                   </Text>
                 </View>
+
+                {data?.otp && (
+                  <View style={{ marginVertical: 5, marginBottom: 15 }}>
+                    <Text style={{ ...FONTS.body4, fontWeight: 500, color: COLORS.light_red }}>
+                      OTP: {data?.otp}
+                    </Text>
+                  </View>
+                )}
 
                 {/* OTP Inputs */}
                 <View style={styles.otpContainer}>
@@ -304,11 +342,12 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   verifyButton: {
-    width: '100%',
+    width: '85%',
     marginBottom: 20,
+    marginHorizontal: 20,
   },
   verifyGradient: {
-    borderRadius: 25,
+    borderRadius: 18,
     paddingVertical: 15,
     alignItems: 'center',
   },

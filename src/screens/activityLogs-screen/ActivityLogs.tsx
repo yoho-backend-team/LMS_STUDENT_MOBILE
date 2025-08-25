@@ -1,70 +1,34 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
-import { FlatList, Image, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import {
+  FlatList,
+  Image,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  RefreshControl,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '~/components/shared/Header';
 import { COLORS, FONTS, icons } from '~/constants';
-import { formatDateandTime } from '~/utils/formatDate';
+import { formatDateandTime, formatDate } from '~/utils/formatDate';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { useNavigation } from '@react-navigation/native';
+import { useDispatch, useSelector } from 'react-redux';
+import { getAllActivityData } from '~/features/reducer/activitylog/reducers/Thunks';
+import { ActivitySelector } from '~/features/reducer/activitylog/reducers/Selector';
 
 type Log = {
   id: string;
   message: string;
   email: string;
   date: string;
+  title: string;
+  user: any;
+  timestamp: any;
 };
-
-const logsData: Log[] = [
-  {
-    id: '1',
-    message: 'Dashboard Logout Successfully',
-    email: 'Musk@Gmail.Com',
-    date: '2025-06-25T09:40:00',
-  },
-  {
-    id: '2',
-    message: 'Dashboard Logout Successfully',
-    email: 'Musk@Gmail.Com',
-    date: '2025-06-25T09:40:00',
-  },
-  {
-    id: '3',
-    message: 'Dashboard Logout Successfully',
-    email: 'Musk@Gmail.Com',
-    date: '2025-06-25T09:40:00',
-  },
-  {
-    id: '4',
-    message: 'Dashboard Logout Successfully',
-    email: 'Musk@Gmail.Com',
-    date: '2025-06-25T09:40:00',
-  },
-  {
-    id: '5',
-    message: 'Dashboard Logout Successfully',
-    email: 'Musk@Gmail.Com',
-    date: '2025-06-25T09:40:00',
-  },
-  {
-    id: '6',
-    message: 'Dashboard Logout Successfully',
-    email: 'Musk@Gmail.Com',
-    date: '2025-06-25T09:40:00',
-  },
-  {
-    id: '7',
-    message: 'Dashboard Logout Successfully',
-    email: 'Musk@Gmail.Com',
-    date: '2025-06-25T09:40:00',
-  },
-  {
-    id: '8',
-    message: 'Dashboard Logout Successfully',
-    email: 'Musk@Gmail.Com',
-    date: '2025-06-25T09:40:00',
-  },
-];
 
 const ActivityLogs = () => {
   const [filterVisible, setFilterVisible] = useState(false);
@@ -72,14 +36,36 @@ const ActivityLogs = () => {
   const [toDate, setToDate] = useState<any>(null);
   const [showPicker, setShowPicker] = useState(false);
   const [pickerMode, setPickerMode] = useState<'from' | 'to'>('from');
-  const navigation = useNavigation();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [refreshing, setRefreshing] = useState(false);
+  const navigation = useNavigation<any>();
   const toggleFilter = () => setFilterVisible((prev) => !prev);
+  const dispatch = useDispatch<any>();
+  const getActivtiy = useSelector(ActivitySelector);
+  const totalPages = getActivtiy?.pagination?.totalPages || 1;
+  const allData = getActivtiy?.data || [];
+
+  useEffect(() => {
+    dispatch(getAllActivityData({ page: currentPage }));
+  }, [currentPage]);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    dispatch(getAllActivityData({ page: currentPage })).then(() => {
+      setRefreshing(false);
+    });
+  };
 
   const handleConfirm = (date: Date) => {
+    const dateWithoutTime = new Date(date);
+    dateWithoutTime.setHours(0, 0, 0, 0);
+
     if (pickerMode === 'from') {
-      setFromDate(date);
+      setFromDate(dateWithoutTime);
     } else {
-      setToDate(date);
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+      setToDate(endOfDay);
     }
     setShowPicker(false);
   };
@@ -89,15 +75,35 @@ const ActivityLogs = () => {
     setToDate(null);
   };
 
-  const filteredLogs = logsData.filter((log) => {
-    const logDate: any = new Date(log.date);
-    if (fromDate && logDate < fromDate) return false;
-    if (toDate && logDate > toDate) return false;
+  const loadNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const loadPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const filteredLogs = allData.filter((log: any) => {
+    if (!fromDate && !toDate) return true;
+
+    const logDate = new Date(log.timestamp);
+
+    if (fromDate && toDate) {
+      return logDate >= fromDate && logDate <= toDate;
+    } else if (fromDate) {
+      return logDate >= fromDate;
+    } else if (toDate) {
+      return logDate <= toDate;
+    }
+
     return true;
   });
 
   const renderItem = ({ item }: { item: Log }) => {
-    const logDate: any = new Date(item.date);
     return (
       <View style={styles.logContainer}>
         <Image source={icons.barLine} style={styles.barLine} />
@@ -107,13 +113,11 @@ const ActivityLogs = () => {
           </View>
           <View style={{ flex: 1 }}>
             <View>
-              <Text style={styles.message}>{item.message}</Text>
+              <Text style={styles.message}>{item.title}</Text>
             </View>
             <View style={styles.logCard}>
-              <Text style={styles.email}>
-                {item.message} {item.email}
-              </Text>
-              <Text style={styles.time}>{formatDateandTime(logDate)}</Text>
+              <Text style={styles.email}>{item.user?.email}</Text>
+              <Text style={styles.time}>{formatDateandTime(item.timestamp)}</Text>
             </View>
           </View>
         </View>
@@ -125,13 +129,11 @@ const ActivityLogs = () => {
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
       <SafeAreaView edges={['top']} style={styles.container}>
-        <Header />
-        {/* code inside the view section*/}
         <View style={styles.container1}>
           {/* Header */}
           <View style={styles.headerRow}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Image source={icons.back_arrow} style={{ width: 25, height: 25 }} />
+              <Image source={require('../../assets/profile/back.png')} style={styles.backbutton} />
             </TouchableOpacity>
             <Text style={styles.header}>Activity Log</Text>
           </View>
@@ -150,8 +152,8 @@ const ActivityLogs = () => {
                   setPickerMode('from');
                   setShowPicker(true);
                 }}>
-                <Text style={{ ...FONTS.h5 }}>
-                  {fromDate ? formatDateandTime(fromDate) : 'From Date'}
+                <Text style={{ ...FONTS.h5, fontWeight: 500, textAlign: 'center' }}>
+                  {fromDate ? formatDate(fromDate) : 'From Date: DD-MM-YYYY'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -160,13 +162,14 @@ const ActivityLogs = () => {
                   setPickerMode('to');
                   setShowPicker(true);
                 }}>
-                <Text style={{ ...FONTS.h5 }}>
-                  {toDate ? formatDateandTime(toDate) : 'To Date'}
+                <Text style={{ ...FONTS.h5, fontWeight: 500, textAlign: 'center' }}>
+                  {toDate ? formatDate(toDate) : 'To Date: DD-MM-YYYY'}
                 </Text>
               </TouchableOpacity>
+
               {(fromDate || toDate) && (
-                <TouchableOpacity onPress={resetFilter}>
-                  <Ionicons name="refresh" size={24} color="red" />
+                <TouchableOpacity onPress={resetFilter} style={styles.resetBtn}>
+                  <Ionicons name="refresh" size={18} color={COLORS.white} />
                 </TouchableOpacity>
               )}
             </View>
@@ -179,7 +182,38 @@ const ActivityLogs = () => {
             renderItem={renderItem}
             contentContainerStyle={{ paddingBottom: 20 }}
             showsVerticalScrollIndicator={false}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>
+                  {fromDate || toDate
+                    ? 'No logs found for the selected date range'
+                    : 'No activity logs found'}
+                </Text>
+              </View>
+            }
           />
+
+          {/* Pagination controls */}
+          <View style={styles.pagination}>
+            <TouchableOpacity
+              onPress={loadPrevPage}
+              disabled={currentPage === 1}
+              style={[styles.pageBtn, currentPage === 1 && styles.disabledBtn]}>
+              <Text style={styles.pageText}>Previous</Text>
+            </TouchableOpacity>
+
+            <Text style={styles.pageInfo}>
+              Page {currentPage} of {totalPages}
+            </Text>
+
+            <TouchableOpacity
+              onPress={loadNextPage}
+              disabled={currentPage === totalPages}
+              style={[styles.pageBtn, currentPage === totalPages && styles.disabledBtn]}>
+              <Text style={styles.pageText}>Next</Text>
+            </TouchableOpacity>
+          </View>
 
           {/* Date Picker Modal */}
           <DateTimePickerModal
@@ -202,9 +236,14 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     backgroundColor: COLORS.bg_Colour,
   },
-  container1: { flex: 1, padding: 15 },
-  headerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
+  container1: { flex: 1, paddingHorizontal: 15 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   header: { fontSize: 20, fontWeight: 'bold', marginLeft: 10 },
+  backbutton: {
+    width: 48,
+    height: 48,
+    resizeMode: 'contain',
+  },
   filterBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -222,8 +261,14 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderRadius: 8,
     padding: 8,
+    paddingVertical: 10,
     marginRight: 8,
     flex: 1,
+  },
+  resetBtn: {
+    padding: 5,
+    backgroundColor: COLORS.text_desc,
+    borderRadius: 50,
   },
   logContainer: { marginBottom: 20 },
   timelineRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 15 },
@@ -255,4 +300,40 @@ const styles = StyleSheet.create({
   message: { fontWeight: 'bold', marginBottom: 8, color: COLORS.text_title },
   email: { fontSize: 12, color: COLORS.green_text, marginBottom: 5 },
   time: { fontSize: 10, color: COLORS.text_desc, textAlign: 'right' },
+  pagination: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.blue_02,
+  },
+  pageBtn: {
+    padding: 10,
+    backgroundColor: COLORS.blue_01,
+    borderRadius: 5,
+    width: '25%',
+  },
+  disabledBtn: {
+    backgroundColor: COLORS.text_desc,
+  },
+  pageText: {
+    color: COLORS.white,
+    textAlign: 'center',
+    fontWeight: 500,
+  },
+  pageInfo: {
+    fontSize: 14,
+    color: COLORS.text_title,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 185,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: COLORS.text_desc,
+    textAlign: 'center',
+  },
 });
