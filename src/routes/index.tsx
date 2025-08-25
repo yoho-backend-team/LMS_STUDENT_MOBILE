@@ -53,7 +53,6 @@ const Routes = () => {
     Profile: undefined;
     CommunitiesScreen: undefined;
     CommunityViewScreen: undefined;
-    SpokenEnglish: undefined;
   };
 
   const Stack: any = createNativeStackNavigator<RootStackParamList>();
