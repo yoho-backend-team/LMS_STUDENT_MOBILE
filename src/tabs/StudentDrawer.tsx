@@ -117,54 +117,57 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
 
   return (
     <View style={{ flex: 1 }}>
-      {/* Scrollable Content */}
-      <DrawerContentScrollView
-        scrollEnabled
-        contentContainerStyle={{ paddingHorizontal: 15, paddingBottom: 20 }}>
-        
-        {/* Close Button */}
-        <View style={{ alignItems: 'flex-end' }}>
-          <TouchableOpacity
-            style={{
-              padding: 8,
-              borderRadius: 20,
-              backgroundColor: '#7B00FF',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-            onPress={() => navigation.closeDrawer()}>
-            <Image
-              source={icons.cross}
-              style={{
-                height: 12,
-                width: 12,
-                tintColor: '#fff',
-              }}
-            />
-          </TouchableOpacity>
-        </View>
-
-        {/* Profile */}
+      {/* Close Button */}
+      <View style={{ alignItems: 'flex-end', padding: 15 }}>
         <TouchableOpacity
-          style={{ flexDirection: 'row', alignItems: 'center', marginTop: 15 }}
-          onPress={() => navigation.navigate('Profile')}>
+          style={{
+            padding: 8,
+            borderRadius: 20,
+            backgroundColor: '#7B00FF',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+          onPress={() => navigation.closeDrawer()}>
           <Image
-            source={{ uri: getImageUrl(userDetail?.image) }}
-            onError={() => setError(true)}
-            style={{ width: 55, height: 55, borderRadius: 40 }}
+            source={icons.cross}
+            style={{
+              height: 12,
+              width: 12,
+              tintColor: '#fff',
+            }}
           />
-          <View style={{ marginLeft: 12, flex: 1 }}>
-            <Text style={{ color: '#333', ...FONTS.h2_01, fontWeight: '600' }}>
-              {userDetail?.full_name}
-            </Text>
-            <Text style={{ color: '#777', ...FONTS.h5 }}>
-              ID : {userDetail?.userDetail?.studentId}
-            </Text>
-          </View>
         </TouchableOpacity>
+      </View>
 
-        {/* Drawer Items */}
-        <View style={{ marginTop: 20 }}>
+      {/* 🔒 Pinned Profile */}
+      <TouchableOpacity
+        style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 15 }}
+        onPress={() => navigation.navigate('Profile')}>
+        <Image
+          source={{ uri: getImageUrl(userDetail?.image) }}
+          onError={() => setError(true)}
+          style={{ width: 55, height: 55, borderRadius: 40 }}
+        />
+        <View style={{ marginLeft: 12, flex: 1 }}>
+          <Text style={{ color: '#333', ...FONTS.h2_01, fontWeight: '600' }}>
+            {userDetail?.full_name}
+          </Text>
+          <Text style={{ color: '#777', ...FONTS.h5 }}>
+            ID : {userDetail?.userDetail?.studentId}
+          </Text>
+        </View>
+      </TouchableOpacity>
+
+      {/* Divider */}
+      <View style={{ height: 1, backgroundColor: '#E0E0E0', marginVertical: 15 }} />
+
+      {/* 🔄 Scrollable Middle Section */}
+      <DrawerContentScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingHorizontal: 15, paddingBottom: 20 }}
+        showsVerticalScrollIndicator={false} // 🚫 Hide Scrollbar
+      >
+        <View>
           <CustomDrawerItem
             label={screens.home}
             icon={sidebaricon.home}
@@ -192,7 +195,7 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
               navigation.navigate('MainLayout');
             }}
           />
-           <CustomDrawerItem
+          <CustomDrawerItem
             label={screens.community}
             icon={
               selectedTab === screens.community ? icons.community_filled : icons.community_outlined
@@ -223,7 +226,6 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
             icon={sidebaricon.activity}
             onPress={() => navigation.navigate('ActivityLog')}
           />
-          
           <CustomDrawerItem
             label="Placement"
             icon={icons.course_filled}
@@ -247,7 +249,10 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
         </View>
       </DrawerContentScrollView>
 
-      {/* Fixed Logout at Bottom */}
+      {/* Divider */}
+      <View style={{ height: 1, backgroundColor: '#E0E0E0', marginBottom: 15 }} />
+
+      {/* 🔒 Fixed Logout at Bottom */}
       <View style={{ paddingHorizontal: 15, paddingBottom: 20 }}>
         <TouchableOpacity
           style={{
@@ -271,7 +276,7 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Custom Logout Modal */}
+      {/* Logout Modal */}
       <Modal
         visible={logoutModalVisible}
         transparent
@@ -330,7 +335,6 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
     </View>
   );
 };
-  
 
 const ServiceDrawer: React.FC = () => {
   const Drawer = createDrawerNavigator();
