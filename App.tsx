@@ -11,6 +11,7 @@ export default function App() {
       <Provider store={store}>
         <SafeAreaProvider>
           <NavigationContainer>
+            
             <Routes />
             <Toast />
           </NavigationContainer>
