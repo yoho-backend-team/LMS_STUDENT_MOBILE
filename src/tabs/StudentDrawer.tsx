@@ -116,9 +116,9 @@
     };
 
     return (
-      <View style={{ flex: 1, marginTop: SIZES.padding }}>
+      <View style={{ flex: 1,}}>
         {/* Close Button */}
-        <View style={{ alignItems: 'flex-end', padding: 20, paddingBottom: 0 , marginTop:10 }}>
+        <View style={{ alignItems: 'flex-end', padding:10,paddingBottom:0 }}>
           <TouchableOpacity
             style={{
               padding: 8,
