@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
   },
   chatbotBtn: {
   position: "absolute",
-  bottom: 60,
+  bottom: 80,
   right: 20,
   backgroundColor: "#7B00FF",
   padding: 16,

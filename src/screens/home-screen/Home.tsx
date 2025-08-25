@@ -383,7 +383,7 @@ const styles = StyleSheet.create({
   },
   chatbotBtn: {
   position: "absolute",
-  bottom: 60,
+  bottom: 80,
   right: 20,
   backgroundColor: "#7B00FF",
   padding: 16,
@@ -392,6 +392,6 @@ const styles = StyleSheet.create({
   shadowOpacity: 0.2,
   shadowRadius: 4,
   shadowOffset: { width: 0, height: 2 },
-  elevation: 5, // for Android shadow
+  elevation: 5, 
 },
 });

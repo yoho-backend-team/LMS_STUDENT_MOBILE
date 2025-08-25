@@ -14,8 +14,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "~/components/shared/Header";
 import { COLORS } from "~/constants";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 
 const Attendance = () => {
+  const Navigation = useNavigation<any>();
   const [showFilter, setShowFilter] = useState(false);
 
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
@@ -241,6 +243,12 @@ const Attendance = () => {
             })()}
           </View>
         </View>
+        <TouchableOpacity
+                          style={styles.chatbotBtn}
+                          onPress={() => Navigation.navigate("ChatbotScreen")}
+                        >
+                          <Ionicons name="chatbubble-ellipses" size={28} color="#fff" />
+                        </TouchableOpacity>
       </SafeAreaView>
     </>
   );
@@ -464,4 +472,17 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 3,
   },
+  chatbotBtn: {
+  position: "absolute",
+  bottom: 80,
+  right: 20,
+  backgroundColor: "#7B00FF",
+  padding: 16,
+  borderRadius: 50,
+  shadowColor: "#000",
+  shadowOpacity: 0.2,
+  shadowRadius: 4,
+  shadowOffset: { width: 0, height: 2 },
+  elevation: 5, 
+},
 });
