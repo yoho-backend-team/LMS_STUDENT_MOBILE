@@ -2,8 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { Alert } from 'react-native';
 
-// const backendUrl = 'https://lms-node-backend-v1.onrender.com/api';
-const backendUrl = 'https://10.29.248.157:3001/api';
+const backendUrl = 'https://lms-node-backend-v1.onrender.com/api';
+// const backendUrl = 'https://10.29.248.157:3001/api';
 
 const Axios = axios.create({
   baseURL: backendUrl,
