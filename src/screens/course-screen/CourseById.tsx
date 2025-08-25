@@ -126,7 +126,7 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
     },
   ];
 
-  // Function to handle back button press when video is playing
+  
   const handleBackPress = () => {
     if (showVideo) {
       setShowVideo(false);
@@ -138,7 +138,7 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scroll}>
-        {/* Back Button */}
+        
         <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
           <Image
             source={require('../../assets/courses/arrow.png')}
@@ -146,7 +146,7 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
           />
         </TouchableOpacity>
 
-        {/* Scrollable Tabs */}
+       
        <ScrollView
   horizontal
   showsHorizontalScrollIndicator={false}
@@ -184,7 +184,7 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
     </TouchableOpacity>
   ))}
 </ScrollView>
-        {/* ABOUT TAB */}
+       
         {activeTab === 'about' && (
           <>
             <View style={styles.card}>
