@@ -1,8 +1,9 @@
-import { useNavigation, DrawerActions } from '@react-navigation/native';
-import { useState } from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
-import { useSelector } from 'react-redux';
+import { useNavigation } from '@react-navigation/native';
+import { View, Image, TouchableOpacity, Text } from 'react-native';
 import { icons, SIZES } from '~/constants';
+import notificationIcon from '../../assets/icons/notification.png';
+import { useSelector } from 'react-redux';
+import { selectNotifications } from '~/features/notification/reducers/selectors';
 
 interface HeaderProps {
   containerStyle?: object;
@@ -14,42 +15,89 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({
   containerStyle,
-  logo,
-  titleStyle,
-  leftComponent,
-  rightComponent,
 }) => {
-  const [error, setError] = useState(false);
   const navigation = useNavigation();
+  const notifications = useSelector(selectNotifications);
+
+
+  const unreadCount = notifications?.filter((n: any) => n.status === 'unread').length || 0;
+
+  const handleNotificationPress = () => {
+    navigation.navigate('Notification' as never); 
+  };
 
   return (
     <View
       style={{
         flexDirection: 'row',
-        height: 35,
+        height: 45,
         paddingHorizontal: SIZES.padding,
         alignItems: 'center',
-      }}>
-      {/**Left */}
+        justifyContent: 'space-between',
+        ...containerStyle,
+      }}
+    >
+     
       <TouchableOpacity onPress={() => navigation.openDrawer()}>
         <Image source={icons.menu} style={{ height: 25, width: 25 }} />
       </TouchableOpacity>
-      {/**Title */}
-      <View
-        style={{
-          flex: 1,
-          marginHorizontal: SIZES.padding,
-          opacity: 0.9,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}></View>
-      {/** Right **/}
-      <View>
+
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }} />
+
+      
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
+        {/* Notifications */}
+        <TouchableOpacity
+          onPress={handleNotificationPress}
+          style={{ position: 'relative' }}
+        >
+          <Image
+            source={notificationIcon}
+            style={{ width: 26, height: 26, resizeMode: 'contain' }}
+          />
+          {unreadCount > 0 && (
+            <View
+              style={{
+                position: 'absolute',
+                right: -4,
+                top: -4,
+                backgroundColor: 'red',
+                borderRadius: 10,
+                minWidth: 18,
+                height: 18,
+                justifyContent: 'center',
+                alignItems: 'center',
+                paddingHorizontal: 3,
+              }}
+            >
+              <Text
+                style={{
+                  color: 'white',
+                  fontSize: 10,
+                  fontWeight: 'bold',
+                }}
+              >
+                {unreadCount}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
+
+        {/* Profile */}
         <TouchableOpacity
           onPress={() => {
             navigation.navigate('Profile' as never);
-          }}>
-          <Image source={icons.user_profile} className="w-25 h-25 rounded-full object-cover" />
+          }}
+        >
+          <Image
+            source={icons.user_profile}
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 16,
+              resizeMode: 'cover',
+            }}
+          />
         </TouchableOpacity>
       </View>
     </View>
