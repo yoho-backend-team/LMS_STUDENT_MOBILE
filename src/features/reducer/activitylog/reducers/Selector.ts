@@ -1,0 +1,1 @@
+export const ActivitySelector = (state: any) => state.ActivitySlice.data;

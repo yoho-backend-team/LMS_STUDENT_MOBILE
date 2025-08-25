@@ -31,7 +31,7 @@ const Header: React.FC<HeaderProps> = ({
         alignItems: 'center',
       }}>
       {/**Left */}
-      <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
+      <TouchableOpacity onPress={() => navigation.openDrawer()}>
         <Image source={icons.menu} style={{ height: 25, width: 25 }} />
       </TouchableOpacity>
       {/**Title */}
