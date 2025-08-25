@@ -119,6 +119,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     color: COLORS.text_desc,
     fontWeight: 500,
+
   },
   textArea: { minHeight: 70, textAlignVertical: 'top' },
   attachmentRow: {

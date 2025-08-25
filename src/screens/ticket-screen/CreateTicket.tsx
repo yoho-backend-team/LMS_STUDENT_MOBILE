@@ -16,7 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/Feather';
-import { createticketdata, uploadticketfile } from '~/features/Ticket/Services';
+import { createticketdata, uploadticketfile } from '~/features/Ticket/Services/index';
 import toast from '~/utils/toasts';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -214,6 +214,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 10,
     gap: 5,
+    marginVertical: 10,
   },
   title: { fontSize: 20, fontWeight: 'bold', },
   backButton: { paddingHorizontal: 10, marginTop: 10 },
@@ -258,7 +259,7 @@ const styles = StyleSheet.create({
     ...FONTS.h5,
     fontWeight: 500,
   },
- 
+
   gradientButton: {
     marginTop: 30,
     borderRadius: 8,

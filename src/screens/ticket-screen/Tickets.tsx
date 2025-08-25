@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import {
   StatusBar,
   StyleSheet,
+  Image,
   Text,
   TouchableOpacity,
   View,
@@ -14,7 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import Header from '~/components/shared/Header';
-import { COLORS, FONTS } from '~/constants';
+import { COLORS, FONTS, icons } from '~/constants';
 import Icon from 'react-native-vector-icons/Feather';
 import { GetallTicketThunks } from '../../features/Ticket/reducers/Thunks';
 import { GetTicketSelector } from '~/features/Ticket/reducers/Selectors';
@@ -68,10 +69,17 @@ const Tickets = () => {
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
       <SafeAreaView edges={['top']} style={styles.container}>
-        <Header />
+        {/* <Header /> */}
 
-        <View style={styles.ticketRow}>
+        <View style={[styles.ticketRow, { justifyContent: 'flex-start' }]}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Image
+              source={icons.back_arrow}
+              style={{ width: 25, height: 25, marginLeft: 15 }}
+            />
+          </TouchableOpacity>
           <Text style={styles.headerText}>Tickets</Text>
+          <View style={{ flex: 1 }} />
           <LinearGradient
             colors={['#7B00FF', '#B200FF']}
             start={{ x: 0.134, y: 0.021 }}
@@ -84,6 +92,7 @@ const Tickets = () => {
             </TouchableOpacity>
           </LinearGradient>
         </View>
+
 
         <View style={styles.filterContainer}>
           {['All', 'Opened', 'Closed'].map((option) => (
@@ -211,17 +220,18 @@ const Tickets = () => {
 export default Tickets;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 10, backgroundColor: COLORS.white },
+  container: { flex: 1, paddingTop: 10, backgroundColor: COLORS.white, },
   headerText: {
     fontSize: 20,
     fontWeight: 'bold',
-    padding: 10,
+    marginLeft: 10
   },
   filterContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: 10,
     gap: 4,
+
   },
   filterText: { ...FONTS.body4, color: COLORS.text_title, fontWeight: '500' },
   cards: { padding: 10, flex: 1 },
@@ -282,7 +292,7 @@ const styles = StyleSheet.create({
     color: COLORS.text_desc,
     textAlign: 'center',
   },
-  
+
   gradientButton: {
     borderRadius: 10,
     overflow: 'hidden',
@@ -304,6 +314,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     alignItems: 'center',
     justifyContent: 'center',
+    width: 110
   },
   buttonText: {
     color: '#fff',

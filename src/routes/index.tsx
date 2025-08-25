@@ -25,6 +25,7 @@ import {
 } from '../screens';
 import StudentDrawer from '../tabs/StudentDrawer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import TaskCard from '~/components/courses/TaskCard';
 
 const Routes = () => {
   type RootStackParamList = {
@@ -111,6 +112,8 @@ const Routes = () => {
         <Stack.Screen name="FAQ" component={FAQScreen} />
         <Stack.Screen name="CommunitiesScreen" component={CommunitiesScreen} />
         <Stack.Screen name="CommunityViewScreen" component={CommunityByIdScreen} />
+                <Stack.Screen name="TaskCard" component={TaskCard} />
+
       </Stack.Navigator>
     );
   };
