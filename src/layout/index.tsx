@@ -1,5 +1,5 @@
 import { useDrawerProgress } from '@react-navigation/drawer';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -100,6 +100,9 @@ const MainLayout: React.FC = () => {
   const { width } = useWindowDimensions();
   const pagerRef = useRef<PagerView>(null);
   const selectedTab = useSelector((state: any) => state.tabReducer.selectedTab);
+  
+  const [currentPage, setCurrentPage] = useState(0);
+  const [isScrolling, setIsScrolling] = useState(false);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
@@ -124,33 +127,53 @@ const MainLayout: React.FC = () => {
   }));
 
   useEffect(() => {
-    if (!selectedTab) dispatch(setSelectedTab(screens.home));
+    if (!selectedTab) {
+      dispatch(setSelectedTab(screens.home));
+      setCurrentPage(0);
+    }
   }, [dispatch, selectedTab]);
 
-  useEffect(() => {
-    const index = bottom_tabs.findIndex((t) => t.label === selectedTab);
-    if (index !== -1 && pagerRef.current) {
-      pagerRef.current.setPage(index);
-    }
-  }, [selectedTab]);
-
-  // Handle page change from PagerView
-  const handlePageSelected = (event: any) => {
+  const handlePageSelected = useCallback((event: any) => {
     const index = event.nativeEvent.position;
     const newTab = bottom_tabs[index]?.label;
-    if (newTab && newTab !== selectedTab) {
-      dispatch(setSelectedTab(newTab));
+    
+    if (newTab && index >= 0 && index < bottom_tabs.length) {
+      setCurrentPage(index);
+      if (newTab !== selectedTab) {
+        dispatch(setSelectedTab(newTab));
+      }
     }
-  };
+    setIsScrolling(false);
+  }, [selectedTab, dispatch]);
 
-  // Handle tab button press
-  const handleTabPress = (tabLabel: string) => {
-    const index = bottom_tabs.findIndex((t) => t.label === tabLabel);
-    if (index !== -1 && pagerRef.current) {
-      pagerRef.current.setPage(index);
+  const handlePageScrollStateChanged = useCallback((event: any) => {
+    const state = event.nativeEvent.pageScrollState;
+    if (state === 'dragging' || state === 'settling') {
+      setIsScrolling(true);
+    } else if (state === 'idle') {
+      setIsScrolling(false);
     }
-    dispatch(setSelectedTab(tabLabel));
-  };
+  }, []);
+
+  const handleTabPress = useCallback((tabLabel: string) => {
+    if (isScrolling) return; 
+    const index = bottom_tabs.findIndex((t) => t.label === tabLabel);
+    if (index !== -1 && index !== currentPage && pagerRef.current) {
+      setCurrentPage(index);
+      pagerRef.current.setPage(index);
+      dispatch(setSelectedTab(tabLabel));
+    }
+  }, [currentPage, isScrolling, dispatch]);
+
+  useEffect(() => {
+    if (!isScrolling && selectedTab) {
+      const index = bottom_tabs.findIndex((t) => t.label === selectedTab);
+      if (index !== -1 && index !== currentPage && pagerRef.current) {
+        setCurrentPage(index);
+        pagerRef.current.setPage(index);
+      }
+    }
+  }, [selectedTab, currentPage, isScrolling]);
 
   return (
     <Animated.View style={[{ flex: 1, backgroundColor: COLORS.white }, animatedStyle]}>
@@ -165,12 +188,15 @@ const MainLayout: React.FC = () => {
             style={{ flex: 1 }}
             initialPage={0}
             onPageSelected={handlePageSelected}
+            onPageScrollStateChanged={handlePageScrollStateChanged}
             scrollEnabled={true}
-            overdrag={false} // Prevents over-scrolling
-            offscreenPageLimit={1} // Keeps adjacent pages in memory for smoother transitions
+            overdrag={false}
+            offscreenPageLimit={1}
+            pageMargin={0} 
+            orientation="horizontal" 
           >
-            {bottom_tabs.map((item) => (
-              <View key={item.id} style={{ width: SIZES.width, height: '100%' }}>
+            {bottom_tabs.map((item, index) => (
+              <View key={`${item.id}-${index}`} style={{ width: SIZES.width, height: '100%' }}>
                 {item.label === screens.home && <HomeScreen />}
                 {item.label === screens.course && <CouresScreen />}
                 {item.label === screens.classes && <ClassesScreen />}
@@ -204,12 +230,12 @@ const MainLayout: React.FC = () => {
               shadowOpacity: 0.1,
               shadowRadius: 8,
             }}>
-            {bottom_tabs.map((tab) => {
-              const isFocused = selectedTab === tab.label;
+            {bottom_tabs.map((tab, index) => {
+              const isFocused = currentPage === index; // Use currentPage instead of selectedTab
 
               return (
                 <View
-                  key={tab.id}
+                  key={`${tab.id}-tab-${index}`}
                   style={{
                     flex: 1,
                     alignItems: 'center',
