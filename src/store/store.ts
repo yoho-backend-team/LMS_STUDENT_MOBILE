@@ -9,6 +9,8 @@ import helpReducer from '../features/HelpCenter/Reducer/HelpSlice';
 import NotificationSlice from '../features/notification/reducers/notificationSlice';
 import ActivitySlice from "../features/reducer/activitylog/reducers/ActivitySlice"
 import PaymentSlice from '../features/payments/reducer/paymentSlice'
+import ClassSlice from '../features/classes/reducers/classslice'
+import ClassIdSlice from '../features/classid/reducers/classidslice'
 
 const store = configureStore({
   reducer: {
@@ -22,6 +24,8 @@ const store = configureStore({
     NotificationSlice: NotificationSlice,
 		ActivitySlice: ActivitySlice,
     PaymentSlice:PaymentSlice,
+    ClassSlice: ClassSlice,
+    ClassIdSlice: ClassIdSlice,
 	},
 });
 

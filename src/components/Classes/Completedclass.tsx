@@ -1,7 +1,15 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Linking, ScrollView } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather'; // or Ionicons 
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Linking,
+  ScrollView,
+} from 'react-native';
+import Icon from 'react-native-vector-icons/Feather';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useNavigation } from '@react-navigation/native';
 
 const classInfoData = [
   { label: 'Date', value: '9 Apr 2025' },
@@ -10,67 +18,103 @@ const classInfoData = [
   { label: 'Duration', value: '6 Mon Hrs' },
 ];
 
-const CompleteClassDetails = () => (
-  <ScrollView contentContainerStyle={styles.screen}>
-    <View style={styles.container}>
-      <TouchableOpacity style={styles.backButton}>
-        <Icon name="arrow-left" size={24} color="#444" />
-      </TouchableOpacity>
-      <Text style={styles.title}>Class Details</Text>
-    </View>
+const CompleteClassDetails = () => {
+  const navigation = useNavigation();
 
-    <View style={styles.container1}>
-      <Text style={styles.batchTitle}>Batch No : #13</Text>
-      <Text style={styles.title}>The Path Of MERN Stack</Text>
-      <Text style={styles.description}>
-        The MERN stack is a collection of technologies for building web applications using JavaScript.
-        It's made up of MongoDB, Express.js, React, and Node.js. Mern is a popular, Pre-build,
-        and versatile technologu stack.
-      </Text>
-
-      <View style={styles.container1}>
-        <LinearGradient
-          colors={['#7B00FF', '#B200FF']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.card}
+  return (
+    <ScrollView contentContainerStyle={styles.screen}>
+      <View style={styles.container}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
         >
-          {classInfoData.map((item, index) => (
-            <View key={index} style={styles.column}>
-              <Text style={styles.label}>{item.label}</Text>
-              <Text style={styles.value}>{item.value}</Text>
-            </View>
-          ))}
-        </LinearGradient>
+          <Icon name="arrow-left" size={24} color="#444" />
+        </TouchableOpacity>
+        <Text style={styles.title}>Class Details</Text>
       </View>
 
-      <Text style={styles.linkLabel}>Class Meeting Link</Text>
-      <Text style={styles.subText}>Join The Class @9:30 AM</Text>
-      <TouchableOpacity style={styles.joinButton} onPress={() => {/* linking code here */ }}>
-        <Text style={styles.joinText}>Join Now</Text>
-      </TouchableOpacity>
-      <Text style={styles.notesubTitle}>Make sure your presence in this class & if you are unable to attend, plase inform the Coordinator.</Text>
+      <View style={styles.container1}>
+        <Text style={styles.batchTitle}>Batch No : #13</Text>
+        <Text style={styles.title}>The Path Of MERN Stack</Text>
+        <Text style={styles.description}>
+          The MERN stack is a collection of technologies for building web
+          applications using JavaScript. It's made up of MongoDB, Express.js,
+          React, and Node.js. Mern is a popular, Pre-build, and versatile
+          technology stack.
+        </Text>
 
-      <TouchableOpacity style={styles.notesCard1} onPress={() => {/* linking code here */ }}>
-        <Text style={styles.noteText}>Check Attendance</Text>
-      </TouchableOpacity>
-      <Text style={styles.notesubTitle}>If any issue in attendance please raise a ticket</Text>
+        <View style={styles.container1}>
+          <LinearGradient
+            colors={['#7B00FF', '#B200FF']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.card}
+          >
+            {classInfoData.map((item, index) => (
+              <View key={index} style={styles.column}>
+                <Text style={styles.label}>{item.label}</Text>
+                <Text style={styles.value}>{item.value}</Text>
+              </View>
+            ))}
+          </LinearGradient>
+        </View>
 
-      <Text style={styles.noteTitle}>Session Notes</Text>
-      <TouchableOpacity style={styles.notesCard1} onPress={() => {/* linking code here */ }}>
-        <Text style={styles.noteText}>Once Class Finished Videos will be Uploaded</Text>
-     </TouchableOpacity>
-    </View>
+        <Text style={styles.linkLabel}>Class Meeting Link</Text>
+        <Text style={styles.subText}>Join The Class @9:30 AM</Text>
+        <TouchableOpacity
+          style={styles.joinButton}
+          onPress={() => {
+            Linking.openURL('https://your-class-link.com');
+          }}
+        >
+          <Text style={styles.joinText}>Join Now</Text>
+        </TouchableOpacity>
+        <Text style={styles.notesubTitle}>
+          Make sure your presence in this class & if you are unable to attend,
+          please inform the Coordinator.
+        </Text>
 
-    <View style={styles.container2}>
-      <Text style={styles.noteTitle}>Study Materials</Text>
-     <TouchableOpacity style={styles.notesCard1} onPress={() => {/* linking code here */ }}>
-        <Text style={styles.noteText}>Once Class Finished Study Materials Videos will be Uploaded</Text>
-      </TouchableOpacity>
-    </View>
-  </ScrollView>
+        <TouchableOpacity
+          style={styles.notesCard1}
+          onPress={() => {
+            Linking.openURL('https://your-attendance-link.com');
+          }}
+        >
+          <Text style={styles.noteText}>Check Attendance</Text>
+        </TouchableOpacity>
+        <Text style={styles.notesubTitle}>
+          If any issue in attendance please raise a ticket
+        </Text>
 
-);
+        <Text style={styles.noteTitle}>Session Notes</Text>
+        <TouchableOpacity
+          style={styles.notesCard1}
+          onPress={() => {
+            Linking.openURL('https://your-notes-link.com');
+          }}
+        >
+          <Text style={styles.noteText}>
+            Once Class Finished Videos will be Uploaded
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.container2}>
+        <Text style={styles.noteTitle}>Study Materials</Text>
+        <TouchableOpacity
+          style={styles.notesCard1}
+          onPress={() => {
+            Linking.openURL('https://your-materials-link.com');
+          }}
+        >
+          <Text style={styles.noteText}>
+            Once Class Finished Study Materials Videos will be Uploaded
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
+  );
+};
 
 const styles = StyleSheet.create({
   screen: {
