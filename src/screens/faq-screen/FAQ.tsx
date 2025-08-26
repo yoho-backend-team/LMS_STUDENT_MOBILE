@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image } from 'react-native';
 import {
   StatusBar,
@@ -17,6 +17,9 @@ import {
   TextStyle,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectFaq } from '~/features/faq/reducers/selectors';
+import { getFaqThunk } from '~/features/faq/reducers/thunks';
 
 const UI = {
   bg: '#EAEFF5', // page background
@@ -30,12 +33,12 @@ const UI = {
 };
 
 const faqs = [
-  { question: 'Introduction', answer: 'This is the introduction answer.' },
-  { question: 'How To Access Payil?', answer: 'You can access Payil from the dashboard.' },
-  { question: 'About Payil Dashboard', answer: 'The dashboard shows all courses and progress.' },
-  { question: 'About Payil Courses', answer: 'Courses include video, notes, and exercises.' },
-  { question: 'How To Access Payil Subject', answer: 'Click on a subject to view its content.' },
-  { question: 'How to add a new course?', answer: 'Go to the add course section.' },
+  { title: 'Introduction', description: 'This is the introduction answer.' },
+  { title: 'How To Access Payil?', description: 'You can access Payil from the dashboard.' },
+  {title: 'About Payil Dashboard', description: 'The dashboard shows all courses and progress.' },
+  { title: 'About Payil Courses', description: 'Courses include video, notes, and exercises.' },
+  { title: 'How To Access Payil Subject', description: 'Click on a subject to view its content.' },
+  { title: 'How to add a new course?', description: 'Go to the add course section.' },
 ];
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -75,7 +78,23 @@ const FAQ = () => {
   const [search, setSearch] = useState('');
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const navigation = useNavigation<any>();
+  const dispatch = useDispatch<any>();
 
+  const selectData = useSelector(selectFaq );
+
+  console.log("selector :" , selectData);
+
+  const getFaqData = async () => {
+    await dispatch(getFaqThunk({
+      instituteId : '973195c0-66ed-47c2-b098-d8989d3e4529',
+      branchid : '90c93163-01cf-4f80-b88b-4bc5a5dd8ee4'
+    }));
+  }
+
+  useEffect (() => {
+    getFaqData();
+  },[dispatch]);
+ 
   const toggleExpand = (index: number) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setExpandedIndex(expandedIndex === index ? null : index);
@@ -111,7 +130,7 @@ const FAQ = () => {
             contentContainerStyle={{ paddingBottom: 20 }}
             showsVerticalScrollIndicator={false}>
             {faqs
-              .filter((i) => i.question.toLowerCase().includes(search.toLowerCase()))
+              .filter((i) => i.title.toLowerCase().includes(search.toLowerCase()))
               .map((item, index) => {
                 const open = expandedIndex === index;
                 return (
@@ -119,7 +138,7 @@ const FAQ = () => {
                     {/* Row – RAISED (popped-out) */}
                     <View style={[styles.card, styles.insetBox]}>
                       <View style={{ flex: 1 }}>
-                        <Text style={styles.cardText}>{item.question}</Text>
+                        <Text style={styles.cardText}>{item.title}</Text>
                       </View>
                       <TouchableOpacity activeOpacity={0.8} onPress={() => toggleExpand(index)}>
                         <PlusMinusIcon open={open} />
@@ -128,11 +147,11 @@ const FAQ = () => {
 
                     {/* Inline expanded content (same page) */}
                     {open &&
-                      (item.question === 'Introduction' ? (
+                      (item.description === 'Introduction' ? (
                         <IntroContent />
                       ) : (
                         <View style={[styles.answerWrap, styles.insetBox]}>
-                          <Text style={styles.answerText}>{item.answer}</Text>
+                          <Text style={styles.answerText}>{item.description}</Text>
                         </View>
                       ))}
                   </React.Fragment>
