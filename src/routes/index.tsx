@@ -156,7 +156,6 @@ const Routes = () => {
         <Stack.Screen name="AuthStackstudent" component={StudentAuthStack} />
         <Stack.Screen name="Student" component={StudentStack} />
       </Stack.Navigator>
-
       <SessionExpiredModal visible={showSessionModal} onConfirm={handleSessionExpired} />
     </>
   );
