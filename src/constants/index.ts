@@ -37,6 +37,20 @@ export const icons = {
   menu: require('../assets/icons/menu.png'),
   user_profile: require('../assets/icons/userprofile.png'),
   notification: require('../assets/icons/notification.png'),
+  app_icon: require('../assets/icons/app-icon.png'),
+  back_arrow: require('../assets/icons/backarrow.png'),
+  filter: require('../assets/icons/filter.png'),
+  barLine: require('../assets/icons/barLine.png'),
+  greenCircle: require('../assets/icons/green circle.png'),
+  pdf: require('../assets/icons/pdf.png'),
+  download: require('../assets/icons/download.png'),
+  security: require('../assets/icons/security.png'),
+  security2: require('../assets/icons/security2.png'),
+};
+
+export const Auth = {
+  header: require('../assets/images/login/login 2.png'),
+  loading: require('../assets/images/login/Group 14.png'),
 };
 
 export const bottom_tabs = [

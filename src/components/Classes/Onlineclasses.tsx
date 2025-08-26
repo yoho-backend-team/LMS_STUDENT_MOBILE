@@ -1,74 +1,46 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Linking, ImageBackground } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-
-
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+  Linking
+} from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { GetallClassesThunks } from '../../features/Classes/reducers/thunks';
+import { GetClassesSelector } from '../../features/Classes/reducers/selectors';
+import { AppDispatch } from '../../store/store';
 
 const Classcards = () => {
   const navigation = useNavigation();
-  const [activeTab, setActiveTab] = useState<'live' | 'upcoming' | 'completed'>('live');
+  const dispatch = useDispatch<AppDispatch>();
   const scrollRef = useRef<ScrollView>(null);
+  const [activeTab, setActiveTab] = useState<'live' | 'upcoming' | 'completed'>('live');
 
-  const ClassCard = ({ item }: { item: any }) => (
-    <View style={styles.card}>
-      <View style={styles.row}>
-        <Text style={styles.label}>Day</Text>
-        <Text style={styles.value}>{item.day}</Text>
-      </View>
-      <View style={styles.row}>
-        <Text style={styles.label}>Topic</Text>
-        <Text style={styles.value}>{item.topic}</Text>
-      </View>
-      
-      <View style={styles.row}>
-        <Text style={styles.label}>Join Link</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('ClassByIdScreen' as never)}>
-          <Text style={styles.value1}>{item.link}</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.row}>
-        <Text style={styles.label}>Duration</Text>
-        <Text style={styles.value}>{item.duration}</Text>
-      </View>
+  useEffect(() => {
+    // if (activeTab === 'live') return; // Skip live tab for now
 
-      <View style={styles.row}>
-        <Text style={styles.label}>Action</Text>
-        <TouchableOpacity onPress={() => Linking.openURL(item.link)} style={styles.joinButton}>
-          <Text style={styles.buttonText}>Join Now</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+    dispatch(GetallClassesThunks({
+      courseId: '67f3b7fcb8d2634300cc87b6',
+      classType: activeTab as 'upcoming' | 'completed' | 'live',
+    }));
+  }, [activeTab, dispatch]);
 
-  );
+  const classes = useSelector(GetClassesSelector);
+  const safeClasses = Array.isArray(classes) ? classes : [];
 
-  const CompletedClassCard = ({ item }: { item: any }) => (
-    <View style={styles.card}>
-      <View style={styles.row}>
-        <Text style={styles.label}>Title</Text>
-        <Text style={styles.value}>{item.Title}</Text>
-      </View>
-      <View style={styles.row}>
-        <Text style={styles.label}>Start Date</Text>
-        <Text style={styles.value}>{item.StartDate}</Text>
-      </View>
-      <View style={styles.row}>
-        <Text style={styles.label}>Start Time</Text>
-        <Text style={styles.value}>{item.StartTime}</Text>
-      </View>
-      <View style={styles.row}>
-        <Text style={styles.label}>Duration</Text>
-        <Text style={styles.value}>{item.duration}</Text>
-      </View>
-      <View style={styles.row}>
-        <Text style={styles.label}>Action</Text>
-        <TouchableOpacity onPress={() => Linking.openURL(item.link)} style={styles.joinButton}>
-          <Text style={styles.buttonText}>Completed</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+  const liveClasses = safeClasses.filter((item: any) => item.status === 'live');
+  const upcomingClasses = safeClasses.filter((item: any) => item.status === 'upcoming');
+  const completedClasses = safeClasses.filter((item: any) => item.status === 'completed');
+  const displayedClasses = safeClasses;
 
+
+  const onTabPress = (key: 'live' | 'upcoming' | 'completed', index: number) => {
+    setActiveTab(key);
+    scrollRef.current?.scrollTo({ x: index * 120 - 20, animated: true });
+  };
 
   const tabs = [
     { key: 'live', label: 'Live Class' },
@@ -76,27 +48,87 @@ const Classcards = () => {
     { key: 'completed', label: 'Completed Class' },
   ];
 
-  const liveClasses = [
-    { day: 'Day 1', topic: 'HTML', link: 'www.google.com/url', duration: '45 Min' },
-    { day: 'Day 2', topic: 'HTML', link: 'www.google.com/url', duration: '45 Min' },
-    { day: 'Day 3', topic: 'HTML', link: 'www.google.com/url', duration: '45 Min' },
-    { day: 'Day 4', topic: 'HTML', link: 'www.google.com/url', duration: '45 Min' },
-  ];
-  const upcomingClasses = [''
-    // { day: 'Day 2', topic: 'CSS', link: 'https://www.example.com', duration: '60 Min' },
-  ];
+  const ClassCard = ({ item }: { item: any }) => (
+    <View style={styles.card}>
+      <View style={styles.row}>
+        <Text style={styles.label}>Title</Text>
+        <Text style={styles.value}>{item.class_name}</Text>
+      </View>
+      <View style={styles.row}>
+        <Text style={styles.label}>Start Date</Text>
+        <Text style={styles.value}>{item.start_date}</Text>
+      </View>
+      <View style={styles.row}>
+        <Text style={styles.label}>Start Time</Text>
+        <Text style={styles.value}>{item.start_time}</Text>
+      </View>
+      <View style={styles.row}>
+        <Text style={styles.label}>Duration</Text>
+        <Text style={styles.value}>{item.duration} min</Text>
+      </View>
+      <View style={styles.row}>
+        <Text style={styles.label}>Action</Text>
+        <TouchableOpacity onPress={() => Linking.openURL(item.video_url)} style={styles.joinButton}>
+          <Text style={styles.buttonText}>Completed</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 
-  const completeClasses = [
-    { Title: 'HTML, CSS Basic', StartDate: '12-06-2025', StartTime: '09:00 AM', duration: '45 Min' },
-    { Title: 'HTML, CSS Basic', StartDate: '12-06-2025', StartTime: '09:00 AM', duration: '45 Min' },
-    { Title: 'HTML, CSS Basic', StartDate: '12-06-2025', StartTime: '09:00 AM', duration: '45 Min' },
-    { Title: 'HTML, CSS Basic', StartDate: '12-06-2025', StartTime: '09:00 AM', duration: '45 Min' },
-  ];
+  const UpcommingClassCard = ({ item }: { item: any }) => (
+    <View style={styles.card}>
+      <View style={styles.row}>
+        <Text style={styles.label}>Title</Text>
+        <Text style={styles.value}>{item.class_name}</Text>
+      </View>
+      <View style={styles.row}>
+        <Text style={styles.label}>Start Date</Text>
+        <Text style={styles.value}>{item.start_date}</Text>
+      </View>
+      <View style={styles.row}>
+        <Text style={styles.label}>Start Time</Text>
+        <Text style={styles.value}>{item.start_time}</Text>
+      </View>
+      <View style={styles.row}>
+        <Text style={styles.label}>Duration</Text>
+        <Text style={styles.value}>{item.duration} min</Text>
+      </View>
+      <View style={styles.row}>
+        <Text style={styles.label}>Action</Text>
+        <TouchableOpacity onPress={() => Linking.openURL(item.video_url)} style={styles.joinButton}>
+          <Text style={styles.buttonText}>Completed</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 
-  const onTabPress = (key: 'live' | 'upcoming' | 'completed', index: number) => {
-    setActiveTab(key);
-    scrollRef.current?.scrollTo({ x: index * 120 - 20, animated: true });
-  };
+  const CompletedClassCard = ({ item }: { item: any }) => (
+    <View style={styles.card}>
+      <View style={styles.row}>
+        <Text style={styles.label}>Title</Text>
+        <Text style={styles.value}>{item.class_name}</Text>
+      </View>
+      <View style={styles.row}>
+        <Text style={styles.label}>Start Date</Text>
+        <Text style={styles.value}>{item.start_date}</Text>
+      </View>
+      <View style={styles.row}>
+        <Text style={styles.label}>Start Time</Text>
+        <Text style={styles.value}>{item.start_time}</Text>
+      </View>
+      <View style={styles.row}>
+        <Text style={styles.label}>Duration</Text>
+        <Text style={styles.value}>{item.duration} min</Text>
+      </View>
+      <View style={styles.row}>
+        <Text style={styles.label}>Action</Text>
+        <TouchableOpacity onPress={() => Linking.openURL(item.video_url)} style={styles.joinButton}>
+          <Text style={styles.buttonText}>Completed</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -110,7 +142,6 @@ const Classcards = () => {
           contentContainerStyle={styles.tabContainer}
         >
           {tabs.map((tab, index) => (
-            
             <TouchableOpacity
               key={tab.key}
               onPress={() => onTabPress(tab.key, index)}
@@ -123,25 +154,24 @@ const Classcards = () => {
           ))}
         </ScrollView>
 
-        <View >
-          {activeTab === 'live' && <Text style={styles.container2}> Classes </Text>}
-          {activeTab === 'upcoming' && <Text style={styles.containerupclass}> Classes </Text>}
-          {activeTab === 'completed' && <Text style={styles.container2}>Completed  </Text>}
+        <View>
+          {activeTab === 'live' && <Text style={styles.container2}>Classes</Text>}
+          {activeTab === 'upcoming' && <Text style={styles.containerupclass}>Classes</Text>}
+          {activeTab === 'completed' && <Text style={styles.container2}>Completed</Text>}
         </View>
       </View>
 
       <View style={styles.container1}>
-        {activeTab === 'live' && liveClasses.map((item, index) => (
+        {activeTab === 'live' && displayedClasses.map((item, index) => (
           <ClassCard key={index} item={item} />
         ))}
-
-        {activeTab === 'upcoming' && upcomingClasses.map((item, index) => (''
-          // <ClassCard key={index} item={item} />
+        {activeTab === 'upcoming' && displayedClasses.map((item, index) => (
+          <UpcommingClassCard key={index} item={item} />
         ))}
-
-        {activeTab === 'completed' && completeClasses.map((item, index) => (
+        {activeTab === 'completed' && displayedClasses.map((item, index) => (
           <CompletedClassCard key={index} item={item} />
         ))}
+
       </View>
     </ScrollView>
   );
@@ -151,7 +181,6 @@ export default Classcards;
 
 const styles = StyleSheet.create({
   container: { padding: 10, backgroundColor: '#dfe9f3ff' },
-  container4: { padding: 16, backgroundColor: '#f2f2f2', height: 860 },
   header: { fontSize: 20, fontWeight: '600', marginBottom: 15, color: '#333' },
   wrapper: { flex: 1, padding: 6, backgroundColor: '#dfe9f3ff' },
   tabContainer: { paddingHorizontal: 0, marginBottom: 5 },
@@ -160,23 +189,18 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
     paddingVertical: 8,
     borderRadius: 6,
-
     backgroundColor: '#E4EBF5',
     alignItems: 'center',
     marginHorizontal: 4,
-
     shadowColor: '#a02d2dff',
     shadowOffset: { width: 6, height: 6 },
     shadowOpacity: 0.4,
     shadowRadius: 6,
     elevation: 8,
-
   },
-
   activeTab: { backgroundColor: '#7B00FF' },
   tabText: { fontSize: 16, color: '#666', fontWeight: '400' },
-  activeTabText: { fontSize: 16, color: '#ffffffff', fontWeight: '600', },
-
+  activeTabText: { fontSize: 16, color: '#fff', fontWeight: '600' },
   card: {
     backgroundColor: '#cfdeedff',
     borderRadius: 12,
@@ -190,9 +214,8 @@ const styles = StyleSheet.create({
   },
   row: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
   label: { color: '#716F6F', fontSize: 14 },
-    value1: { color: '#5d62f3ff', fontSize: 14 },
   value: { color: '#716F6F', fontSize: 14 },
-
+  value1: { color: '#5d62f3ff', fontSize: 14 },
   joinButton: {
     alignSelf: 'flex-end',
     backgroundColor: '#dae1e8ff',
@@ -227,13 +250,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     borderRadius: 20,
     padding: 10,
-    height:600,
     fontWeight: '500',
-  },
-  activeTabGradient: {
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 });

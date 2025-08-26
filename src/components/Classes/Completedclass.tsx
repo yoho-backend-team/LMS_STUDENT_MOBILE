@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Linking, ScrollView } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather'; // or Ionicons 
+import Icon from 'react-native-vector-icons/Feather';  
 import { LinearGradient } from 'expo-linear-gradient';
+
 
 const classInfoData = [
   { label: 'Date', value: '9 Apr 2025' },
@@ -10,12 +11,30 @@ const classInfoData = [
   { label: 'Duration', value: '6 Mon Hrs' },
 ];
 
+// const [showVideo, setShowVideo] = useState(false);
+//  // Function to handle back button press when video is playing
+//   const handleBackPress = () => {
+//     if (showVideo) {
+//       setShowVideo(false);
+//     } else {
+//       navigation.goBack();
+//     }
+//   };
+
 const CompleteClassDetails = () => (
   <ScrollView contentContainerStyle={styles.screen}>
     <View style={styles.container}>
       <TouchableOpacity style={styles.backButton}>
         <Icon name="arrow-left" size={24} color="#444" />
       </TouchableOpacity>
+
+      {/* Back Button
+              <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
+                <Image
+                  source={require('../../assets/courses/arrow.png')}
+                  style={{ width: 24, height: 24 }}
+                />
+              </TouchableOpacity> */}
       <Text style={styles.title}>Class Details</Text>
     </View>
 
