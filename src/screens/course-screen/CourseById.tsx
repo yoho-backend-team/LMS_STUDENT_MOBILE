@@ -66,6 +66,8 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
       deadline: '26-06-2025',
       status: 'Completed',
       question: 'why we use mongo db insted of sql',
+      score:'8',
+      localFilePath: 'IMG-202033885599'
     },
     {
       id: 2,
@@ -75,6 +77,7 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
       deadline: '26-06-2025',
       status: 'Pending',
       question: 'why we use reacenative  insted of java',
+      score:''
     },
     {
       id: 3,
@@ -84,6 +87,7 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
       deadline: '26-06-2025',
       status: 'Completed',
       question: 'what is the future scope of mongo db',
+      score:'8'
     },
     {
       id: 4,
@@ -93,6 +97,7 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
       deadline: '26-06-2025',
       status: 'Completed',
       question: 'what is the future scope of react native',
+      score:'8',
     },
   ];
 
@@ -153,7 +158,7 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
           />
         </TouchableOpacity>
 
-        {/* Scrollable Tabs */}
+      
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}

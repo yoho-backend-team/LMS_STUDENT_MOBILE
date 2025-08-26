@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
@@ -5,39 +6,77 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  StyleSheet,
-  SafeAreaView,
   StatusBar,
   KeyboardAvoidingView,
   Platform,
   Keyboard,
   TouchableWithoutFeedback,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { getImageUrl } from '~/utils/imageUtils';
+import { StyleSheet } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { GetallMessageThunks } from '../../features/Community/reducers.ts/thunks';
+import { GetCommuntiyIdSelector } from '~/features/Community/reducers.ts/selectore';
+import { COLORS } from '~/constants';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 interface Message {
   id: string;
   text: string;
   isOutgoing: boolean;
+  senderName?: string;
+  createdAt?: string;
 }
+
+const COLORS_LIST = [
+  '#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231',
+  '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe'
+];
+
+const getColorForSender = (senderName: string) => {
+  if (!senderName) return '#000';
+  let hash = 0;
+  for (let i = 0; i < senderName.length; i++) {
+    hash = senderName.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % COLORS_LIST.length;
+  return COLORS_LIST[index];
+};
 
 const CommunityById: React.FC = () => {
   const navigation = useNavigation();
-  const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState<Message[]>([
-    { id: '1', text: 'Hey there!', isOutgoing: false },
-    { id: '2', text: 'Hello! How are you?', isOutgoing: true },
-    { id: '3', text: "I'm doing great, thanks for asking", isOutgoing: false },
-    { id: '4', text: "That's wonderful to hear!", isOutgoing: true },
-    { id: '5', text: 'What are your plans for today?', isOutgoing: true },
-    { id: '6', text: 'Just working on some projects', isOutgoing: false },
-    { id: '7', text: 'Sounds productive!', isOutgoing: true },
-    { id: '8', text: 'Yeah, staying busy', isOutgoing: false },
-    { id: '9', text: 'Let me know if you need any help', isOutgoing: true },
-  ]);
+  const route = useRoute<any>();
+  const { community } = route.params;
 
+  const dispatch = useDispatch();
+  const [message, setMessage] = useState('');
+  const [messages, setMessages] = useState<Message[]>([]);
   const scrollViewRef = useRef<ScrollView>(null);
+
+  const messagelist = useSelector(GetCommuntiyIdSelector);
+
+  useEffect(() => {
+    dispatch<any>(GetallMessageThunks({ community: community?._id }));
+  }, [community?._id, dispatch]);
+
+  useEffect(() => {
+    if (messagelist && messagelist.length > 0) {
+      const formatted = messagelist
+        .map((msg: any) => ({
+          id: msg.uuid || msg._id,
+          text: msg.message || msg.text,
+          isOutgoing: msg.sender === 'me',
+          senderName: msg.sender_name || 'Unknown',
+          createdAt: msg.createdAt || new Date().toISOString(),
+        }))
+        .sort((a: Message, b: Message) => new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime()); // Sort oldest -> newest
+      setMessages(formatted);
+    }
+  }, [messagelist]);
 
   const handleSend = () => {
     if (message.trim()) {
@@ -45,6 +84,8 @@ const CommunityById: React.FC = () => {
         id: Date.now().toString(),
         text: message,
         isOutgoing: true,
+        senderName: 'Me',
+        createdAt: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, newMsg]);
       setMessage('');
@@ -52,80 +93,102 @@ const CommunityById: React.FC = () => {
   };
 
   useEffect(() => {
-    // Auto scroll to bottom whenever messages update
-    scrollViewRef.current?.scrollToEnd({ animated: true });
+    setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, 50); // small delay to allow rendering
   }, [messages]);
 
-  const renderMessage = (msg: Message) => (
-    <View
-      key={msg.id}
-      style={[
-        styles.messageContainer,
-        msg.isOutgoing ? styles.outgoingMessage : styles.incomingMessage,
-      ]}>
+  const formatTime = (isoString?: string) => {
+    if (!isoString) return '';
+    const date = new Date(isoString);
+    return `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+  };
+
+  const renderMessage = (msg: Message) => {
+    const senderColor = getColorForSender(msg.senderName || 'Unknown');
+
+    return (
       <View
+        key={msg.id}
         style={[
-          styles.messageBubble,
-          msg.isOutgoing ? styles.outgoingBubble : styles.incomingBubble,
-        ]}>
-        <Text
-          style={[styles.messageText, msg.isOutgoing ? styles.outgoingText : styles.incomingText]}>
-          {msg.text}
-        </Text>
+          styles.messageContainer,
+          msg.isOutgoing ? styles.outgoingMessage : styles.incomingMessage,
+        ]}
+      >
+        <View
+          style={[
+            styles.messageBubble,
+            msg.isOutgoing ? styles.outgoingBubble : styles.incomingBubble,
+          ]}
+        >
+          {!msg.isOutgoing && (
+            <Text style={[styles.senderName, { color: senderColor }]}>
+              {msg.senderName}
+            </Text>
+          )}
+          <Text
+            style={[
+              styles.messageText,
+              msg.isOutgoing ? styles.outgoingText : styles.incomingText,
+            ]}
+          >
+            {msg.text}
+          </Text>
+          <Text style={styles.timeText}>{formatTime(msg.createdAt)}</Text>
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#f5f5f5" />
-
-      {/* Dismiss keyboard when tapping outside */}
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 50 : 0}>
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-              <Ionicons name="arrow-back" size={24} color="#333" />
-            </TouchableOpacity>
-            <View style={styles.profileContainer}>
-              <View style={styles.profileIcon} />
-              <View style={styles.headerText}>
-                <Text style={styles.headerTitle}>MERN 2025</Text>
-                <Text style={styles.headerSubtitle}>5 Members</Text>
+    <>
+      <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
+      <SafeAreaView edges={['top']} style={styles.container}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+          <KeyboardAvoidingView
+            style={{ flex: 1}}
+          >
+            <View style={styles.header}>
+              <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                <Ionicons name="arrow-back" size={24} color="#333" />
+              </TouchableOpacity>
+              <View style={styles.profileContainer}>
+                <Image style={styles.avatar} source={{ uri: getImageUrl(community?.groupimage) }} />
+                <View style={styles.headerText}>
+                  <Text style={styles.headerTitle}>{community?.group}</Text>
+                  <Text style={styles.headerSubtitle}>
+                    {community?.users?.length || 'Unknown'} Members
+                  </Text>
+                </View>
               </View>
             </View>
-          </View>
 
-          {/* Chat Messages */}
-          <ScrollView
-            ref={scrollViewRef}
-            style={styles.chatContainer}
-            contentContainerStyle={styles.chatContent}
-            showsVerticalScrollIndicator={false}>
-            {messages.map(renderMessage)}
-          </ScrollView>
+            <ScrollView
+              ref={scrollViewRef}
+              style={styles.chatContainer}
+              contentContainerStyle={styles.chatContent}
+              showsVerticalScrollIndicator={false}
+            >
+              {messages.map(renderMessage)}
+            </ScrollView>
 
-          {/* Message Input */}
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Type a Message"
-              placeholderTextColor="#999"
-              value={message}
-              onChangeText={setMessage}
-              multiline
-            />
-            <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
-              <Ionicons name="send" size={20} color="#fff" />
-            </TouchableOpacity>
-          </View>
-        </KeyboardAvoidingView>
-      </TouchableWithoutFeedback>
-    </SafeAreaView>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Type a Message"
+                placeholderTextColor="#999"
+                value={message}
+                onChangeText={setMessage}
+                multiline
+              />
+              <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+                <Ionicons name="send" size={20} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          </KeyboardAvoidingView>
+        </TouchableWithoutFeedback>
+      </SafeAreaView>
+    </>
   );
 };
 
@@ -135,6 +198,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  avatar: {
+    width: 40,
+    height: 40,
+    backgroundColor: '#000',
+    borderRadius: 20,
+    marginRight: 12,
   },
   header: {
     flexDirection: 'row',
@@ -213,6 +283,18 @@ const styles = StyleSheet.create({
   },
   incomingText: {
     color: '#333',
+  },
+  senderName: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#444',
+    marginBottom: 2,
+  },
+  timeText: {
+    fontSize: 10,
+    color: '#666',
+    marginTop: 4,
+    textAlign: 'right',
   },
   inputContainer: {
     flexDirection: 'row',
