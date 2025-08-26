@@ -1,5 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectDashboardData } from '~/features/home/reducer/selectors';
+import { getDashboardthunks } from '~/features/home/reducer/thunks';
 
 // Colors
 const CHART_COLORS = {
@@ -11,29 +14,36 @@ const CHART_COLORS = {
   white: '#FFFFFF',
 };
 
-interface AttendanceData {
-  overallAttendance: number;
-  remainingAttendance: number;
-  daysAbsent: number;
-}
+const AttendanceChart: React.FC = () => {
+  const dispatch = useDispatch();
+  const dashboardData = useSelector(selectDashboardData);
 
-interface AttendanceChartProps {
-  data?: AttendanceData;
-}
+  useEffect(() => {
+    dispatch(getDashboardthunks({}) as any);
+  }, [dispatch]);
 
-const AttendanceChart: React.FC<AttendanceChartProps> = ({
-  data = {
-    overallAttendance: 0,
-    remainingAttendance: 12,
-    daysAbsent: 0,
-  },
-}) => {
-  // Calculate bar heights
+  // Extract latest attendance entry (or default if empty)
+  const latestAttendance = dashboardData?.attendance?.[0] || {
+    present: { percentage: 0 },
+    absent: { percentage: 0 },
+    total: { percentage: 0 },
+  };
+
+  const overallAttendance = latestAttendance.total.percentage || 0;
+  const daysAbsent = latestAttendance.absent.percentage || 0;
+  const remainingAttendance =
+   (latestAttendance.present.percentage || 0);
+
+  // Calculate bar heights dynamically
   const getBarHeight = (value: number, maxValue: number = 100) => {
     return Math.max((value / maxValue) * 80, 8);
   };
 
-  const barHeights = [getBarHeight(50), getBarHeight(85), getBarHeight(45)];
+  const barHeights = [
+    getBarHeight(overallAttendance),
+    getBarHeight(remainingAttendance),
+    getBarHeight(daysAbsent),
+  ];
 
   return (
     <View style={styles.container}>
@@ -52,11 +62,11 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
                     {
                       height: height,
                       backgroundColor:
-                        index === 1
+                        index === 0
                           ? CHART_COLORS.primary
-                          : index === 2
-                            ? CHART_COLORS.secondary
-                            : CHART_COLORS.primary,
+                          : index === 1
+                          ? CHART_COLORS.secondary
+                          : '#00BFA5', // red for absent
                     },
                   ]}
                 />
@@ -65,11 +75,11 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
                     styles.baseCircle,
                     {
                       backgroundColor:
-                        index === 1
+                        index === 0
                           ? CHART_COLORS.primary
-                          : index === 2
-                            ? CHART_COLORS.secondary
-                            : CHART_COLORS.primary,
+                          : index === 1
+                          ? CHART_COLORS.secondary
+                          : '#00BFA5',
                     },
                   ]}
                 />
@@ -86,7 +96,9 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
               source={require('../../assets/home/attendance1.png')}
               style={styles.iconSquare}
             />
-            <Text style={styles.statLabel}>Overall {data.overallAttendance}%</Text>
+            <Text style={styles.statLabel}>
+              Overall {overallAttendance}%
+            </Text>
           </View>
 
           {/* Remaining Attendance */}
@@ -95,7 +107,9 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
               source={require('../../assets/home/attendance2.png')}
               style={styles.iconSquare}
             />
-            <Text style={styles.statLabel}>{data.remainingAttendance}% Remaining</Text>
+            <Text style={styles.statLabel}>
+              {remainingAttendance}% Remaining
+            </Text>
           </View>
 
           {/* Days Absent */}
@@ -104,7 +118,7 @@ const AttendanceChart: React.FC<AttendanceChartProps> = ({
               source={require('../../assets/home/attendance3.png')}
               style={styles.iconSquare}
             />
-            <Text style={styles.statLabel}>{data.daysAbsent}% Absent</Text>
+            <Text style={styles.statLabel}>{daysAbsent}% Absent</Text>
           </View>
         </View>
       </View>

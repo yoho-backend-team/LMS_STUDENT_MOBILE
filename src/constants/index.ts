@@ -45,7 +45,23 @@ export const icons = {
   pdf: require('../assets/icons/pdf.png'),
   download: require('../assets/icons/download.png'),
   security: require('../assets/icons/security.png'),
+  security2: require('../assets/icons/security2.png'),
 };
+
+export const sidebaricon={
+  home:require('../assets/sidebar/home.png'),
+  classes:require('../assets/sidebar/classes.png'),
+  course:require('../assets/sidebar/course.png'),
+  helpcenter:require('../assets/sidebar/helpcenter.png'),
+  logout:require('../assets/sidebar/logout.png'),
+  fag:require('../assets/sidebar/faq.png'),
+  activity:require('../assets/sidebar/activity.png'),
+  notification:require('../assets/sidebar/notification.png'),
+  payment:require('../assets/sidebar/payment.png'),
+  ticket:require('../assets/sidebar/ticket.png'),
+  attendance:require('../assets/sidebar/attence.png'),
+  community:require('../assets/sidebar/community.png')
+}
 
 export const Auth = {
   header: require('../assets/images/login/login 2.png'),

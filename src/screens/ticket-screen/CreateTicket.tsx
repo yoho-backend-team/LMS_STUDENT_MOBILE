@@ -7,15 +7,19 @@ import {
   View,
   TextInput,
   ScrollView,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { COLORS, icons } from '~/constants';
+import { COLORS, FONTS, icons } from '~/constants';
 import Header from '~/components/shared/Header';
 import { useNavigation } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 import { Picker } from '@react-native-picker/picker';
-import { Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
+import { createticketdata, uploadticketfile } from '~/features/Ticket/Services/index';
+import toast from '~/utils/toasts';
+import { LinearGradient } from 'expo-linear-gradient';
+
 
 const CreateTicket = () => {
   const navigation = useNavigation();
@@ -24,34 +28,89 @@ const CreateTicket = () => {
   const [category, setCategory] = useState('');
   const [attachment, setAttachment] = useState<any>(null);
   const [priority, setPriority] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const pickDocument = async () => {
+  const problemCategories = [
+    { label: 'Select your problem', value: '' },
+    { label: 'Attendance Issue', value: 'attendance' },
+    { label: 'Grade Issue', value: 'grade' },
+    { label: 'Course Material', value: 'material' },
+    { label: 'Technical Support', value: 'technical' },
+    { label: 'Feedback', value: 'feedback' },
+    { label: 'Assignment Submission', value: 'assignment' },
+    { label: 'Others', value: 'other' },
+  ];
+
+  const pickFile = async () => {
     try {
-      const docRes = await DocumentPicker.getDocumentAsync({ type: '*/*' });
-      if (docRes && docRes.assets && docRes.assets.length > 0) {
-        setAttachment(docRes.assets[0]);
+      const result: any = await DocumentPicker.getDocumentAsync({
+        type: ['image/*', 'application/pdf'],
+      });
+
+      if (result) {
+        setAttachment(result?.assets[0]);
       }
-    } catch (error: any) {
-      console.log('Error while selecting the file:', error.message);
+    } catch (error) {
+      console.error('Error picking file:', error);
+      toast.error('Error', 'Failed to pick file');
     }
   };
 
-  const handleSubmit = () => {
-    if (!subject || !description) {
-      alert('Please fill all required fields');
+  const handleSubmit = async () => {
+    if (!subject || !description || !category || !priority) {
+      toast.error('Error', 'Please fill all required fields');
       return;
     }
 
-    console.log({ subject, description, category, attachment, priority });
-    alert('Ticket created successfully!');
-    navigation.goBack();
+    setIsLoading(true);
+
+    try {
+      let fileUrl: string | null = null;
+
+      if (attachment) {
+        try {
+          const formData = new FormData();
+          formData.append('file', {
+            uri: attachment.uri,
+            name: attachment.name,
+            type: attachment.mimeType || 'application/octet-stream',
+          } as any);
+
+          const uploadRes = await uploadticketfile(formData);
+          fileUrl = uploadRes?.data?.data?.file;
+        } catch (uploadError) {
+          console.error('File upload failed:', uploadError);
+          toast.error('Error', 'File upload failed. Creating ticket without attachment.');
+        }
+      }
+
+      const ticketData = {
+        branch: '67f3a26ef4b2c530acd16425',
+        category: category,
+        description: description,
+        file: fileUrl,
+        institute: '67f3a26df4b2c530acd16419',
+        priority: priority,
+        query: subject,
+        user: '67f3b8feb8d2634300cc8819',
+      };
+
+      await createticketdata(ticketData, {});
+      toast.success('Success', 'Ticket created successfully');
+      navigation.goBack();
+    } catch (err) {
+      console.error('Ticket creation failed:', err);
+      toast.error('Error', 'Failed to create ticket');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
       <SafeAreaView edges={['top']} style={styles.container}>
-        <Header />
+        {/* <Header /> */}
 
         <View style={styles.headerRow}>
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
@@ -61,23 +120,34 @@ const CreateTicket = () => {
         </View>
 
         <ScrollView contentContainerStyle={styles.formContainer}>
-          <Text style={styles.label}>Select Your Problem</Text>
+          <Text style={styles.label}>Select Your Problem*</Text>
+          <View style={styles.dropdownContainer}>
+            <Picker
+              selectedValue={category}
+              onValueChange={(itemValue) => {
+                setCategory(itemValue);
+                const selectedProblem = problemCategories.find((prob) => prob.value === itemValue);
+                if (selectedProblem && selectedProblem.value) {
+                  setSubject(selectedProblem.label);
+                }
+              }}
+              style={styles.picker}>
+              {problemCategories.map((problem) => (
+                <Picker.Item key={problem.value} label={problem.label} value={problem.value} />
+              ))}
+            </Picker>
+          </View>
+
+          <Text style={styles.label}>Query*</Text>
           <TextInput
             style={styles.input}
-            placeholder="Enter ticket subject"
+            placeholder="Enter your query"
             value={subject}
             onChangeText={setSubject}
+            editable={true}
           />
 
-          <Text style={styles.label}>Query</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter category (e.g., Support, Billing)"
-            value={category}
-            onChangeText={setCategory}
-          />
-
-          <Text style={styles.label}>Description</Text>
+          <Text style={styles.label}>Description*</Text>
           <TextInput
             style={[styles.input, styles.textarea]}
             placeholder="Enter detailed description"
@@ -86,13 +156,13 @@ const CreateTicket = () => {
             multiline
           />
 
-          {/* Priority Dropdown */}
-          <Text style={styles.label}>Priority</Text>
+          <Text style={styles.label}>Priority*</Text>
           <View style={styles.dropdownContainer}>
             <Picker
               selectedValue={priority}
-              onValueChange={(itemValue: any) => setPriority(itemValue)}
+              onValueChange={(itemValue) => setPriority(itemValue)}
               style={styles.picker}>
+              <Picker.Item label="Select priority" value="" />
               <Picker.Item label="Low" value="Low" />
               <Picker.Item label="Medium" value="Medium" />
               <Picker.Item label="High" value="High" />
@@ -100,7 +170,7 @@ const CreateTicket = () => {
           </View>
 
           <Text style={styles.label}>Attachment</Text>
-          <TouchableOpacity style={styles.attachmentButton} onPress={pickDocument}>
+          <TouchableOpacity style={styles.attachmentButton} onPress={pickFile} disabled={isLoading}>
             <View style={styles.attachmentContent}>
               <Icon name="upload" size={24} color={COLORS.blue_01} />
               <Text style={styles.attachmentText}>
@@ -109,9 +179,26 @@ const CreateTicket = () => {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-            <Text style={styles.submitText}>Create Ticket</Text>
-          </TouchableOpacity>
+          {attachment && (
+            <TouchableOpacity onPress={() => setAttachment(null)} style={styles.removeAttachment}>
+              <Text style={styles.removeAttachmentText}>Remove Attachment</Text>
+            </TouchableOpacity>
+          )}
+
+          <LinearGradient
+            colors={['#7B00FF', '#B200FF']}
+            start={{ x: 0.134, y: 0.021 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.gradientButton, isLoading && styles.submitButtonDisabled]}>
+            <TouchableOpacity
+              style={styles.submitButton}
+              onPress={handleSubmit}
+              disabled={isLoading}>
+              <Text style={styles.submitText}>{isLoading ? 'Creating...' : 'Create Ticket'}</Text>
+            </TouchableOpacity>
+          </LinearGradient>
+
+
         </ScrollView>
       </SafeAreaView>
     </>
@@ -127,15 +214,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 10,
     gap: 5,
+    marginVertical: 10,
   },
-  title: { fontSize: 20, fontWeight: 'bold' },
-  backButton: {
-    paddingHorizontal: 10,
-    marginTop: 10,
-  },
-  backText: { color: 'white', fontSize: 18, fontWeight: 'bold' },
-  formContainer: { paddingHorizontal: 15 },
-  label: { fontSize: 16, fontWeight: '600', marginBottom: 5, marginTop: 15 },
+  title: { fontSize: 20, fontWeight: 'bold', },
+  backButton: { paddingHorizontal: 10, marginTop: 10 },
+  formContainer: { paddingHorizontal: 15, paddingBottom: 30 },
+  label: { fontSize: 16, fontWeight: '600', marginBottom: 8, marginTop: 15 },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
@@ -150,6 +234,8 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 8,
     backgroundColor: '#f9f9f9',
+    overflow: 'hidden',
+    marginBottom: 15,
   },
   picker: { height: 50, width: '100%' },
   attachmentButton: {
@@ -162,22 +248,30 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9f9f9',
     marginTop: 10,
   },
-  attachmentContent: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 5,
+  attachmentContent: { justifyContent: 'center', alignItems: 'center', gap: 5 },
+  attachmentText: { ...FONTS.body6, color: COLORS.text_desc, textAlign: 'center' },
+  removeAttachment: {
+    marginTop: 10,
+    alignSelf: 'flex-end',
   },
-  attachmentText: {
-    fontSize: 16,
-    color: '#333',
-    textAlign: 'center',
+  removeAttachmentText: {
+    color: COLORS.light_red,
+    ...FONTS.h5,
+    fontWeight: 500,
+  },
+
+  gradientButton: {
+    marginTop: 30,
+    borderRadius: 8,
+    overflow: 'hidden',
   },
   submitButton: {
-    marginTop: 30,
-    backgroundColor: COLORS.blue_01,
     paddingVertical: 15,
-    borderRadius: 8,
     alignItems: 'center',
+  },
+
+  submitButtonDisabled: {
+    backgroundColor: COLORS.shadow_01,
   },
   submitText: { color: '#fff', fontSize: 18, fontWeight: '600' },
 });

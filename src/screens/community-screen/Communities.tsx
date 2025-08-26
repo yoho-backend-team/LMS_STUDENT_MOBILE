@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StatusBar,
   StyleSheet,
@@ -8,8 +8,10 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as Font from "expo-font";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -26,6 +28,9 @@ import {
 import { getAllStudentCommunities } from "~/features/Community/reducer/Communitythunks";
 import { AppDispatch } from "~/store";
 
+// 👉 update with your actual backend base URL
+const backendUrl = "https://lms-node-backend-v1.onrender.com/";
+
 type CommunitiesScreenNavProp = StackNavigationProp<
   RootStackParamList,
   "CommunitiesScreen"
@@ -35,14 +40,35 @@ const Communities = () => {
   const navigation = useNavigation<CommunitiesScreenNavProp>();
   const dispatch = useDispatch<AppDispatch>();
 
-  const communities = useSelector(community => selectStudentCommunity(community));
+  const communities = useSelector((state) => selectStudentCommunity(state));
   const loading = useSelector(selectLoading);
-useEffect(() => {
-  // replace with actual courseId
-  dispatch(getAllStudentCommunities("67f3b7fcb8d2634300cc87b6"));
-}, [dispatch]);
 
-console.log("👀 Communities data:", communities);
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  useEffect(() => {
+    async function loadFonts() {
+      await Font.loadAsync(Ionicons.font); // ✅ preload Ionicons
+      setFontsLoaded(true);
+    }
+    loadFonts();
+  }, []);
+
+  useEffect(() => {
+    console.log("📡 Fetching communities for course: 67f3b7fcb8d2634300cc87b6");
+    dispatch(getAllStudentCommunities("67f3b7fcb8d2634300cc87b6"));
+  }, [dispatch]);
+
+  useEffect(() => {
+    console.log("👀 Updated Communities data:", communities);
+  }, [communities]);
+
+  if (!fontsLoaded) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={COLORS.black} />
+      </View>
+    );
+  }
 
   return (
     <>
@@ -82,18 +108,29 @@ console.log("👀 Communities data:", communities);
                   onPress={() =>
                     navigation.navigate("CommunityViewScreen", {
                       communityId: community._id,
-                      communityName: community.name,
-                      members: community.members?.length || 0,
+                      communityName: community.group, // ✅ use group as name
+                      members: community.users?.length || 0,
                     })
                   }
                 >
-                  <View style={styles.avatar} />
+                  {/* Avatar / Group Image */}
+                  {community.groupimage ? (
+                    <Image
+                      source={{ uri: `${backendUrl}${community.groupimage}` }}
+                      style={styles.avatar}
+                    />
+                  ) : (
+                    <View style={[styles.avatar, { backgroundColor: "#9CA3AF" }]} />
+                  )}
+
+                  {/* Community Info */}
                   <View style={styles.messageContent}>
-                    <Text style={styles.messageName}>{community.name}</Text>
+                    <Text style={styles.messageName}>{community.group}</Text>
                     <Text style={styles.messageText}>
-                      {community.description || "Tap to chat"}
+                      {community.last_message?.message || "Tap to chat"}
                     </Text>
                   </View>
+
                   <View style={styles.messageRight}>
                     <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
                   </View>
@@ -108,7 +145,6 @@ console.log("👀 Communities data:", communities);
 };
 
 export default Communities;
-
 
 const styles = StyleSheet.create({
   container: {
@@ -170,9 +206,9 @@ const styles = StyleSheet.create({
   avatar: {
     width: 40,
     height: 40,
-    backgroundColor: "#000",
     borderRadius: 20,
     marginRight: 12,
+    backgroundColor: "#ccc", // fallback background
   },
   messageContent: {
     flex: 1,
@@ -206,4 +242,3 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 });
-

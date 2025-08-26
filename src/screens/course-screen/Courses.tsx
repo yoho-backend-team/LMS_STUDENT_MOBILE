@@ -1,20 +1,31 @@
-import React from 'react';
-import { StatusBar, StyleSheet, Text, View, Image, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import {
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  RefreshControl,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '~/components/shared/Header';
 import { COLORS } from '~/constants';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch } from '~/store/store';
+import { getStudentcourse } from '~/features/Courses/Reducers/thunks';
+import { selectCourse } from '~/features/Courses/Reducers/selectors';
+import { getImageUrl } from '~/utils/imageUtils';
+import { Ionicons } from '@expo/vector-icons';
 
-
-// 1. Define your stack params
 type RootStackParamList = {
   Courses: undefined;
   CourseViewScreen: { course: Course };
 };
 
-// 2. Define course type
 type Course = {
   id: number;
   title: string;
@@ -24,35 +35,36 @@ type Course = {
   image: any;
 };
 
-// 3. Tell TS what navigation type this screen uses
-type CoursesScreenNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  'Courses'
->;
+type CoursesScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Courses'>;
 
 const Courses = () => {
-  const navigation = useNavigation<CoursesScreenNavigationProp>();
+  const navigation = useNavigation<any>();
+  const dispatch = useDispatch<AppDispatch>();
+  const coursedata = useSelector(selectCourse);
 
-  const courses: Course[] = [
-    {
-      id: 1,
-      title: 'MERN STACK',
-      description:
-        'A MERN Stack Developer Is Responsible For Front-End And Back-End Development, Database Management, Integration And Deployment, Bug Fixing, And Working With Cross-Functional Teams.',
-      modules: '1 Modules',
-      duration: '30 Days Hours',
-      image: require('../../assets/courses/course grp.png'),
-    },
-    {
-      id: 2,
-      title: 'PYTHON',
-      description:
-        'A Python Developer Is Responsible For Back-End Development,Bug Fixing, And Working With Cross-Functional Teams.',
-      modules: '3 Modules',
-      duration: '35 Days Hours',
-      image: require('../../assets/courses/course grp.png'),
-    },
-  ];
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchData = useCallback(async () => {
+    try {
+      const params = {
+        courseId: '67f3b7fcb8d2634300cc87b6',
+      };
+      await dispatch(getStudentcourse(params));
+    } catch (error) {
+      console.error('Course fetch error:', error);
+    }
+  }, [dispatch]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchData();
+    setRefreshing(false);
+  };
+  const course = coursedata?.data;
 
   return (
     <>
@@ -60,40 +72,56 @@ const Courses = () => {
       <SafeAreaView edges={['top']} style={styles.container}>
         <Header />
 
-        <ScrollView style={styles.scrollContainer}>
+        <ScrollView
+          style={styles.scrollContainer}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
           <Text style={styles.heading}>Courses</Text>
 
-          {courses.map((course) => (
+          {course && (
             <TouchableOpacity
-              key={course.id}
               style={styles.card}
-              onPress={() =>
-                navigation.navigate('CourseViewScreen', { course })
-              }
-            >
-              <View style={styles.card}><Image
-                source={course.image}
-                style={styles.courseImage}
-                resizeMode="contain"
-              />
-               </View>
-              <Text style={styles.title}>{course.title}</Text>
-              <Text style={styles.description}>{course.description}</Text>
+              onPress={() => navigation.navigate('CourseViewScreen', { course })}>
+              <View style={styles.card}>
+                <Image
+                  source={{ uri: getImageUrl(course?.image) }}
+                  style={styles.courseImage}
+                  resizeMode="contain"
+                />
+              </View>
+
+              <Text style={styles.title}>{course.course_name}</Text>
+              <Text style={styles.description}>
+                {course.description ?? 'No description available'}
+              </Text>
 
               <View style={styles.footer}>
                 <View style={styles.footerItem}>
-                 <Image source={require("../../assets/courses/modules.png")} style={{width:24,height:24}}/>
-                                   <Text style={styles.footerText}>{course.modules}</Text>
+                  <Image
+                    source={require('../../assets/courses/modules.png')}
+                    style={{ width: 24, height: 24 }}
+                  />
+                  <Text style={styles.footerText}>
+                    {course.coursemodules.length ?? '0'} modules
+                  </Text>
                 </View>
+
                 <View style={styles.footerItem}>
-                  <Image source={require("../../assets/courses/Alarm.png")} style={{width:24,height:24}}/>
-                  <Text style={styles.footerText}>{course.duration}</Text>
+                  <Image
+                    source={require('../../assets/courses/Alarm.png')}
+                    style={{ width: 24, height: 24 }}
+                  />
+                  <Text style={styles.footerText}>{course.duration ?? 'N/A'}</Text>
                 </View>
               </View>
             </TouchableOpacity>
-          ))}
-          <View style={{ marginTop: 70 }}></View>
+          )}
         </ScrollView>
+
+        <TouchableOpacity
+          style={styles.chatbotBtn}
+          onPress={() => navigation.navigate('ChatbotScreen')}>
+          <Ionicons name="chatbubble-ellipses" size={28} color="#fff" />
+        </TouchableOpacity>
       </SafeAreaView>
     </>
   );
@@ -101,22 +129,22 @@ const Courses = () => {
 
 export default Courses;
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 10,
-    backgroundColor: "#ebeff3",
+    backgroundColor: '#ebeff3',
   },
   scrollContainer: {
     flex: 1,
-    backgroundColor: '#ebeff3', // light gray
-    padding: 16,
+    backgroundColor: '#ebeff3',
+    padding: 18,
+    marginTop: 10,
   },
   heading: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#1F2937', // gray-800
+    color: '#1F2937',
     marginBottom: 16,
   },
   card: {
@@ -134,7 +162,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 160,
     borderRadius: 12,
-    // backgroundColor: '#E5E7EB',
     marginBottom: 12,
   },
   title: {
@@ -145,7 +172,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 14,
-    color: '#716F6F', 
+    color: '#716F6F',
     lineHeight: 20,
     marginBottom: 16,
   },
@@ -162,5 +189,18 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     fontSize: 12,
     color: '#716F6F',
+  },
+  chatbotBtn: {
+    position: 'absolute',
+    bottom: 80,
+    right: 20,
+    backgroundColor: '#7B00FF',
+    padding: 16,
+    borderRadius: 50,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 5,
   },
 });

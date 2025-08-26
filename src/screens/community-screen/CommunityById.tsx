@@ -12,86 +12,65 @@ import {
   Platform,
   Keyboard,
   TouchableWithoutFeedback,
-  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { useSelector, useDispatch } from "react-redux";
+import axios from "axios";
 
-import {
-  fetchCommunityMessages,
-  sendMessage,
-} from "~/features/Community/reducer/Communitythunks";
-import {
-  addLocalMessage,
-  setCurrentCommunity,
-} from "~/features/Community/reducer/CommunitySlice";
-import {
-  selectCurrentCommunity,
-  selectCommunityLoading,
-} from "~/features/Community/reducer/CommunitySelectors";
-
-import { RootState, AppDispatch } from "~/store";
-
-interface RouteParams {
-  communityId: string;
-  communityName: string;
-  members: number;
+interface Message {
+  _id?: string;
+  message: string;
+  sender?: string;
+  isOutgoing: boolean;
 }
 
 const CommunityById: React.FC = () => {
   const navigation = useNavigation();
-  const route = useRoute();
-  const { communityId, communityName, members } = route.params as RouteParams;
+  const route = useRoute<any>();
 
-  const dispatch = useDispatch<AppDispatch>();
-  const currentCommunity = useSelector(selectCurrentCommunity);
-  const loading = useSelector(selectCommunityLoading);
+  // ✅ correctly get params
+  const { communityId, communityName, members } = route.params;
 
   const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState<Message[]>([]);
   const scrollViewRef = useRef<ScrollView>(null);
 
+  // Fetch messages from API
   useEffect(() => {
-    dispatch(
-      setCurrentCommunity({
-        id: communityId,
-        name: communityName,
-        members,
-        messages: [],
-      })
-    );
+    const fetchMessages = async () => {
+  try {
+    const url = `https://lms-node-backend-v1.onrender.com/api/institutes/community/messages/all/?community=${communityId}`;
+    console.log("📡 Fetching messages:", url);
 
-    dispatch(fetchCommunityMessages(communityId));
-  }, [dispatch, communityId, communityName, members]);
+    const res = await axios.get(url);
 
+    console.log("✅ Messages fetched:", res.data);
+
+    const apiMessages: Message[] = res.data.data.map((m: any) => ({
+      _id: m._id,
+      message: m.message || "",
+      sender: m.sender,
+      isOutgoing: m.sender === "me", // TODO: replace with logged-in user
+    }));
+
+    setMessages(apiMessages);
+  } catch (err: any) {
+    console.error("❌ Error fetching community messages:", err.response?.data || err.message);
+  }
+};
+
+
+    if (communityId) fetchMessages();
+  }, [communityId]);
+
+  // Auto-scroll
   useEffect(() => {
     scrollViewRef.current?.scrollToEnd({ animated: true });
-  }, [currentCommunity?.messages]);
+  }, [messages]);
 
-  const handleSend = () => {
-    if (message.trim()) {
-      const newMsg = {
-        id: `temp-${Date.now()}`,
-        content: message, // ✅ match schema
-        sender: { id: "me", name: "You" },
-        timestamp: new Date().toISOString(),
-        isOutgoing: true,
-      };
-
-      dispatch(addLocalMessage(newMsg));
-      dispatch(sendMessage({ communityId, message }));
-      setMessage("");
-    }
-  };
-
-  const formatTime = (timestamp: string) => {
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  };
-
-  const renderMessage = (msg: any) => (
+  const renderMessage = (msg: Message) => (
     <View
-      key={msg.id}
+      key={msg._id}
       style={[
         styles.messageContainer,
         msg.isOutgoing ? styles.outgoingMessage : styles.incomingMessage,
@@ -109,29 +88,11 @@ const CommunityById: React.FC = () => {
             msg.isOutgoing ? styles.outgoingText : styles.incomingText,
           ]}
         >
-          {msg.content}
-        </Text>
-        <Text
-          style={[
-            styles.timeText,
-            msg.isOutgoing ? styles.outgoingTime : styles.incomingTime,
-          ]}
-        >
-          {formatTime(msg.timestamp)}
+          {msg.message}
         </Text>
       </View>
     </View>
   );
-
-  if (loading && !currentCommunity?.messages?.length) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#1a4a47" />
-        </View>
-      </SafeAreaView>
-    );
-  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -155,9 +116,7 @@ const CommunityById: React.FC = () => {
               <View style={styles.profileIcon} />
               <View style={styles.headerText}>
                 <Text style={styles.headerTitle}>{communityName}</Text>
-                <Text style={styles.headerSubtitle}>
-                  {currentCommunity?.members || 0} Members
-                </Text>
+                <Text style={styles.headerSubtitle}>{members} Members</Text>
               </View>
             </View>
           </View>
@@ -169,7 +128,7 @@ const CommunityById: React.FC = () => {
             contentContainerStyle={styles.chatContent}
             showsVerticalScrollIndicator={false}
           >
-            {currentCommunity?.messages?.map(renderMessage)}
+            {messages.map(renderMessage)}
           </ScrollView>
 
           {/* Input */}
@@ -182,7 +141,7 @@ const CommunityById: React.FC = () => {
               onChangeText={setMessage}
               multiline
             />
-            <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+            <TouchableOpacity style={styles.sendButton}>
               <Ionicons name="send" size={20} color="#fff" />
             </TouchableOpacity>
           </View>
@@ -191,6 +150,8 @@ const CommunityById: React.FC = () => {
     </SafeAreaView>
   );
 };
+
+export default CommunityById;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f5f5f5" },
@@ -205,7 +166,13 @@ const styles = StyleSheet.create({
   },
   backButton: { marginRight: 12 },
   profileContainer: { flexDirection: "row", alignItems: "center", flex: 1 },
-  profileIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: "#333", marginRight: 12 },
+  profileIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#333",
+    marginRight: 12,
+  },
   headerText: { flex: 1 },
   headerTitle: { fontSize: 16, fontWeight: "600", color: "#333" },
   headerSubtitle: { fontSize: 12, color: "#666", marginTop: 2 },
@@ -214,15 +181,17 @@ const styles = StyleSheet.create({
   messageContainer: { marginVertical: 4 },
   outgoingMessage: { alignItems: "flex-end" },
   incomingMessage: { alignItems: "flex-start" },
-  messageBubble: { maxWidth: "80%", paddingHorizontal: 12, paddingVertical: 8, borderRadius: 16 },
+  messageBubble: {
+    maxWidth: "80%",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+  },
   outgoingBubble: { backgroundColor: "#7ed321", borderBottomRightRadius: 4 },
-  incomingBubble: { backgroundColor: "#e5e7eb", borderBottomLeftRadius: 4 },
+  incomingBubble: { backgroundColor: "#ffffff", borderBottomLeftRadius: 4 },
   messageText: { fontSize: 14, lineHeight: 18 },
   outgoingText: { color: "#000" },
-  incomingText: { color: "#111827" },
-  timeText: { fontSize: 10, marginTop: 4 },
-  outgoingTime: { color: "rgba(0, 0, 0, 0.6)", textAlign: "right" },
-  incomingTime: { color: "rgba(17, 24, 39, 0.7)" },
+  incomingText: { color: "#333" },
   inputContainer: {
     flexDirection: "row",
     alignItems: "flex-end",
@@ -252,7 +221,4 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#f5f5f5" },
 });
-
-export default CommunityById;
