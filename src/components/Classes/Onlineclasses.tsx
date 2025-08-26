@@ -1,24 +1,26 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Linking, ImageBackground } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+  Linking,
+  ImageBackground,
+} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from '~/store/store';
 import { getClassDetails } from '~/features/classes/reducers/thunks';
 import { selectClass } from '~/features/classes/reducers/selector';
-
-
+import { COLORS } from '~/constants';
 
 const Classcards = () => {
   const dispatch = useDispatch<AppDispatch>();
-    const classData = useSelector(selectClass)?.data || [];
-
-      
-  
-
+  const classData = useSelector(selectClass)?.data || [];
 
   const fetchClassData = () => {
-   
     dispatch(
       getClassDetails({
         // courseId: '67f3b7fcb8d2634300cc87b6',
@@ -30,7 +32,6 @@ const Classcards = () => {
   };
 
   useEffect(() => {
-
     fetchClassData();
   }, []);
 
@@ -48,10 +49,10 @@ const Classcards = () => {
         <Text style={styles.label}>Topic</Text>
         <Text style={styles.value}>{item.topic}</Text>
       </View>
-      
+
       <View style={styles.row}>
         <Text style={styles.label}>Join Link</Text>
-        <TouchableOpacity >
+        <TouchableOpacity>
           <Text style={styles.value1}>{item.link}</Text>
         </TouchableOpacity>
       </View>
@@ -67,7 +68,6 @@ const Classcards = () => {
         </TouchableOpacity>
       </View>
     </View>
-
   );
 
   const CompletedClassCard = ({ item }: { item: any }) => (
@@ -90,13 +90,14 @@ const Classcards = () => {
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>Action</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('ClassByIdScreen' as never)} style={styles.joinButton}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('ClassByIdScreen' as never)}
+          style={styles.joinButton}>
           <Text style={styles.buttonText}>Completed</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
-
 
   const tabs = [
     { key: 'live', label: 'Live Class' },
@@ -110,15 +111,35 @@ const Classcards = () => {
     { day: 'Day 3', topic: 'HTML', link: 'www.google.com/url', duration: '45 Min' },
     { day: 'Day 4', topic: 'HTML', link: 'www.google.com/url', duration: '45 Min' },
   ];
-  const upcomingClasses = [''
-    // { day: 'Day 2', topic: 'CSS', link: 'https://www.example.com', duration: '60 Min' },
+  const upcomingClasses = [
+    { day: 'Day 2', topic: 'CSS', link: 'https://www.example.com', duration: '60 Min' },
   ];
 
   const completeClasses = [
-    { Title: 'HTML, CSS Basic', StartDate: '12-06-2025', StartTime: '09:00 AM', duration: '45 Min' },
-    { Title: 'HTML, CSS Basic', StartDate: '12-06-2025', StartTime: '09:00 AM', duration: '45 Min' },
-    { Title: 'HTML, CSS Basic', StartDate: '12-06-2025', StartTime: '09:00 AM', duration: '45 Min' },
-    { Title: 'HTML, CSS Basic', StartDate: '12-06-2025', StartTime: '09:00 AM', duration: '45 Min' },
+    {
+      Title: 'HTML, CSS Basic',
+      StartDate: '12-06-2025',
+      StartTime: '09:00 AM',
+      duration: '45 Min',
+    },
+    {
+      Title: 'HTML, CSS Basic',
+      StartDate: '12-06-2025',
+      StartTime: '09:00 AM',
+      duration: '45 Min',
+    },
+    {
+      Title: 'HTML, CSS Basic',
+      StartDate: '12-06-2025',
+      StartTime: '09:00 AM',
+      duration: '45 Min',
+    },
+    {
+      Title: 'HTML, CSS Basic',
+      StartDate: '12-06-2025',
+      StartTime: '09:00 AM',
+      duration: '45 Min',
+    },
   ];
 
   const onTabPress = (key: 'live' | 'upcoming' | 'completed', index: number) => {
@@ -135,15 +156,12 @@ const Classcards = () => {
           horizontal
           ref={scrollRef}
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.tabContainer}
-        >
-          {tabs.map((tab, index) => (
-            
+          contentContainerStyle={styles.tabContainer}>
+          {tabs.map((tab: any, index) => (
             <TouchableOpacity
               key={tab.key}
               onPress={() => onTabPress(tab.key, index)}
-              style={[styles.tab, { width: 140 }, activeTab === tab.key && styles.activeTab]}
-            >
+              style={[styles.tab, {}, activeTab === tab.key && styles.activeTab]}>
               <Text style={activeTab === tab.key ? styles.activeTabText : styles.tabText}>
                 {tab.label}
               </Text>
@@ -151,25 +169,27 @@ const Classcards = () => {
           ))}
         </ScrollView>
 
-        <View >
-          {activeTab === 'live' && <Text style={styles.container2}> Classes </Text>}
-          {activeTab === 'upcoming' && <Text style={styles.containerupclass}> Classes </Text>}
-          {activeTab === 'completed' && <Text style={styles.container2}>Completed  </Text>}
+        <View>
+          {activeTab === 'live' && <Text style={styles.container2}>Live Classes </Text>}
+          {activeTab === 'upcoming' && (
+            <Text style={styles.containerupclass}>Upcoming Classes </Text>
+          )}
+          {activeTab === 'completed' && <Text style={styles.container2}>Completed Classes</Text>}
         </View>
       </View>
 
       <View style={styles.container1}>
-        {activeTab === 'live' && liveClasses.map((item, index) => (
-          <ClassCard key={index} item={item} />
-        ))}
+        {activeTab === 'live' &&
+          liveClasses.map((item, index) => <ClassCard key={index} item={item} />)}
 
-        {activeTab === 'upcoming' && upcomingClasses.map((item, index) => (''
-          // <ClassCard key={index} item={item} />
-        ))}
+        {activeTab === 'upcoming' &&
+          upcomingClasses.map(
+            (item, index) => 
+            <ClassCard key={index} item={item} />
+          )}
 
-        {activeTab === 'completed' && completeClasses.map((item, index) => (
-          <CompletedClassCard key={index} item={item} />
-        ))}
+        {activeTab === 'completed' &&
+          completeClasses.map((item, index) => <CompletedClassCard key={index} item={item} />)}
       </View>
     </ScrollView>
   );
@@ -201,9 +221,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 6,
-    backgroundColor: '#E6ECF3',
+    backgroundColor: COLORS.bg_Colour,
     marginHorizontal: 6,
-    
   },
   activeTab: {
     backgroundColor: '#7B00FF',
@@ -219,7 +238,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   card: {
-   backgroundColor: '#E4EBF5',
+    backgroundColor: '#E4EBF5',
     borderRadius: 14,
     padding: 20,
     marginBottom: 16,
