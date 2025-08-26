@@ -29,10 +29,10 @@
       "supportsTablet": true
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./src/assets/icons/app-icon.png",
-        "backgroundColor": "#ffffff"
+        "adaptiveIcon": {
+          "foregroundImage": "./src/assets/icons/app-icon.png",
+          "backgroundColor": "#ffffff"
+        }
       }
     }
-  }
 }
