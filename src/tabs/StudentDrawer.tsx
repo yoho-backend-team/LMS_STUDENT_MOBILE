@@ -1,7 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createDrawerNavigator, DrawerContentScrollView } from '@react-navigation/drawer';
 import React, { useEffect, useState } from 'react';
-import { Modal, Image, ImageSourcePropType, Text, TouchableOpacity, View, StatusBar } from 'react-native';
+import {
+  Modal,
+  Image,
+  ImageSourcePropType,
+  Text,
+  TouchableOpacity,
+  View,
+  StatusBar,
+} from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { COLORS, FONTS, icons, screens, sidebaricon, SIZES } from '../constants';
 import MainLayout from '../layout';
@@ -124,7 +132,7 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView edges={['top']} style={{flex: 1}}>
+    <SafeAreaView edges={['top']} style={{ flex: 1 }}>
       <View style={{ flex: 1 }}>
         {/* Close Button */}
         <View
@@ -191,16 +199,7 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
               isFocused={selectedTab === screens.home}
               onPress={() => {
                 dispatch(setSelectedTab(screens.home));
-                navigation.navigate('MainLayout');
-              }}
-            />
-            <CustomDrawerItem
-              label={screens.classes}
-              icon={sidebaricon.classes}
-              isFocused={selectedTab === screens.classes}
-              onPress={() => {
-                dispatch(setSelectedTab(screens.classes));
-                navigation.navigate('MainLayout');
+                navigation.closeDrawer();
               }}
             />
             <CustomDrawerItem
@@ -209,7 +208,16 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
               isFocused={selectedTab === screens.course}
               onPress={() => {
                 dispatch(setSelectedTab(screens.course));
-                navigation.navigate('MainLayout');
+                navigation.closeDrawer();
+              }}
+            />
+            <CustomDrawerItem
+              label={screens.classes}
+              icon={sidebaricon.classes}
+              isFocused={selectedTab === screens.classes}
+              onPress={() => {
+                dispatch(setSelectedTab(screens.classes));
+                navigation.closeDrawer();
               }}
             />
             <CustomDrawerItem
@@ -218,7 +226,7 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
               isFocused={selectedTab === screens.attendance}
               onPress={() => {
                 dispatch(setSelectedTab(screens.attendance));
-                navigation.navigate('MainLayout');
+                navigation.closeDrawer();
               }}
             />
             <CustomDrawerItem
@@ -227,7 +235,7 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
               isFocused={selectedTab === screens.community}
               onPress={() => {
                 dispatch(setSelectedTab(screens.community));
-                navigation.navigate('MainLayout');
+                navigation.closeDrawer();
               }}
             />
             <CustomDrawerItem
@@ -252,12 +260,12 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
             />
             <CustomDrawerItem
               label="Placement"
-              icon={icons.course_filled}
+              icon={sidebaricon.placement}
               onPress={() => navigation.navigate('Placement')}
             />
             <CustomDrawerItem
               label="Spoken English"
-              icon={icons.course_filled}
+              icon={sidebaricon.spokenenglish}
               onPress={() => navigation.navigate('SpokenEnglish')}
             />
             <CustomDrawerItem

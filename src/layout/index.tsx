@@ -127,11 +127,14 @@ const MainLayout: React.FC = () => {
   }));
 
   useEffect(() => {
-    if (!selectedTab) {
-      dispatch(setSelectedTab(screens.home));
-      setCurrentPage(0);
+  if (!isScrolling && selectedTab) {
+    const index = bottom_tabs.findIndex((t) => t.label === selectedTab);
+    if (index !== -1 && index !== currentPage && pagerRef.current) {
+      setCurrentPage(index);
+      pagerRef.current.setPageWithoutAnimation(index); 
     }
-  }, [dispatch, selectedTab]);
+  }
+}, [selectedTab, currentPage, isScrolling]);
 
   const handlePageSelected = useCallback((event: any) => {
     const index = event.nativeEvent.position;
@@ -231,11 +234,11 @@ const MainLayout: React.FC = () => {
               shadowRadius: 8,
             }}>
             {bottom_tabs.map((tab, index) => {
-              const isFocused = currentPage === index; // Use currentPage instead of selectedTab
+              const isFocused = currentPage === index;
 
               return (
                 <View
-                  key={`${tab.id}-tab-${index}`}
+                  key={`${tab.id}-tab-${index}`}  
                   style={{
                     flex: 1,
                     alignItems: 'center',
