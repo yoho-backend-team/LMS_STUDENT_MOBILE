@@ -20,6 +20,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { selectAttendance, selectAttendanceByDate } from "~/features/Attendance/reducers/selectors";
 import { getattendanceByDate, getStudentattendance } from "~/features/Attendance/reducers/thunks";
 import { getattendancedata } from "~/features/Attendance/Services";
+import AttendanceCards from "~/components/attendance/attCard";
 
 const { width } = Dimensions.get("window");
 
@@ -52,11 +53,6 @@ const Attendance = () => {
     { id: 2, title: "Present Days", attended: attendance?.data?.totalPresentDays, total: attendance?.data?.totalWorkingDays, img: require("../../assets/attendace/attengraph2.png") },
     { id: 3, title: "Absent Days", attended: attendance?.data?.totalAbsentDays, total:  attendance?.data?.totalWorkingDays, img: require("../../assets/attendace/attengraph3.png") },
   ];
-
-
-  
-console.log("attendance",attendance)
-
   
 useEffect(() => {
   if (selectedDate) {
@@ -167,7 +163,7 @@ useEffect(() => {
             showsHorizontalScrollIndicator={false}
             pagingEnabled
           >
-            {cards.map((card) => (
+            {/* {cards.map((card) => (
               <View key={card.id} style={styles.card}>
                 <View style={styles.row}>
                   <Text style={styles.title}>{card.title}</Text>
@@ -177,7 +173,8 @@ useEffect(() => {
                 </View>
                 <Image source={card.img} style={styles.curveImage} resizeMode="contain" />
               </View>
-            ))}
+            ))} */}
+            <AttendanceCards attendance={attendance} />
           </ScrollView>
         </View>
 
