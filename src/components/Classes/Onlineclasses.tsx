@@ -1,11 +1,40 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Linking, ImageBackground } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+  Linking,
+  ImageBackground,
+} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-
-
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch } from '~/store/store';
+import { getClassDetails } from '~/features/classes/reducers/thunks';
+import { selectClass } from '~/features/classes/reducers/selector';
+import { COLORS } from '~/constants';
 
 const Classcards = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const classData = useSelector(selectClass)?.data || [];
+
+  const fetchClassData = () => {
+    dispatch(
+      getClassDetails({
+        // courseId: '67f3b7fcb8d2634300cc87b6',
+        userType: 'online',
+        classType: 'completed',
+        page: 1,
+      })
+    );
+  };
+
+  useEffect(() => {
+    fetchClassData();
+  }, []);
+
   const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState<'live' | 'upcoming' | 'completed'>('live');
   const scrollRef = useRef<ScrollView>(null);
@@ -20,10 +49,10 @@ const Classcards = () => {
         <Text style={styles.label}>Topic</Text>
         <Text style={styles.value}>{item.topic}</Text>
       </View>
-      
+
       <View style={styles.row}>
         <Text style={styles.label}>Join Link</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('ClassByIdScreen' as never)}>
+        <TouchableOpacity>
           <Text style={styles.value1}>{item.link}</Text>
         </TouchableOpacity>
       </View>
@@ -39,7 +68,6 @@ const Classcards = () => {
         </TouchableOpacity>
       </View>
     </View>
-
   );
 
   const CompletedClassCard = ({ item }: { item: any }) => (
@@ -62,13 +90,14 @@ const Classcards = () => {
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>Action</Text>
-        <TouchableOpacity onPress={() => Linking.openURL(item.link)} style={styles.joinButton}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('ClassByIdScreen' as never)}
+          style={styles.joinButton}>
           <Text style={styles.buttonText}>Completed</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
-
 
   const tabs = [
     { key: 'live', label: 'Live Class' },
@@ -82,15 +111,37 @@ const Classcards = () => {
     { day: 'Day 3', topic: 'HTML', link: 'www.google.com/url', duration: '45 Min' },
     { day: 'Day 4', topic: 'HTML', link: 'www.google.com/url', duration: '45 Min' },
   ];
-  const upcomingClasses = [''
-    // { day: 'Day 2', topic: 'CSS', link: 'https://www.example.com', duration: '60 Min' },
+  const upcomingClasses = [
+    { day: 'Day 1', topic: 'CSS', link: 'https://www.example.com', duration: '60 Min' },
+    { day: 'Day 2', topic: 'CSS', link: 'https://www.example.com', duration: '60 Min' },
+    { day: 'Day 3', topic: 'CSS', link: 'https://www.example.com', duration: '60 Min' },
   ];
 
   const completeClasses = [
-    { Title: 'HTML, CSS Basic', StartDate: '12-06-2025', StartTime: '09:00 AM', duration: '45 Min' },
-    { Title: 'HTML, CSS Basic', StartDate: '12-06-2025', StartTime: '09:00 AM', duration: '45 Min' },
-    { Title: 'HTML, CSS Basic', StartDate: '12-06-2025', StartTime: '09:00 AM', duration: '45 Min' },
-    { Title: 'HTML, CSS Basic', StartDate: '12-06-2025', StartTime: '09:00 AM', duration: '45 Min' },
+    {
+      Title: 'HTML, CSS Basic',
+      StartDate: '12-06-2025',
+      StartTime: '09:00 AM',
+      duration: '45 Min',
+    },
+    {
+      Title: 'HTML, CSS Basic',
+      StartDate: '12-06-2025',
+      StartTime: '09:00 AM',
+      duration: '45 Min',
+    },
+    {
+      Title: 'HTML, CSS Basic',
+      StartDate: '12-06-2025',
+      StartTime: '09:00 AM',
+      duration: '45 Min',
+    },
+    {
+      Title: 'HTML, CSS Basic',
+      StartDate: '12-06-2025',
+      StartTime: '09:00 AM',
+      duration: '45 Min',
+    },
   ];
 
   const onTabPress = (key: 'live' | 'upcoming' | 'completed', index: number) => {
@@ -107,15 +158,12 @@ const Classcards = () => {
           horizontal
           ref={scrollRef}
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.tabContainer}
-        >
-          {tabs.map((tab, index) => (
-            
+          contentContainerStyle={styles.tabContainer}>
+          {tabs.map((tab: any, index) => (
             <TouchableOpacity
               key={tab.key}
               onPress={() => onTabPress(tab.key, index)}
-              style={[styles.tab, { width: 140 }, activeTab === tab.key && styles.activeTab]}
-            >
+              style={[styles.tab, {}, activeTab === tab.key && styles.activeTab]}>
               <Text style={activeTab === tab.key ? styles.activeTabText : styles.tabText}>
                 {tab.label}
               </Text>
@@ -123,25 +171,24 @@ const Classcards = () => {
           ))}
         </ScrollView>
 
-        <View >
-          {activeTab === 'live' && <Text style={styles.container2}> Classes </Text>}
-          {activeTab === 'upcoming' && <Text style={styles.containerupclass}> Classes </Text>}
-          {activeTab === 'completed' && <Text style={styles.container2}>Completed  </Text>}
+        <View>
+          {activeTab === 'live' && <Text style={styles.container2}>Live Classes </Text>}
+          {activeTab === 'upcoming' && (
+            <Text style={styles.containerupclass}>Upcoming Classes </Text>
+          )}
+          {activeTab === 'completed' && <Text style={styles.container2}>Completed Classes</Text>}
         </View>
       </View>
 
       <View style={styles.container1}>
-        {activeTab === 'live' && liveClasses.map((item, index) => (
-          <ClassCard key={index} item={item} />
-        ))}
+        {activeTab === 'live' &&
+          liveClasses.map((item, index) => <ClassCard key={index} item={item} />)}
 
-        {activeTab === 'upcoming' && upcomingClasses.map((item, index) => (''
-          // <ClassCard key={index} item={item} />
-        ))}
+        {activeTab === 'upcoming' &&
+          upcomingClasses.map((item, index) => <ClassCard key={index} item={item} />)}
 
-        {activeTab === 'completed' && completeClasses.map((item, index) => (
-          <CompletedClassCard key={index} item={item} />
-        ))}
+        {activeTab === 'completed' &&
+          completeClasses.map((item, index) => <CompletedClassCard key={index} item={item} />)}
       </View>
     </ScrollView>
   );
@@ -150,90 +197,105 @@ const Classcards = () => {
 export default Classcards;
 
 const styles = StyleSheet.create({
-  container: { padding: 10, backgroundColor: '#dfe9f3ff' },
-  container4: { padding: 16, backgroundColor: '#f2f2f2', height: 860 },
-  header: { fontSize: 20, fontWeight: '600', marginBottom: 15, color: '#333' },
-  wrapper: { flex: 1, padding: 6, backgroundColor: '#dfe9f3ff' },
-  tabContainer: { paddingHorizontal: 0, marginBottom: 5 },
-  tab: {
+  gradientBackground: {
     flex: 1,
-    alignSelf: 'flex-end',
-    paddingVertical: 8,
-    borderRadius: 6,
-
-    backgroundColor: '#E4EBF5',
-    alignItems: 'center',
-    marginHorizontal: 4,
-
-    shadowColor: '#a02d2dff',
-    shadowOffset: { width: 6, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 6,
-    elevation: 8,
-
   },
-
-  activeTab: { backgroundColor: '#7B00FF' },
-  tabText: { fontSize: 16, color: '#666', fontWeight: '400' },
-  activeTabText: { fontSize: 16, color: '#ffffffff', fontWeight: '600', },
-
+  container: {
+    padding: 16,
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: '700',
+    marginBottom: 20,
+    color: '#333',
+  },
+  wrapper: {
+    marginBottom: 16,
+  },
+  tabContainer: {
+    paddingHorizontal: 0,
+    marginBottom: 10,
+  },
+  tab: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    backgroundColor: COLORS.bg_Colour,
+    marginHorizontal: 6,
+  },
+  activeTab: {
+    backgroundColor: '#7B00FF',
+  },
+  tabText: {
+    fontSize: 16,
+    color: '#555',
+    fontWeight: '500',
+  },
+  activeTabText: {
+    fontSize: 16,
+    color: '#fff',
+    fontWeight: '600',
+  },
   card: {
-    backgroundColor: '#cfdeedff',
-    borderRadius: 12,
+    backgroundColor: '#E4EBF5',
+    borderRadius: 14,
     padding: 20,
     marginBottom: 16,
-    shadowColor: '#3b3030ff',
-    shadowOffset: { width: 6, height: 6 },
-    shadowOpacity: 1,
+    shadowColor: '#ebeff3',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
     shadowRadius: 6,
-    elevation: 8,
+    elevation: 6,
   },
-  row: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  label: { color: '#716F6F', fontSize: 14 },
-    value1: { color: '#5d62f3ff', fontSize: 14 },
-  value: { color: '#716F6F', fontSize: 14 },
-
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  label: {
+    color: '#666',
+    fontWeight: '500',
+    fontSize: 14,
+  },
+  value: {
+    color: '#222',
+    fontSize: 14,
+  },
+  value1: {
+    color: '#3366FF',
+    fontSize: 14,
+    textDecorationLine: 'underline',
+  },
   joinButton: {
     alignSelf: 'flex-end',
-    backgroundColor: '#dae1e8ff',
+    backgroundColor: '#ebeff3',
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 6,
-    shadowColor: '#a02d2dff',
-    shadowOffset: { width: 6, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 6,
-    elevation: 4,
   },
-  buttonText: { color: '#4f3636ff', fontSize: 14, fontWeight: '500' },
+  buttonText: {
+    color: 'black',
+    fontWeight: '500',
+    fontSize: 14,
+  },
   container1: {
-    flex: 1,
-    backgroundColor: '#d9e8f5ff',
+    backgroundColor: '#f1f6fc',
     padding: 16,
-    borderRadius: 20,
-    shadowColor: '#3b3030ff',
-    shadowOffset: { width: 6, height: 6 },
-    shadowOpacity: 1,
-    shadowRadius: 6,
-    elevation: 6,
+    borderRadius: 16,
   },
   container2: {
     fontSize: 18,
     borderRadius: 20,
     padding: 10,
     fontWeight: '500',
+    color: '#333',
   },
   containerupclass: {
     fontSize: 18,
     borderRadius: 20,
     padding: 10,
-    height:600,
+    height: 600,
     fontWeight: '500',
-  },
-  activeTabGradient: {
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+    color: '#333',
   },
 });
