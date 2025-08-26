@@ -1,16 +1,36 @@
+
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Image } from 'react-native';
 import QuizModal from './QuizModal';
 
-const steps = [
+type Question = {
+  title: string;
+  options: { text: string; correct?: boolean }[];
+  explanation: string;
+};
+
+type ChildItem = {
+  childtitle: string;
+  questions: Question[];
+};
+
+type Step = {
+  id: number;
+  steptitle: string;
+  icon?: any;
+  children: ChildItem[];
+};
+
+const steps: Step[] = [
   {
-    title: 'Beginner',
-    icon: require('../../assets/icons/barLine.png'),
+    id: 1,
+    steptitle: 'Beginner',
+    icon: require('../../assets/icons/beginner.png'),
     children: [
       { 
-        title: 'Professional Introduction',
+        childtitle: 'Professional Introduction',
         questions: [
           {
             title: "Which sentence is grammatically correct?",
@@ -65,7 +85,7 @@ const steps = [
         ]
       },
       { 
-        title: 'Career Goals',
+        childtitle: 'Career Goals',
         questions: [
           {
             title: "What is a SMART goal?",
@@ -120,7 +140,7 @@ const steps = [
         ]
       },
       { 
-        title: 'Skills & Strengths',
+        childtitle: 'Skills & Strengths',
         questions: [
           {
             title: "What are hard skills?",
@@ -175,7 +195,7 @@ const steps = [
         ]
       },
       { 
-        title: 'Work Experience',
+        childtitle: 'Work Experience',
         questions: [
           {
             title: "How should you describe your work experience on a resume?",
@@ -232,10 +252,12 @@ const steps = [
     ],
   },
   {
-    title: 'Intermediate',
+    id: 2,
+    steptitle: 'Intermediate',
+    icon: require('../../assets/icons/intermadiate.png'),
     children: [
       { 
-        title: 'Project Experience',
+        childtitle: 'Project Experience',
         questions: [
           {
             title: "How should you describe project experience in an interview?",
@@ -290,7 +312,7 @@ const steps = [
         ]
       },
       { 
-        title: 'Certifications',
+        childtitle: 'Certifications',
         questions: [
           {
             title: "Which certifications are most valuable?",
@@ -347,11 +369,12 @@ const steps = [
     ],
   },
   {
-    title: 'Advanced',
-    icon: require('../../assets/icons/Group.png'),
+    id: 3,
+    steptitle: 'Advanced',
+    icon: require('../../assets/icons/advance (1).png'),
     children: [
       { 
-        title: 'Leadership Skills',
+        childtitle: 'Leadership Skills',
         questions: [
           {
             title: "What is the most important leadership quality?",
@@ -406,7 +429,7 @@ const steps = [
         ]
       },
       { 
-        title: 'Mentorship',
+        childtitle: 'Mentorship',
         questions: [
           {
             title: "What makes an effective mentor?",
@@ -463,10 +486,12 @@ const steps = [
     ],
   },
   {
-    title: 'Professional',
+    id: 4,
+    steptitle: 'Professional',
+    icon : require('../../assets/icons/proffessional.png'),
     children: [
       { 
-        title: 'Industry Expert',
+        childtitle: 'Industry Expert',
         questions: [
           {
             title: "How does one become an industry expert?",
@@ -529,70 +554,165 @@ type LearningPathStepsProps = {
 };
 
 const LearningPathSteps: React.FC<LearningPathStepsProps> = ({ onClose }) => {
-  const [expandedParent, setExpandedParent] = useState<number | null>(null);
+  const [expandedParent, setExpandedParent] = useState<number | null>(0);
   const [quizVisible, setQuizVisible] = useState(false);
   const [selectedQuestions, setSelectedQuestions] = useState<any[]>([]);
+  const [activeChild, setActiveChild] = useState<{
+    stepIndex: number;
+    childIndex: number;
+    stepTitle: string;
+    childTitle: string;
+  } | null>(null);
 
-  const toggleExpand = (index: number) => {
-    setExpandedParent(expandedParent === index ? null : index);
-  };
+  // Unlock state
+  const [unlockedSections, setUnlockedSections] = useState<number[]>([0]); // only parent 0 unlocked
+  const [unlockedChildren, setUnlockedChildren] = useState<{ [stepIndex: number]: number[] }>({
+    0: [0], // only first child of first parent unlocked
+  });
+    const [scores, setScores] = useState<{ [key: string]: number }>({}); // { "Beginner": 85 }
 
-  const handleChildPress = (child: any) => {
-    if (child.questions) {
-      setSelectedQuestions(child.questions);
-      setQuizVisible(true);
+
+  // Handle child click
+  const handleChildPress = (
+    stepIndex: number,
+    stepTitle: string,
+    child: any,
+    childIndex: number
+  ) => {
+    const childUnlocked = unlockedChildren[stepIndex]?.includes(childIndex);
+    if (!childUnlocked) {
+      alert("This section is locked. Complete the previous section with 80%+ to unlock.");
+      return;
     }
+
+    setSelectedQuestions(child.questions);
+    setActiveChild({ stepIndex, childIndex, stepTitle, childTitle: child.childtitle });
+    setQuizVisible(true);
   };
+
+  // Handle quiz complete
+// Handle quiz complete
+const handleQuizComplete = (scorePercent: number) => {
+  if (activeChild) {
+    const { stepIndex, childIndex, stepTitle } = activeChild;
+    setScores(prev => ({ ...prev, [stepTitle]: scorePercent }));
+
+    if (scorePercent >= 80) {
+      setUnlockedChildren(prev => {
+        const current = prev[stepIndex] || [];
+        const updated = [...new Set([...current, childIndex + 1])];
+        return {
+          ...prev,
+          [stepIndex]: updated
+        };
+      });
+
+      // ✅ If last child of this step → unlock next step and its first child
+      const isLastChild = childIndex === steps[stepIndex].children.length - 1;
+      if (isLastChild && stepIndex < steps.length - 1) {
+        setUnlockedSections(prev => [...new Set([...prev, stepIndex + 1])]);
+
+        setUnlockedChildren(prev => ({
+          ...prev,
+          [stepIndex + 1]: [0], // unlock first child of next step
+        }));
+      }
+    } else {
+      alert("You need at least 80% to unlock the next section. Please retry!");
+    }
+  }
+
+  setQuizVisible(false);
+  setActiveChild(null);
+};
+
+
 
   return (
     <View style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Learning Path Steps</Text>
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
           <Text style={styles.closeText}>X</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Steps */}
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
-        {steps.map((step, index) => {
+        {steps?.map((step, index) => {
           const isActive = index === expandedParent;
+          const isUnlocked = unlockedSections.includes(index);
 
           return (
             <View key={index} style={{ marginBottom: 16 }}>
               {/* Parent */}
-              <TouchableOpacity onPress={() => toggleExpand(index)} activeOpacity={0.8}>
-                {isActive ? (
-                  <LinearGradient colors={['#a259ff', '#7209b7']} style={styles.activeStep}>
-                    {step.icon && <Image source={step.icon} style={styles.icon} />}
-                    <Text style={styles.activeText}>{step.title}</Text>
+              <TouchableOpacity
+                disabled={!isUnlocked}
+                onPress={() => setExpandedParent(isActive ? null : index)}
+                activeOpacity={0.8}
+              >
+                {isUnlocked ? (
+                  <LinearGradient
+                    colors={["#a259ff", "#7209b7"]}
+                    style={styles.activeStep}
+                  >
+                    {step.icon && (
+                      <Image source={step.icon} style={[styles.icon, { tintColor: "#fff" }]} />
+                    )}
+                    <Text style={styles.activeText}>{step?.steptitle}</Text>
                   </LinearGradient>
                 ) : (
-                  <View style={styles.inactiveStep}>
-                    {step.icon && <Image source={step.icon} style={[styles.icon, { tintColor: '#444' }]} />}
-                    <Text style={styles.inactiveText}>{step.title}</Text>
+                  <View style={[styles.inactiveStep, { opacity: 0.5 }]}>
+                    {step.icon && (
+                      <Image
+                        source={step.icon}
+                        style={[styles.icon, { tintColor: "#444" }]}
+                      />
+                    )}
+                    <Text style={styles.inactiveText}>
+                      {step?.steptitle} 🔒
+                    </Text>
                   </View>
                 )}
               </TouchableOpacity>
 
-              {/* Children (only visible if expanded) */}
-              {isActive && step.children && step.children.map((child, childIndex) => (
-                <TouchableOpacity 
-                  key={childIndex} 
-                  style={styles.childStep}
-                  onPress={() => handleChildPress(child)}
-                >
-                  <Text style={styles.childText}>• {child.title}</Text>
-                </TouchableOpacity>
-              ))}
+              {/* Children */}
+              {isActive &&
+                step.children &&
+                isUnlocked &&
+                step.children.map((child, childIndex) => {
+                  const childUnlocked =
+                    unlockedChildren[index]?.includes(childIndex);
+                  return (
+                    <TouchableOpacity
+                      key={childIndex}
+                      style={[
+                        styles.childStep,
+                        !childUnlocked && { opacity: 0.5 },
+                      ]}
+                      disabled={!childUnlocked}
+                      onPress={() =>
+                        handleChildPress(index, step?.steptitle, child, childIndex)
+                      }
+                    >
+                      <Text style={styles.childText}>
+                        • {child?.childtitle} {childUnlocked ? "🔓" : "🔒"}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
             </View>
           );
         })}
       </ScrollView>
-      
+
+      {/* Quiz Modal */}
       <QuizModal
         visible={quizVisible}
-        onClose={() => setQuizVisible(false)}
         questions={selectedQuestions}
-        onComplete={() => console.log('Quiz completed')}
+        onComplete={handleQuizComplete}
+        onClose={() => setQuizVisible(false)}
       />
     </View>
   );
@@ -671,6 +791,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   icon: {
+    color: '#fff',
     width: 20,
     height: 20,
     marginRight: 10,
