@@ -6,19 +6,26 @@ import {
   View,
   Image,
   ScrollView,
+  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import placementimg from '../../assets/icons/Placement/placementimg.png';
+import backIcon from '../../assets/icons/Placement/back.png';
 
-const Placement = () => {
+const Placement = ({ navigation }: any) => {
   return (
     <>
       <StatusBar backgroundColor="#000" barStyle="light-content" />
       <SafeAreaView edges={['top']} style={styles.container}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {/* Page Title */}
+        {/* Header with Back Button */}
+        <View style={styles.headerRow}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Image source={backIcon} style={styles.backIcon} resizeMode="contain" />
+          </TouchableOpacity>
           <Text style={styles.header}>Placement</Text>
+        </View>
 
+        <ScrollView showsVerticalScrollIndicator={false}>
           {/* Image */}
           <Image source={placementimg} style={styles.image} />
 
@@ -100,10 +107,22 @@ const styles = StyleSheet.create({
     padding: 15,
     backgroundColor: '#f6f8fb',
   },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  backBtn: {
+    padding: 5,
+  },
+  backIcon: {
+    width: 50,
+    height: 50,
+  },
   header: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: '600',
-    marginBottom: 10,
+    marginLeft: -2,
     color: '#000',
   },
   image: {

@@ -16,8 +16,10 @@ import { useNavigation } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/Feather';
-import { createticketdata, uploadticketfile } from '~/features/Ticket/Services';
+import { createticketdata, uploadticketfile } from '~/features/Ticket/Services/index';
 import toast from '~/utils/toasts';
+import { LinearGradient } from 'expo-linear-gradient';
+
 
 const CreateTicket = () => {
   const navigation = useNavigation();
@@ -108,7 +110,7 @@ const CreateTicket = () => {
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
       <SafeAreaView edges={['top']} style={styles.container}>
-        <Header />
+        {/* <Header /> */}
 
         <View style={styles.headerRow}>
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
@@ -183,12 +185,20 @@ const CreateTicket = () => {
             </TouchableOpacity>
           )}
 
-          <TouchableOpacity
-            style={[styles.submitButton, isLoading && styles.submitButtonDisabled]}
-            onPress={handleSubmit}
-            disabled={isLoading}>
-            <Text style={styles.submitText}>{isLoading ? 'Creating...' : 'Create Ticket'}</Text>
-          </TouchableOpacity>
+          <LinearGradient
+            colors={['#7B00FF', '#B200FF']}
+            start={{ x: 0.134, y: 0.021 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.gradientButton, isLoading && styles.submitButtonDisabled]}>
+            <TouchableOpacity
+              style={styles.submitButton}
+              onPress={handleSubmit}
+              disabled={isLoading}>
+              <Text style={styles.submitText}>{isLoading ? 'Creating...' : 'Create Ticket'}</Text>
+            </TouchableOpacity>
+          </LinearGradient>
+
+
         </ScrollView>
       </SafeAreaView>
     </>
@@ -204,8 +214,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 10,
     gap: 5,
+    marginVertical: 10,
   },
-  title: { fontSize: 20, fontWeight: 'bold' },
+  title: { fontSize: 20, fontWeight: 'bold', },
   backButton: { paddingHorizontal: 10, marginTop: 10 },
   formContainer: { paddingHorizontal: 15, paddingBottom: 30 },
   label: { fontSize: 16, fontWeight: '600', marginBottom: 8, marginTop: 15 },
@@ -248,13 +259,17 @@ const styles = StyleSheet.create({
     ...FONTS.h5,
     fontWeight: 500,
   },
-  submitButton: {
+
+  gradientButton: {
     marginTop: 30,
-    backgroundColor: COLORS.blue_01,
-    paddingVertical: 15,
     borderRadius: 8,
+    overflow: 'hidden',
+  },
+  submitButton: {
+    paddingVertical: 15,
     alignItems: 'center',
   },
+
   submitButtonDisabled: {
     backgroundColor: COLORS.shadow_01,
   },
