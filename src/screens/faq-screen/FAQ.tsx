@@ -80,7 +80,7 @@ const FAQ = () => {
   const navigation = useNavigation<any>();
   const dispatch = useDispatch<any>();
 
-  const selectData = useSelector(selectFaq );
+  const selectData = useSelector(selectFaq )?.data;
 
   console.log("selector :" , selectData);
 
@@ -129,8 +129,7 @@ const FAQ = () => {
             style={{ marginBottom: 20 }}
             contentContainerStyle={{ paddingBottom: 20 }}
             showsVerticalScrollIndicator={false}>
-            {faqs
-              .filter((i) => i.title.toLowerCase().includes(search.toLowerCase()))
+            {selectData?.filter((i) => i.title.toLowerCase().includes(search.toLowerCase()))
               .map((item, index) => {
                 const open = expandedIndex === index;
                 return (
