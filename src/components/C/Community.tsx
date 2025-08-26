@@ -8,7 +8,7 @@ export default function CommunityScreen() {
     time: "1:15 PM",
   })
 
-  return (
+  return ( 
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         {/* Header */}

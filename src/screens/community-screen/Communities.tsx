@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   StatusBar,
   StyleSheet,
@@ -7,14 +7,24 @@ import {
   TextInput,
   ScrollView,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { useSelector, useDispatch } from "react-redux";
+
 import Header from "~/components/shared/Header";
 import { COLORS } from "~/constants";
-import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../routes/index";
+
+import {
+  selectStudentCommunity,
+  selectLoading,
+} from "~/features/Community/reducer/CommunitySelectors";
+import { getAllStudentCommunities } from "~/features/Community/reducer/Communitythunks";
+import { AppDispatch } from "~/store";
 
 type CommunitiesScreenNavProp = StackNavigationProp<
   RootStackParamList,
@@ -23,14 +33,16 @@ type CommunitiesScreenNavProp = StackNavigationProp<
 
 const Communities = () => {
   const navigation = useNavigation<CommunitiesScreenNavProp>();
+  const dispatch = useDispatch<AppDispatch>();
 
-  const messages = [
-    { name: "MERN 2025", message: "Hi", time: "1:15 PM" },
-    { name: "React Native Devs", message: "Welcome!", time: "2:20 PM" },
-    { name: "Fullstack Hub", message: "Project updates", time: "3:05 PM" },
-    { name: "NodeJS Learners", message: "Check this out", time: "4:45 PM" },
-    { name: "Open Source Crew", message: "PR merged 🎉", time: "6:30 PM" },
-  ];
+  const communities = useSelector(community => selectStudentCommunity(community));
+  const loading = useSelector(selectLoading);
+useEffect(() => {
+  // replace with actual courseId
+  dispatch(getAllStudentCommunities("67f3b7fcb8d2634300cc87b6"));
+}, [dispatch]);
+
+console.log("👀 Communities data:", communities);
 
   return (
     <>
@@ -39,11 +51,10 @@ const Communities = () => {
         <Header />
 
         <View style={styles.content}>
-          {/* Header */}
-          <Text style={styles.header}>Community</Text>
+          <Text style={styles.heading}>Community</Text>
 
-          {/* Search Bar */}
-          <View style={styles.searchContainer}>
+          {/* Search */}
+          <View style={styles.searchContainers}>
             <Ionicons
               name="search"
               size={16}
@@ -57,37 +68,39 @@ const Communities = () => {
             />
           </View>
 
-          {/* Message List */}
-          <View style={styles.messageList}>
-            <ScrollView showsVerticalScrollIndicator={false}>
-              {messages.map((message, index) => (
+          {loading ? (
+            <ActivityIndicator size="large" color={COLORS.black} />
+          ) : (
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: 20 }}
+            >
+              {communities?.map((community: any, index: number) => (
                 <TouchableOpacity
                   key={index}
-                  style={styles.messageItem}
+                  style={styles.card}
                   onPress={() =>
-                    navigation.navigate("CommunityViewScreen", { community: message })
+                    navigation.navigate("CommunityViewScreen", {
+                      communityId: community._id,
+                      communityName: community.name,
+                      members: community.members?.length || 0,
+                    })
                   }
                 >
-                  {/* Avatar */}
                   <View style={styles.avatar} />
-
-                  {/* Message Content */}
                   <View style={styles.messageContent}>
-                    <Text style={styles.messageName}>{message.name}</Text>
-                    <Text style={styles.messageText}>{message.message}</Text>
+                    <Text style={styles.messageName}>{community.name}</Text>
+                    <Text style={styles.messageText}>
+                      {community.description || "Tap to chat"}
+                    </Text>
                   </View>
-
-                  {/* Time and Check */}
                   <View style={styles.messageRight}>
-                    <Text style={styles.messageTime}>{message.time}</Text>
-                    <View style={styles.checkContainer}>
-                      <Ionicons name="checkmark" size={12} color="white" />
-                    </View>
+                    <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
                   </View>
                 </TouchableOpacity>
               ))}
             </ScrollView>
-          </View>
+          )}
         </View>
       </SafeAreaView>
     </>
@@ -96,11 +109,12 @@ const Communities = () => {
 
 export default Communities;
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 10,
-    backgroundColor: COLORS.white,
+    backgroundColor: "#ebeff3", // light gray background
   },
   content: {
     flex: 1,
@@ -109,14 +123,14 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     width: "100%",
   },
-  header: {
-    fontSize: 20,
-    fontWeight: "500",
-    color: "#111827",
-    marginBottom: 24,
+  heading: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#1F2937", // gray-800
+    marginBottom: 16,
     marginTop: 16,
   },
-  searchContainer: {
+  searchContainers: {
     position: "relative",
     marginBottom: 16,
   },
@@ -127,36 +141,31 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   searchInput: {
-    backgroundColor: "white",
-    borderRadius: 8,
+    backgroundColor: "#fff",
+    borderRadius: 12,
     paddingLeft: 40,
     paddingRight: 16,
     paddingVertical: 12,
     fontSize: 16,
     color: "#6B7280",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  messageList: {
-    backgroundColor: "white",
-    borderRadius: 8,
-    flex: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  messageItem: {
+  card: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+    padding: 16,
+    marginBottom: 16,
   },
   avatar: {
     width: 40,
@@ -171,9 +180,9 @@ const styles = StyleSheet.create({
   },
   messageName: {
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: "600",
     color: "#111827",
-    marginBottom: 2,
+    marginBottom: 4,
   },
   messageText: {
     fontSize: 14,
@@ -197,3 +206,4 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 });
+

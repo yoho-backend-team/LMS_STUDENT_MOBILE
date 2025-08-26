@@ -1,7 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useEffect } from 'react';
-
 import {
   ActivityLogsScreen,
   ClassByIdScreen,
@@ -25,45 +24,46 @@ import {
   TicketsScreen,
 } from '../screens';
 import StudentDrawer from '../tabs/StudentDrawer';
-
-
-// ✅ move outside & export so other files can use it
-export type RootStackParamList = {
-  AuthStackstudent: undefined;
-  Student: undefined;
-  FAQ: undefined;
-  StudentDrawer: undefined;
-  login: undefined;
-  ForgetPassword: undefined;
-  OtpVerification: undefined;
-  ResetPassword: undefined;
-  Payment: undefined;
-  Helpcenter: undefined;
-  ActivityLog: undefined;
-  TicketsScreen: undefined;
-  TicketViewScreen: undefined;
-  CreateTicket: undefined;
-  ClassesScreen: undefined;
-  ClassViewScreen: undefined;
-  CoursesScreen: undefined;
-  CourseViewScreen: undefined;
-  Notification: undefined;
-  Placement: undefined;
-  Profile: undefined;
-  CommunitiesScreen: undefined;
-  CommunityViewScreen: { community: { name: string; message: string; time: string } }; // 👈 add param type
-};
-
-const Stack = createNativeStackNavigator<RootStackParamList>();
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Routes = () => {
+  type RootStackParamList = {
+    AuthStackstudent: undefined;
+    Student: undefined;
+    FAQ: undefined;
+    StudentDrawer: undefined;
+    login: undefined;
+    ForgetPassword: undefined;
+    OtpVerification: undefined;
+    ResetPassword: undefined;
+    Payment: undefined;
+    Helpcenter: undefined;
+    ActivityLog: undefined;
+    TicketsScreen: undefined;
+    TicketViewScreen: undefined;
+    CreateTicket: undefined;
+    ClassesScreen: undefined;
+    ClassByIdScreen:undefined;
+    ClassViewScreen: undefined;
+    CoursesScreen: undefined;
+    CourseViewScreen: undefined;
+    Notification: undefined;
+    Placement: undefined;
+    Profile: undefined;
+    CommunitiesScreen: undefined;
+    CommunityViewScreen: undefined;
+  };
+
+  const Stack: any = createNativeStackNavigator<RootStackParamList>();
   const navigation =
     useNavigation<import('@react-navigation/native').NavigationProp<RootStackParamList>>();
 
   useEffect(() => {
     const checkAuthState = async () => {
       try {
-        const isLoggedIn = true;
+        const token = await AsyncStorage.getItem('AuthStudentToken');
+        const isLoggedIn = token ? true : false;
+         //const isLoggedIn =  true;
         if (isLoggedIn) {
           navigation.reset({
             index: 0,
@@ -84,7 +84,7 @@ const Routes = () => {
 
   const StudentAuthStack = () => {
     return (
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator screenOptions={{ headerShown: true }}>
         <Stack.Screen name="login" component={LoginScreen} />
         <Stack.Screen name="ForgetPassword" component={EmailVerificationScreen} />
         <Stack.Screen name="OtpVerification" component={OtpVerificationScreen} />
@@ -104,6 +104,7 @@ const Routes = () => {
         <Stack.Screen name="TicketViewScreen" component={TicketByIdScreen} />
         <Stack.Screen name="CreateTicket" component={CreateTicketScreen} />
         <Stack.Screen name="ClassesScreen" component={ClassesScreen} />
+        <Stack.Screen name="ClassByIdScreen" component={ClassByIdScreen} />
         <Stack.Screen name="ClassViewScreen" component={ClassByIdScreen} />
         <Stack.Screen name="CoursesScreen" component={CouresScreen} />
         <Stack.Screen name="CourseViewScreen" component={CourseByIdScreen} />
