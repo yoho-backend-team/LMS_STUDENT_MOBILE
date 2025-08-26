@@ -11,6 +11,8 @@ import { useNavigation } from '@react-navigation/native';
 import Header from '~/components/shared/Header'
 
 
+
+
 function Classes() {
   const Navigation = useNavigation<any>();
   return (
@@ -39,7 +41,7 @@ export default Classes;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F7F7F7',
+    backgroundColor: '#ebeff3',
     padding: 20,
   },
   chatbotBtn: {
