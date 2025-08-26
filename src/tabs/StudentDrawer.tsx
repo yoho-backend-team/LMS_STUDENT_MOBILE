@@ -252,12 +252,12 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
             />
             <CustomDrawerItem
               label="Placement"
-              icon={icons.course_filled}
+              icon={sidebaricon.placement}
               onPress={() => navigation.navigate('Placement')}
             />
             <CustomDrawerItem
               label="Spoken English"
-              icon={icons.course_filled}
+              icon={sidebaricon.spokenenglish}
               onPress={() => navigation.navigate('SpokenEnglish')}
             />
             <CustomDrawerItem

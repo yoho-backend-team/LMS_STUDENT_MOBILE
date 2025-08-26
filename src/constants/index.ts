@@ -60,7 +60,9 @@ export const sidebaricon={
   payment:require('../assets/sidebar/payment.png'),
   ticket:require('../assets/sidebar/ticket.png'),
   attendance:require('../assets/sidebar/attence.png'),
-  community:require('../assets/sidebar/community.png')
+  community:require('../assets/sidebar/community.png'),
+  spokenenglish:require('../assets/sidebar/spokenenglish.png'),
+  placement:require('../assets/sidebar/placement.png')
 }
 
 export const Auth = {
