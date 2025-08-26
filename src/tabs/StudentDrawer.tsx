@@ -12,6 +12,7 @@ import { getStudentProfileThunk } from '~/features/Profile/reducer/thunks';
 import { selectProfile } from '~/features/Profile/reducer/selectors';
 import { getImageUrl } from '~/utils/imageUtils';
 import { LinearGradient } from 'expo-linear-gradient';
+import { getStudentLogoutClient } from '~/features/Authentication/services';
 
 type CustomDrawerItemProps = {
   label: string;
@@ -97,7 +98,6 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
   const [error, setError] = useState(false);
   const profileDetails = useSelector(selectProfile);
   const userDetail = profileDetails?.data;
-
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
 
   useEffect(() => {
@@ -106,10 +106,16 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
 
   const confirmLogout = async () => {
     try {
-      await AsyncStorage.removeItem('AuthStudentToken');
-      toast.success('Success', 'Logout Successfully.');
-      setLogoutModalVisible(false);
-      navigation.reset({ index: 0, routes: [{ name: 'AuthStackstudent' }] });
+      const response = await getStudentLogoutClient({});
+      if (response) {
+        await AsyncStorage.removeItem('AuthStudentToken');
+        await AsyncStorage.removeItem('StudentData');
+        toast.success('Success', 'Logout Successfully.');
+        setLogoutModalVisible(false);
+        navigation.reset({ index: 0, routes: [{ name: 'AuthStackstudent' }] });
+      } else {
+        toast.error('Error', 'Failed to logout');
+      }
     } catch (error) {
       toast.error('Error', 'An error occurred during logout. Please try again later.');
     }
