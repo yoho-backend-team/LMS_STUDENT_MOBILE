@@ -9,7 +9,7 @@ import helpReducer from '../features/HelpCenter/Reducer/HelpSlice';
 import NotificationSlice from '../features/notification/reducers/notificationSlice';
 import ActivitySlice from "../features/reducer/activitylog/reducers/ActivitySlice"
 import PaymentSlice from '../features/payments/reducer/paymentSlice'
-import faqSlice from "../features/faq/reducer/faqslice"; 
+import faqSlice from "../features/faq/reducer/faqSlice"; 
 
 const store = configureStore({
   reducer: {

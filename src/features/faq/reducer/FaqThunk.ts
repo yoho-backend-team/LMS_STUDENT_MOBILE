@@ -12,7 +12,7 @@
 
 
 import { fetchFaqServices } from "../services";
-import { fetchFaqStart, fetchFaqData, fetchFaqError } from "./faqslice";
+import { fetchFaqStart, fetchFaqData, fetchFaqError } from "./faqSlice";
 
 export const fetchFaqThunk = (params?: any) => async (dispatch: any) => {
   try {

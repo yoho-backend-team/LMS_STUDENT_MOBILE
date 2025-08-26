@@ -8,7 +8,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchFaqThunk } from "../../features/faq/reducer/FaqThunk";
 import { selectFaqData, selectFaqError, selectFaqLoading } from "../../features/faq/reducer/selector";
-import type { FaqItem } from "../../features/faq/reducer/faqslice";
+import type { FaqItem } from "../../features/faq/reducer/faqSlice";
 
 /*  Palette */
 const UI = {
