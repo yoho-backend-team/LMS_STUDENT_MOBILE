@@ -1,14 +1,14 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   StatusBar, Text, View, TextInput, TouchableOpacity, ScrollView,
-  ImageBackground, StyleSheet, LayoutAnimation, Platform, UIManager,
+  StyleSheet, LayoutAnimation, Platform, UIManager,
   ViewStyle, TextStyle
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchFaqThunk } from "../../features/faq/reducer/FaqThunk";
-import { selectFaqData, selectFaqError, selectFaqLoading } from "../../features/faq/reducer/selector";
 import type { FaqItem } from "../../features/faq/reducer/faqSlice";
+import type { RootState, AppDispatch } from "../../store/store";
 
 /*  Palette */
 const UI = {
@@ -57,17 +57,24 @@ const IntroContent = () => (
 );
 
 const FAQ = () => {
-  const dispatch = useDispatch();
-  const faqData = useSelector(selectFaqData);
-  const loading = useSelector(selectFaqLoading);
-  const error = useSelector(selectFaqError);
+  const dispatch = useDispatch<AppDispatch>();
+
+  const faqData = useSelector((s: RootState) => s.faq.faqData);
+  const loading = useSelector((s: RootState) => s.faq.loading);
+  const error   = useSelector((s: RootState) => s.faq.error);
 
   const [search, setSearch] = useState("");
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
+  // 🔹 Call API
   useEffect(() => {
-    dispatch<any>(fetchFaqThunk({})); 
+    dispatch(fetchFaqThunk()); // ✅ no params
   }, [dispatch]);
+
+  // 🔹 Debug logs
+  useEffect(() => {
+    console.log("🟡 faqData:", faqData, "loading:", loading, "error:", error);
+  }, [faqData, loading, error]);
 
   const filteredFaqs = useMemo<FaqItem[]>(() => {
     const list = faqData ?? [];
@@ -86,7 +93,8 @@ const FAQ = () => {
   return (
     <>
       <StatusBar backgroundColor={"#000"} barStyle="light-content" />
-      <ImageBackground style={styles.background} resizeMode="cover">
+      {/* Changed from ImageBackground → View to remove warning */}
+      <View style={styles.background}>
         <SafeAreaView style={styles.container}>
           <Text style={styles.header}>FAQ - Frequently Asked Questions</Text>
 
@@ -100,17 +108,25 @@ const FAQ = () => {
             />
           </View>
 
-          {loading ? (
+          {loading && (
             <Text style={{ color: UI.sub, marginBottom: 10 }}>Loading…</Text>
-          ) : error ? (
+          )}
+          {error && (
             <Text style={{ color: "red", marginBottom: 10 }}>{error}</Text>
-          ) : null}
+          )}
 
           <ScrollView
             style={{ marginBottom: 20 }}
             contentContainerStyle={{ paddingBottom: 20 }}
             showsVerticalScrollIndicator={false}
           >
+            {/* fallback message if no FAQs */}
+            {!loading && !error && filteredFaqs.length === 0 && (
+              <Text style={{ textAlign: "center", color: UI.sub, marginTop: 12 }}>
+                No FAQs found
+              </Text>
+            )}
+
             {filteredFaqs.map((item, index) => {
               const open = expandedIndex === index;
               return (
@@ -146,7 +162,7 @@ const FAQ = () => {
             <Text style={styles.supportBtnText}>Contact Support</Text>
           </TouchableOpacity>
         </SafeAreaView>
-      </ImageBackground>
+      </View>
     </>
   );
 };

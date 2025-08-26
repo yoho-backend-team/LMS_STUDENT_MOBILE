@@ -68,7 +68,7 @@ class Client {
       get: (params: any) => httpClient.get(HTTP_END_POINTS.activity.get, params, 'student'),
     },
     faq: {
-      get: (params: any) => httpClient.get(`${HTTP_END_POINTS.faq.get}`, params, 'student'),
+      get: `/institutes/faq/all`,
     },
     help: {
       get: (params: any) => httpClient.get(HTTP_END_POINTS.help.get, params, 'student'),

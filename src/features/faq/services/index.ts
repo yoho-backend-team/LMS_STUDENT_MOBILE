@@ -29,12 +29,29 @@
 //   }
 // };
 
-import Client from "../../../api";
+// import Client from "../../../api";
+
+// export const fetchFaqServices = async (params?: any) => {
+//   try {
+//     const response = await Client.student.faq.get(params);
+//     console.log("🔵 API raw response:" );
+//     // API sometimes returns { data: [...] } or directly [...]
+//     const data = (response as any)?.data?.data ?? (response as any)?.data ?? [];
+//     return data; // expect FaqItem[]
+//   } catch (error) {
+//     console.log("Error fetching faq services:", error);
+//     throw error;
+//   }
+// };
+
+
+// features/faq/services/index.ts
+import httpClient from "../../../api/httpClients";   // ← path to your HttpClient.ts
 
 export const fetchFaqServices = async (params?: any) => {
   try {
-    const response = await Client.student.faq.get(params);
-    // API sometimes returns { data: [...] } or directly [...]
+    const response = await httpClient.get("/institutes/faq/all", params, "student");
+    console.log("🔵 API raw response:", response?.data);
     const data = (response as any)?.data?.data ?? (response as any)?.data ?? [];
     return data; // expect FaqItem[]
   } catch (error) {
@@ -42,3 +59,4 @@ export const fetchFaqServices = async (params?: any) => {
     throw error;
   }
 };
+
