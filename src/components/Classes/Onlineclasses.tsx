@@ -112,7 +112,9 @@ const Classcards = () => {
     { day: 'Day 4', topic: 'HTML', link: 'www.google.com/url', duration: '45 Min' },
   ];
   const upcomingClasses = [
+    { day: 'Day 1', topic: 'CSS', link: 'https://www.example.com', duration: '60 Min' },
     { day: 'Day 2', topic: 'CSS', link: 'https://www.example.com', duration: '60 Min' },
+    { day: 'Day 3', topic: 'CSS', link: 'https://www.example.com', duration: '60 Min' },
   ];
 
   const completeClasses = [
@@ -183,10 +185,7 @@ const Classcards = () => {
           liveClasses.map((item, index) => <ClassCard key={index} item={item} />)}
 
         {activeTab === 'upcoming' &&
-          upcomingClasses.map(
-            (item, index) => 
-            <ClassCard key={index} item={item} />
-          )}
+          upcomingClasses.map((item, index) => <ClassCard key={index} item={item} />)}
 
         {activeTab === 'completed' &&
           completeClasses.map((item, index) => <CompletedClassCard key={index} item={item} />)}
