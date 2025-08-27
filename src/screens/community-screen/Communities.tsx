@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from 'react';
 import {
   StatusBar,
   StyleSheet,
@@ -9,33 +10,22 @@ import {
   Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import Header from '~/components/shared/Header';
-import { COLORS } from '~/constants';
+import { COLORS, FONTS } from '~/constants';
 import { useDispatch, useSelector } from 'react-redux';
 import { GetallCommunityThunks } from '~/features/Community/reducers.ts/thunks';
-import { useEffect } from 'react';
 import { GetCommuntiySelector } from '../../features/Community/reducers.ts/selectore';
 import { getImageUrl } from '~/utils/imageUtils';
-import {  formatTime } from '~/utils/formatDate';
-
+import { formatTime } from '~/utils/formatDate';
 
 const Communities = () => {
   const navigation = useNavigation<any>();
-
-  const messages = [
-    { name: 'MERN 2025', message: 'Hi', time: '1:15 PM' },
-    { name: 'React Native Devs', message: 'Welcome!', time: '2:20 PM' },
-    { name: 'Fullstack Hub', message: 'Project updates', time: '3:05 PM' },
-    { name: 'NodeJS Learners', message: 'Check this out', time: '4:45 PM' },
-    { name: 'Open Source Crew', message: 'PR merged 🎉', time: '6:30 PM' },
-  ];
-
   const communityList = useSelector(GetCommuntiySelector);
-  console.log(communityList, "message")
   const dispatch = useDispatch<any>();
 
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchCommunities = (page = 1) => {
     dispatch(GetallCommunityThunks({ page }));
@@ -45,6 +35,9 @@ const Communities = () => {
     fetchCommunities(1);
   }, []);
 
+  const filteredCommunities = communityList?.filter((community: any) =>
+    community?.group?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <>
@@ -53,29 +46,34 @@ const Communities = () => {
         <Header />
 
         <View style={styles.content}>
-
           <Text style={styles.header}>Community</Text>
 
+          {/* 🔍 Search Input */}
           <View style={styles.searchContainer}>
-            <Ionicons name="search" size={16} color="#9CA3AF" style={styles.searchIcon} />
+            <Ionicons name="search" size={16} color={COLORS.text_desc} style={styles.searchIcon} />
             <TextInput
               placeholder="Search"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={COLORS.text_desc}
               style={styles.searchInput}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
             />
-          </View>
 
+            {/* ✅ Clear Button */}
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearIcon}>
+                <Ionicons name="close-circle" size={18} color={COLORS.text_desc} />
+              </TouchableOpacity>
+            )}
+          </View>
 
           <View style={styles.messageList}>
             <ScrollView showsVerticalScrollIndicator={false}>
-              {communityList?.map((community: any, index: any) => (
+              {filteredCommunities?.map((community: any, index: number) => (
                 <TouchableOpacity
                   key={index}
                   style={styles.messageItem}
-                  onPress={() =>
-                    navigation.navigate('CommunityViewScreen', { community })
-                  }>
-
+                  onPress={() => navigation.navigate('CommunityViewScreen', { community })}>
                   <Image style={styles.avatar} src={getImageUrl(community?.groupimage)} />
 
                   <View style={styles.messageContent}>
@@ -83,26 +81,41 @@ const Communities = () => {
                     <Text style={styles.messageText}>{community?.last_message?.message}</Text>
                   </View>
 
-
                   <View style={styles.messageRight}>
                     <Text style={styles.messageTime}>
                       {formatTime(community?.last_message?.createdAt, true)}
-
                     </Text>
                     <View style={styles.checkContainer}>
-                      <Ionicons name="checkmark" size={12} color="white" />
+                      <MaterialCommunityIcons
+                        name="check-all"
+                        size={16}
+                        color={COLORS.light_green}
+                      />
                     </View>
                   </View>
-
                 </TouchableOpacity>
               ))}
+
+              {/* If no results */}
+              {filteredCommunities?.length === 0 && (
+                <Text
+                  style={{
+                    textAlign: 'center',
+                    marginTop: 50,
+                    color: COLORS.text_desc,
+                    ...FONTS.h3,
+                  }}>
+                  No communities found
+                </Text>
+              )}
             </ScrollView>
           </View>
         </View>
+
+        {/* Chatbot button */}
         <TouchableOpacity
           style={styles.chatbotBtn}
-          onPress={() => navigation.navigate("ChatbotScreen")}
-        >
+          onPress={() => navigation.navigate('ChatbotScreen')}>
           <Ionicons name="chatbubble-ellipses" size={28} color="#fff" />
         </TouchableOpacity>
       </SafeAreaView>
@@ -206,23 +219,26 @@ const styles = StyleSheet.create({
   },
   checkContainer: {
     width: 20,
-    height: 20,
-    backgroundColor: '#3B82F6',
-    borderRadius: 10,
+    borderRadius: 50,
     alignItems: 'center',
     justifyContent: 'center',
   },
   chatbotBtn: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 80,
     right: 20,
-    backgroundColor: "#7B00FF",
+    backgroundColor: '#7B00FF',
     padding: 16,
     borderRadius: 50,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOpacity: 0.2,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
     elevation: 5,
+  },
+  clearIcon: {
+    position: 'absolute',
+    right: 12,
+    top: 12,
   },
 });
