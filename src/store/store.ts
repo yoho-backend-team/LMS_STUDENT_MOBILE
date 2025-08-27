@@ -13,6 +13,7 @@ import ClassSlice from '../features/classes/reducers/classslice';
 import ClassIdSlice from '../features/classid/reducers/classidslice';
 import FaqSlice from '../features/faq/reducers/faqSlice';
 import Community from '../features/Community/reducers.ts/ModuleSlice';
+import AttendanceSlice from '../features/Attendance/reducers/attendanceSlice';
 
 const store = configureStore({
   reducer: {
@@ -30,6 +31,7 @@ const store = configureStore({
     ClassIdSlice: ClassIdSlice,
     faqSlice: FaqSlice,
     Community: Community,
+    AttendanceSlice: AttendanceSlice,
   },
 });
 
