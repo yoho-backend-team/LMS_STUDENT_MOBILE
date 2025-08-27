@@ -32,15 +32,6 @@ const UI = {
   light: '#FFFFFF', // light rim (top/left)
 };
 
-const faqs = [
-  { title: 'Introduction', description: 'This is the introduction answer.' },
-  { title: 'How To Access Payil?', description: 'You can access Payil from the dashboard.' },
-  {title: 'About Payil Dashboard', description: 'The dashboard shows all courses and progress.' },
-  { title: 'About Payil Courses', description: 'Courses include video, notes, and exercises.' },
-  { title: 'How To Access Payil Subject', description: 'Click on a subject to view its content.' },
-  { title: 'How to add a new course?', description: 'Go to the add course section.' },
-];
-
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
@@ -79,22 +70,21 @@ const FAQ = () => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const navigation = useNavigation<any>();
   const dispatch = useDispatch<any>();
-
-  const selectData = useSelector(selectFaq )?.data;
-
-  console.log("selector :" , selectData);
+  const selectData = useSelector(selectFaq)?.data;
 
   const getFaqData = async () => {
-    await dispatch(getFaqThunk({
-      instituteId : '973195c0-66ed-47c2-b098-d8989d3e4529',
-      branchid : '90c93163-01cf-4f80-b88b-4bc5a5dd8ee4'
-    }));
-  }
+    await dispatch(
+      getFaqThunk({
+        instituteId: '973195c0-66ed-47c2-b098-d8989d3e4529',
+        branchid: '90c93163-01cf-4f80-b88b-4bc5a5dd8ee4',
+      })
+    );
+  };
 
-  useEffect (() => {
+  useEffect(() => {
     getFaqData();
-  },[dispatch]);
- 
+  }, [dispatch]);
+
   const toggleExpand = (index: number) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setExpandedIndex(expandedIndex === index ? null : index);
@@ -129,8 +119,9 @@ const FAQ = () => {
             style={{ marginBottom: 20 }}
             contentContainerStyle={{ paddingBottom: 20 }}
             showsVerticalScrollIndicator={false}>
-            {selectData?.filter((i) => i.title.toLowerCase().includes(search.toLowerCase()))
-              .map((item, index) => {
+            {selectData
+              ?.filter((i: any) => i.title.toLowerCase().includes(search.toLowerCase()))
+              .map((item: any, index: any) => {
                 const open = expandedIndex === index;
                 return (
                   <React.Fragment key={index}>
@@ -180,33 +171,23 @@ export default FAQ;
 type Styles = {
   background: ViewStyle;
   container: ViewStyle;
-
   backbutton: ViewStyle;
-
   header: TextStyle;
-
   searchBox: ViewStyle;
   searchInput: TextStyle;
-
   card: ViewStyle;
   cardText: TextStyle;
-
   answerWrap: ViewStyle;
   answerText: TextStyle;
-
   pmWrap: ViewStyle;
   hBar: ViewStyle;
   vBar: ViewStyle;
-
   helpTitle: TextStyle;
   helpText: TextStyle;
-
   supportBtn: ViewStyle;
   supportBtnText: TextStyle;
-
   bigCard: ViewStyle;
   bigCardText: TextStyle;
-
   smallCard: ViewStyle;
   smallCardText: TextStyle;
 
