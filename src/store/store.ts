@@ -7,10 +7,11 @@ import ProfileSlice from '../features/Profile/reducer/profileSlice';
 import DashboardSlice from '../features/home/reducer/DashboardSlice';
 import helpReducer from '../features/HelpCenter/Reducer/HelpSlice';
 import NotificationSlice from '../features/notification/reducers/notificationSlice';
-import ActivitySlice from "../features/reducer/activitylog/reducers/ActivitySlice"
-import PaymentSlice from '../features/payments/reducer/paymentSlice'
-import ClassSlice from '../features/classes/reducers/classslice'
-import ClassIdSlice from '../features/classid/reducers/classidslice'
+import ActivitySlice from '../features/reducer/activitylog/reducers/ActivitySlice';
+import PaymentSlice from '../features/payments/reducer/paymentSlice';
+import ClassSlice from '../features/classes/reducers/classslice';
+import ClassIdSlice from '../features/classid/reducers/classidslice';
+import FaqSlice from '../features/faq/reducers/faqSlice';
 
 const store = configureStore({
   reducer: {
@@ -22,11 +23,12 @@ const store = configureStore({
     DashboardSlice: DashboardSlice,
     helpSlice: helpReducer,
     NotificationSlice: NotificationSlice,
-		ActivitySlice: ActivitySlice,
-    PaymentSlice:PaymentSlice,
+    ActivitySlice: ActivitySlice,
+    PaymentSlice: PaymentSlice,
     ClassSlice: ClassSlice,
     ClassIdSlice: ClassIdSlice,
-	},
+    faqSlice: FaqSlice,
+  },
 });
 
 export { store };
