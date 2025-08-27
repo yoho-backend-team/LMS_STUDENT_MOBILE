@@ -133,7 +133,6 @@ const Routes = () => {
         <Stack.Screen name="TicketViewScreen" component={TicketByIdScreen} />
         <Stack.Screen name="CreateTicket" component={CreateTicketScreen} />
         <Stack.Screen name="ClassesScreen" component={ClassesScreen} />
-        <Stack.Screen name="ClassByIdScreen" component={ClassByIdScreen} />
         <Stack.Screen name="ClassViewScreen" component={ClassByIdScreen} />
         <Stack.Screen name="CoursesScreen" component={CouresScreen} />
         <Stack.Screen name="CourseViewScreen" component={CourseByIdScreen} />

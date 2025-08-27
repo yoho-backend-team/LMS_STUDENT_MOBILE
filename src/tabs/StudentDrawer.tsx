@@ -171,9 +171,13 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
           }}
           onPress={() => navigation.navigate('Profile')}>
           <Image
-            source={{ uri: getImageUrl(userDetail?.image) }}
+            source={
+              userDetail?.image
+                ? { uri: getImageUrl(userDetail?.image) }
+                : require('../assets/home/profile.png')
+            }
             onError={() => setError(true)}
-            style={{ width: 55, height: 55, borderRadius: 40 }}
+            style={{ width: 55, height: 55, borderRadius: 12 }}
           />
           <View style={{ marginLeft: 12, flex: 1 }}>
             <Text style={{ color: '#333', ...FONTS.h2_01, fontWeight: '600' }}>

@@ -1,17 +1,18 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Linking } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Linking, Alert } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from '~/store/store';
 import { getClassDetails } from '~/features/classes/reducers/thunks';
 import { selectClass } from '~/features/classes/reducers/selector';
-import { COLORS } from '~/constants';
+import { COLORS, FONTS } from '~/constants';
+import { formatDate, formatTime } from '~/utils/formatDate';
+import toast from '~/utils/toasts';
 
 const Classcards = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const classData = useSelector(selectClass) || [];
-  const navigation = useNavigation();
-
+  const classData = useSelector(selectClass) || { data: [] };
+  const navigation = useNavigation<any>();
   const [activeTab, setActiveTab] = useState<'live' | 'upcoming' | 'completed'>('live');
   const scrollRef = useRef<ScrollView>(null);
 
@@ -20,9 +21,7 @@ const Classcards = () => {
     { key: 'upcoming', label: 'Upcoming Class' },
     { key: 'completed', label: 'Completed Class' },
   ];
-  console.log('Classdata....', classData?.data);
 
-  // Fetch classes from API
   const fetchClassData = (type: 'live' | 'upcoming' | 'completed') => {
     dispatch(
       getClassDetails({
@@ -35,13 +34,23 @@ const Classcards = () => {
   };
 
   useEffect(() => {
-    fetchClassData('completed');
-  }, []);
+    fetchClassData(activeTab);
+  }, [dispatch, activeTab]);
 
   const onTabPress = (key: 'live' | 'upcoming' | 'completed', index: number) => {
     setActiveTab(key);
     scrollRef.current?.scrollTo({ x: index * 120 - 20, animated: true });
     fetchClassData(key);
+  };
+
+  const handleOpenLink = (url: string) => {
+    if (!url) {
+      toast.error('Invalid link', 'No link available for this class.');
+      return;
+    }
+    Linking.openURL(url).catch(() => {
+      toast.error('Error', 'Unable to open the link.');
+    });
   };
 
   const ClassCard = ({ item }: { item: any }) => (
@@ -58,7 +67,7 @@ const Classcards = () => {
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>Join Link</Text>
-        <TouchableOpacity onPress={() => Linking.openURL(item.link)}>
+        <TouchableOpacity onPress={() => handleOpenLink(item.link)}>
           <Text style={styles.value1}>
             {item.link.length > 20 ? item.link.substring(0, 20) + '...' : item.link}
           </Text>
@@ -70,7 +79,9 @@ const Classcards = () => {
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>Action</Text>
-        <TouchableOpacity onPress={() => Linking.openURL(item.link)} style={styles.joinButton}>
+        <TouchableOpacity
+          onPress={() => handleOpenLink(item.link)}
+          style={[styles.joinButton, { backgroundColor: COLORS.blue_01 }]}>
           <Text style={styles.buttonText}>Join Now</Text>
         </TouchableOpacity>
       </View>
@@ -78,7 +89,13 @@ const Classcards = () => {
   );
 
   const CompletedClassCard = ({ item }: { item: any }) => (
-    <View style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() =>
+        activeTab === 'completed'
+          ? navigation.navigate('ClassViewScreen' as never, { classData: item?.classData })
+          : null
+      }>
       <View style={styles.row}>
         <Text style={styles.label}>Title</Text>
         <Text style={styles.value}>
@@ -90,26 +107,67 @@ const Classcards = () => {
         <Text style={styles.value}>{item.StartDate}</Text>
       </View>
       <View style={styles.row}>
-        <Text style={styles.label}>Start Time</Text>
-        <Text style={styles.value}>{item.StartTime}</Text>
+        <Text style={styles.label}>Time</Text>
+        <Text style={styles.value}>
+          {item.StartTime} - {item.EndTime}
+        </Text>
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>Duration</Text>
         <Text style={styles.value}>{item.duration}</Text>
       </View>
-      <View style={styles.row}>
-        <Text style={styles.label}>Action</Text>
-        <TouchableOpacity
-          onPress={() => navigation.navigate('ClassByIdScreen' as never)}
-          style={styles.joinButton}>
-          <Text style={styles.buttonText}>Completed</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+      {activeTab === 'completed' && (
+        <View style={styles.row}>
+          <Text style={styles.label}>Action</Text>
+          <View style={styles.joinButton}>
+            <Text style={styles.buttonText}>Completed</Text>
+          </View>
+        </View>
+      )}
+    </TouchableOpacity>
   );
 
+  const renderClasses = () => {
+    if (!classData?.data?.length) {
+      return (
+        <View>
+          <Text style={{ textAlign: 'center', color: COLORS.text_desc, ...FONTS.body3 }}>
+            No classes available
+          </Text>
+        </View>
+      );
+    }
+
+    if (activeTab === 'live') {
+      return classData?.data?.map((item: any, index: number) => (
+        <ClassCard
+          key={index}
+          item={{
+            topic: item.class_name,
+            link: item.video_url,
+            duration: item.duration,
+          }}
+        />
+      ));
+    }
+
+    return classData?.data?.map((item: any, index: number) => (
+      <CompletedClassCard
+        key={index}
+        item={{
+          Title: item.class_name,
+          StartDate: formatDate(item?.start_date),
+          StartTime: formatTime(item?.start_time, false),
+          EndTime: formatTime(item?.end_time, false),
+          duration: item.duration,
+          classData: item,
+        }}
+      />
+    ));
+  };
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <View style={styles.container}>
       <Text style={styles.header}>Online Classes</Text>
 
       <View style={styles.wrapper}>
@@ -130,51 +188,26 @@ const Classcards = () => {
           ))}
         </ScrollView>
 
-        <View>
-          {activeTab === 'live' && <Text style={styles.container2}>Live Classes </Text>}
-          {activeTab === 'upcoming' && <Text style={styles.container2}>Upcoming Classes </Text>}
-          {activeTab === 'completed' && <Text style={styles.container2}>Completed Classes</Text>}
-        </View>
+        <Text style={styles.sectionTitle}>
+          {activeTab === 'live'
+            ? 'Live Classes'
+            : activeTab === 'upcoming'
+              ? 'Upcoming Classes'
+              : 'Completed Classes'}
+        </Text>
       </View>
 
-      <View style={styles.container1}>
-        {activeTab !== 'completed' &&
-          classData?.data?.map((item: any, index: number) => (
-            <ClassCard
-              key={index}
-              item={{
-                day: `Day ${index + 1}`,
-                topic: item.class_name,
-                link: item.video_url,
-                duration: item.duration + ' Min',
-              }}
-            />
-          ))}
-
-        {activeTab === 'completed' &&
-          classData?.data?.map((item: any, index: number) => (
-            <CompletedClassCard
-              key={index}
-              item={{
-                Title: item.class_name,
-                StartDate: new Date(item.start_date).toLocaleDateString(),
-                StartTime: new Date(item.start_time).toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                }),
-                duration: item.duration + ' Min',
-              }}
-            />
-          ))}
-      </View>
-    </ScrollView>
+      <ScrollView contentContainerStyle={styles.container1} showsVerticalScrollIndicator={false}>
+        {renderClasses()}
+      </ScrollView>
+    </View>
   );
 };
 
 export default Classcards;
 
 const styles = StyleSheet.create({
-  container: { padding: 16 },
+  container: { padding: 5 },
   header: { fontSize: 24, fontWeight: '700', marginBottom: 20, color: '#333' },
   wrapper: { marginBottom: 16 },
   tabContainer: { paddingHorizontal: 0, marginBottom: 10 },
@@ -189,7 +222,7 @@ const styles = StyleSheet.create({
   tabText: { fontSize: 16, color: '#555', fontWeight: '500' },
   activeTabText: { fontSize: 16, color: '#fff', fontWeight: '600' },
   card: {
-    backgroundColor: '#E4EBF5',
+    backgroundColor: COLORS.white,
     borderRadius: 14,
     padding: 20,
     marginBottom: 16,
@@ -205,12 +238,12 @@ const styles = StyleSheet.create({
   value1: { color: '#3366FF', fontSize: 14, textDecorationLine: 'underline' },
   joinButton: {
     alignSelf: 'flex-end',
-    backgroundColor: '#ebeff3',
+    backgroundColor: COLORS.light_green,
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 6,
   },
-  buttonText: { color: 'black', fontWeight: '500', fontSize: 14 },
-  container1: { backgroundColor: '#f1f6fc', padding: 16, borderRadius: 16 },
-  container2: { fontSize: 18, borderRadius: 20, padding: 10, fontWeight: '500', color: '#333' },
+  buttonText: { color: COLORS.white, fontWeight: '500', fontSize: 14 },
+  container1: { backgroundColor: '#f1f6fc', padding: 16, borderRadius: 16, paddingBottom: 450 },
+  sectionTitle: { fontSize: 18, fontWeight: '500', color: '#333' },
 });

@@ -1,35 +1,34 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { StatusBar, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '~/components/shared/Header';
 import { COLORS } from '~/constants';
-import Classcards from '~/components/Classes/Onlineclasses';
 import CompleteClassDetails from '~/components/Classes/Completedclass';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from '~/store/store';
 import { selectIdClass } from '~/features/classid/reducers/selector';
 import { getClassIdDetail } from '~/features/classid/reducers/thunks';
+import { useRoute } from '@react-navigation/native';
 
 const ClassById = () => {
+  const route = useRoute<any>();
+  const { classData } = route?.params;
+  const dispatch = useDispatch<AppDispatch>();
+  const classIdData = useSelector(selectIdClass);
 
-   const { id } = useParams();
-    const dispatch = useDispatch<AppDispatch>();
+  useEffect(() => {
+    if (classData) {
+      dispatch(
+        getClassIdDetail({
+          id: classData?.uuid,
+          course: classData?.uuid,
+          classType: 'online',
+        })
+      );
+    }
+  }, [classData, dispatch]);
 
-	// handle backpage button function
-
-    const classIdData = useSelector(selectIdClass);
-
-    console.log('classIdData:',classIdData);
-
-    useEffect(() => {
-		if (id) {
-			dispatch(getClassIdDetail({ 
-                id,
-            course: id,
-            classType: 'online', }));
-		}
-	}, [id, dispatch]);
-	 return (
+  return (
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
       <SafeAreaView edges={['top']} style={styles.container}>
@@ -37,7 +36,7 @@ const ClassById = () => {
 
         {/* code inside the view section*/}
         <View>
-     <CompleteClassDetails />
+          <CompleteClassDetails classData={classIdData} />
         </View>
       </SafeAreaView>
     </>
@@ -53,4 +52,3 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
   },
 });
-

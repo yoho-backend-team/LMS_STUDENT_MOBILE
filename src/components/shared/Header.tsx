@@ -5,6 +5,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectNotifications } from '~/features/notification/reducers/selectors';
 import { useEffect } from 'react';
 import { getAllNotificationsThunk } from '~/features/notification/reducers/thunks';
+import { selectProfile } from '~/features/Profile/reducer/selectors';
+import { getStudentProfileThunk } from '~/features/Profile/reducer/thunks';
+import { getImageUrl } from '../../utils/imageUtils';
 
 interface HeaderProps {
   containerStyle?: object;
@@ -18,6 +21,12 @@ const Header: React.FC<HeaderProps> = ({ containerStyle }) => {
   const navigation = useNavigation<any>();
   const notifications = useSelector(selectNotifications);
   const dispatch = useDispatch<any>();
+  const profileDetails = useSelector(selectProfile);
+  const userDetail = profileDetails?.data;
+
+  useEffect(() => {
+    dispatch(getStudentProfileThunk({}));
+  }, [dispatch]);
 
   useEffect(() => {
     loadNotifications();
@@ -88,11 +97,15 @@ const Header: React.FC<HeaderProps> = ({ containerStyle }) => {
             navigation.navigate('Profile' as never);
           }}>
           <Image
-            source={icons.user_profile}
+            source={
+              userDetail?.userDetail?.institute_id?.logo
+                ? { uri: getImageUrl(userDetail?.userDetail?.institute_id?.logo) }
+                : icons.user_profile
+            }
             style={{
               width: 50,
               height: 50,
-              borderRadius: 16,
+              borderRadius: 12,
               resizeMode: 'cover',
             }}
           />

@@ -11,7 +11,8 @@ import { useNavigation } from '@react-navigation/native';
 import Header from '~/components/shared/Header';
 
 function Classes() {
-  const Navigation = useNavigation<any>();
+  const navigation = useNavigation<any>();
+
   return (
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
@@ -24,7 +25,7 @@ function Classes() {
         </View>
         <TouchableOpacity
           style={styles.chatbotBtn}
-          onPress={() => Navigation.navigate('ChatbotScreen')}>
+          onPress={() => navigation.navigate('ChatbotScreen')}>
           <Ionicons name="chatbubble-ellipses" size={28} color="#fff" />
         </TouchableOpacity>
       </SafeAreaView>

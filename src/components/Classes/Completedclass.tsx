@@ -1,126 +1,106 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Linking,
-  ScrollView,
-} from 'react-native';
-import Icon from 'react-native-vector-icons/Feather';
+import { View, Text, TouchableOpacity, StyleSheet, Linking, ScrollView, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
+import { COLORS, screens } from '~/constants';
+import { formatDate, formatTime } from '~/utils/formatDate';
+import { setSelectedTab } from '~/store/tab/tabSlice';
+import { useDispatch } from 'react-redux';
 
-const classInfoData = [
-  { label: 'Date', value: '9 Apr 2025' },
-  { label: 'Start At', value: '9:30 AM' },
-  { label: 'End At', value: '6:00 PM' },
-  { label: 'Duration', value: '6 Mon Hrs' },
-];
+interface ClassDataProps {
+  classData: any;
+}
 
-const CompleteClassDetails = () => {
-  const navigation = useNavigation();
+const CompleteClassDetails: React.FC<ClassDataProps> = ({ classData }) => {
+  const navigation = useNavigation<any>();
+  const dispatch = useDispatch<any>();
+
+  const classInfoData = [
+    { label: 'Date', value: formatDate(classData?.start_date) },
+    { label: 'Start At', value: formatTime(classData?.start_time, false) },
+    { label: 'End At', value: formatTime(classData?.end_time, false) },
+    { label: 'Duration', value: classData?.duration },
+  ];
 
   return (
-    <ScrollView contentContainerStyle={styles.screen}>
-      <View style={styles.container}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Icon name="arrow-left" size={24} color="#444" />
-        </TouchableOpacity>
-        <Text style={styles.title}>Class Details</Text>
-      </View>
-
-      <View style={styles.container1}>
-        <Text style={styles.batchTitle}>Batch No : #13</Text>
-        <Text style={styles.title}>The Path Of MERN Stack</Text>
-        <Text style={styles.description}>
-          The MERN stack is a collection of technologies for building web
-          applications using JavaScript. It's made up of MongoDB, Express.js,
-          React, and Node.js. Mern is a popular, Pre-build, and versatile
-          technology stack.
-        </Text>
-
-        <View style={styles.container1}>
-          <LinearGradient
-            colors={['#7B00FF', '#B200FF']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.card}
-          >
-            {classInfoData.map((item, index) => (
-              <View key={index} style={styles.column}>
-                <Text style={styles.label}>{item.label}</Text>
-                <Text style={styles.value}>{item.value}</Text>
-              </View>
-            ))}
-          </LinearGradient>
+    <>
+      <ScrollView contentContainerStyle={styles.screen}>
+        <View style={styles.container}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Image source={require('../../assets/profile/back.png')} style={styles.backbutton} />
+          </TouchableOpacity>
+          <Text style={styles.title}>{classData?.class_name}</Text>
         </View>
 
-        <Text style={styles.linkLabel}>Class Meeting Link</Text>
-        <Text style={styles.subText}>Join The Class @9:30 AM</Text>
-        <TouchableOpacity
-          style={styles.joinButton}
-          onPress={() => {
-            Linking.openURL('https://your-class-link.com');
-          }}
-        >
-          <Text style={styles.joinText}>Join Now</Text>
-        </TouchableOpacity>
-        <Text style={styles.notesubTitle}>
-          Make sure your presence in this class & if you are unable to attend,
-          please inform the Coordinator.
-        </Text>
+        <View style={styles.container1}>
+          <Text style={styles.batchTitle}>Batch No : #{classData?.batch?.id}</Text>
 
-        <TouchableOpacity
-          style={styles.notesCard1}
-          onPress={() => {
-            Linking.openURL('https://your-attendance-link.com');
-          }}
-        >
-          <Text style={styles.noteText}>Check Attendance</Text>
-        </TouchableOpacity>
-        <Text style={styles.notesubTitle}>
-          If any issue in attendance please raise a ticket
-        </Text>
+          <View style={{}}>
+            <LinearGradient
+              colors={['#7B00FF', '#B200FF']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.card}>
+              {classInfoData?.map((item, index) => (
+                <View key={index} style={styles.column}>
+                  <Text style={styles.label}>{item.label}</Text>
+                  <Text style={styles.value}>{item.value}</Text>
+                </View>
+              ))}
+            </LinearGradient>
+          </View>
 
-        <Text style={styles.noteTitle}>Session Notes</Text>
-        <TouchableOpacity
-          style={styles.notesCard1}
-          onPress={() => {
-            Linking.openURL('https://your-notes-link.com');
-          }}
-        >
-          <Text style={styles.noteText}>
-            Once Class Finished Videos will be Uploaded
+          <Text style={styles.notesubTitle}>
+            Make sure your presence in this class & if you are unable to attend, please inform the
+            Coordinator.
           </Text>
-        </TouchableOpacity>
-      </View>
 
-      <View style={styles.container2}>
-        <Text style={styles.noteTitle}>Study Materials</Text>
-        <TouchableOpacity
-          style={styles.notesCard1}
-          onPress={() => {
-            Linking.openURL('https://your-materials-link.com');
-          }}
-        >
-          <Text style={styles.noteText}>
-            Once Class Finished Study Materials Videos will be Uploaded
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+          <TouchableOpacity
+            style={styles.notesCard}
+            onPress={() => {
+              navigation.goBack();
+              dispatch(setSelectedTab(screens.attendance));
+            }}>
+            <Text style={styles.noteText1}>Check Attendance</Text>
+          </TouchableOpacity>
+          <Text style={styles.notesubTitle}>If any issue in attendance please raise a ticket</Text>
+          <View style={{ marginTop: 5 }}></View>
+          <Text style={styles.noteTitle}>Session Notes</Text>
+          <TouchableOpacity
+            style={styles.notesCard1}
+            onPress={() => {
+              Linking.openURL('https://your-notes-link.com');
+            }}>
+            <Text style={styles.noteText}>Once Class Finished Videos will be Uploaded</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.container2}>
+          <Text style={styles.noteTitle}>Study Materials</Text>
+          <TouchableOpacity
+            style={styles.notesCard1}
+            onPress={() => {
+              Linking.openURL('https://your-materials-link.com');
+            }}>
+            <Text style={styles.noteText}>
+              Once Class Finished Study Materials Videos will be Uploaded
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
   screen: {
-    padding: 20,
-    paddingTop: 20,
-    backgroundColor: '#EBF0F5',
+    paddingHorizontal: 20,
+    backgroundColor: COLORS.white,
+  },
+  backbutton: {
+    width: 48,
+    height: 48,
+    resizeMode: 'contain',
   },
   batchTitle: {
     color: '#7B00FF',
@@ -144,7 +124,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     marginBottom: 24,
-    
+
     shadowColor: '#FFFFFF',
     shadowOffset: { width: -6, height: -6 },
     shadowOpacity: 1,
@@ -198,8 +178,9 @@ const styles = StyleSheet.create({
   },
   noteTitle: {
     fontSize: 16,
-    color: '#333',
+    color: COLORS.text_title,
     marginBottom: 8,
+    fontWeight: 600,
   },
   notesubTitle: {
     fontSize: 14,
@@ -224,7 +205,8 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   notesCard: {
-    backgroundColor: '#EBF0F5',
+    backgroundColor: COLORS.light_blue,
+    alignSelf: 'flex-start',
     borderRadius: 16,
     padding: 16,
     // Inset shadow to mimic “inner” effect
@@ -233,11 +215,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 4,
-
   },
   noteText: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.text_title,
+  },
+  noteText1: {
+    fontSize: 14,
+    color: COLORS.white,
+    fontWeight: 500,
   },
   container1: {
     flex: 1,
@@ -266,7 +252,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 10,
-    backgroundColor: '#edf2f7', 
+    backgroundColor: COLORS.white,
   },
   backButton: {
     width: 36,

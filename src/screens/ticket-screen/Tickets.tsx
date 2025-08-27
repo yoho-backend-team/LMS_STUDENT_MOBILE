@@ -14,7 +14,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
-import Header from '~/components/shared/Header';
 import { COLORS, FONTS, icons } from '~/constants';
 import Icon from 'react-native-vector-icons/Feather';
 import { GetallTicketThunks } from '../../features/Ticket/reducers/Thunks';

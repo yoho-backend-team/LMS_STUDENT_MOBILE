@@ -1,15 +1,13 @@
-import { getClassDetailsId } from "../services"
-import { getClassIdDetails } from "../reducers/classidslice";
+import { getClassDetailsId } from '../services';
+import { getClassIdDetails } from '../reducers/classidslice';
 
-
-export const getClassIdDetail = (params: any) => async(dispatch:any) => {
-    try{
-        const response = await getClassDetailsId(params);
-        console.log('classIddetails :', response);
-        dispatch(getClassIdDetails(response))
+export const getClassIdDetail = (params: any) => async (dispatch: any) => {
+  try {
+    const response = await getClassDetailsId(params);
+    if (response) {
+      dispatch(getClassIdDetails(response?.data?.data));
     }
-    catch(error){
-        console.log(error);
-        
-    }
-}
+  } catch (error) {
+    console.log(error);
+  }
+};
