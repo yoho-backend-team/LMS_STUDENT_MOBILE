@@ -6,12 +6,20 @@ import {
   TextInput,
   ScrollView,
   TouchableOpacity,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import Header from '~/components/shared/Header';
 import { COLORS } from '~/constants';
+import { useDispatch, useSelector } from 'react-redux';
+import { GetallCommunityThunks } from '~/features/Community/reducers.ts/thunks';
+import { useEffect } from 'react';
+import { GetCommuntiySelector } from '../../features/Community/reducers.ts/selectore';
+import { getImageUrl } from '~/utils/imageUtils';
+import {  formatTime } from '~/utils/formatDate';
+
 
 const Communities = () => {
   const navigation = useNavigation<any>();
@@ -24,6 +32,20 @@ const Communities = () => {
     { name: 'Open Source Crew', message: 'PR merged 🎉', time: '6:30 PM' },
   ];
 
+  const communityList = useSelector(GetCommuntiySelector);
+  console.log(communityList, "message")
+  const dispatch = useDispatch<any>();
+
+
+  const fetchCommunities = (page = 1) => {
+    dispatch(GetallCommunityThunks({ page }));
+  };
+
+  useEffect(() => {
+    fetchCommunities(1);
+  }, []);
+
+
   return (
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
@@ -31,10 +53,9 @@ const Communities = () => {
         <Header />
 
         <View style={styles.content}>
-          {/* Header */}
+
           <Text style={styles.header}>Community</Text>
 
-          {/* Search Bar */}
           <View style={styles.searchContainer}>
             <Ionicons name="search" size={16} color="#9CA3AF" style={styles.searchIcon} />
             <TextInput
@@ -44,32 +65,35 @@ const Communities = () => {
             />
           </View>
 
-          {/* Message List */}
+
           <View style={styles.messageList}>
             <ScrollView showsVerticalScrollIndicator={false}>
-              {messages?.map((message, index) => (
+              {communityList?.map((community: any, index: any) => (
                 <TouchableOpacity
                   key={index}
                   style={styles.messageItem}
                   onPress={() =>
-                    navigation.navigate('CommunityViewScreen', { community: message })
+                    navigation.navigate('CommunityViewScreen', { community })
                   }>
-                  {/* Avatar */}
-                  <View style={styles.avatar} />
 
-                  {/* Message Content */}
+                  <Image style={styles.avatar} src={getImageUrl(community?.groupimage)} />
+
                   <View style={styles.messageContent}>
-                    <Text style={styles.messageName}>{message.name}</Text>
-                    <Text style={styles.messageText}>{message.message}</Text>
+                    <Text style={styles.messageName}>{community?.group}</Text>
+                    <Text style={styles.messageText}>{community?.last_message?.message}</Text>
                   </View>
 
-                  {/* Time and Check */}
+
                   <View style={styles.messageRight}>
-                    <Text style={styles.messageTime}>{message.time}</Text>
+                    <Text style={styles.messageTime}>
+                      {formatTime(community?.last_message?.createdAt, true)}
+
+                    </Text>
                     <View style={styles.checkContainer}>
                       <Ionicons name="checkmark" size={12} color="white" />
                     </View>
                   </View>
+
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -164,7 +188,7 @@ const styles = StyleSheet.create({
   messageName: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#111827',
+    color: '#9CA3AF',
     marginBottom: 2,
   },
   messageText: {
@@ -189,16 +213,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   chatbotBtn: {
-  position: "absolute",
-  bottom: 80,
-  right: 20,
-  backgroundColor: "#7B00FF",
-  padding: 16,
-  borderRadius: 50,
-  shadowColor: "#000",
-  shadowOpacity: 0.2,
-  shadowRadius: 4,
-  shadowOffset: { width: 0, height: 2 },
-  elevation: 5, 
-},
+    position: "absolute",
+    bottom: 80,
+    right: 20,
+    backgroundColor: "#7B00FF",
+    padding: 16,
+    borderRadius: 50,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 5,
+  },
 });

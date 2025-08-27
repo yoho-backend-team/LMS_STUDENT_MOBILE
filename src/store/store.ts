@@ -12,6 +12,7 @@ import PaymentSlice from '../features/payments/reducer/paymentSlice';
 import ClassSlice from '../features/classes/reducers/classslice';
 import ClassIdSlice from '../features/classid/reducers/classidslice';
 import FaqSlice from '../features/faq/reducers/faqSlice';
+import Community from '../features/Community/reducers.ts/ModuleSlice';
 
 const store = configureStore({
   reducer: {
@@ -28,6 +29,7 @@ const store = configureStore({
     ClassSlice: ClassSlice,
     ClassIdSlice: ClassIdSlice,
     faqSlice: FaqSlice,
+    Community: Community,
   },
 });
 

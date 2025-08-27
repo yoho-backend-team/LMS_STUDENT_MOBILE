@@ -6,6 +6,7 @@ import { COLORS, icons } from '~/constants';
 import * as DocumentPicker from 'expo-document-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import toast from '~/utils/toasts';
+import { LinearGradient } from 'expo-linear-gradient';
 
 type RootStackParamList = {
   TaskCard: { task: any };
@@ -19,6 +20,7 @@ type Task = {
   deadline: string;
   status: 'Completed' | 'Pending';
   question: string;
+  score?: number | string;
 };
 
 type Props = NativeStackScreenProps<RootStackParamList, 'TaskCard'>;
@@ -57,67 +59,111 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
           </View>
 
           <View style={styles.taskCard}>
-            <View style={styles.textRow}>
+            <View style={styles.textColumn}>
               <Text style={styles.taskText}>Instructor Name</Text>
               <Text style={styles.taskValue}>{task.instructorname}</Text>
             </View>
 
-            <View style={styles.textRow}>
-              <Text style={styles.taskText}>Task</Text>
-              <Text style={styles.taskValue}>{task.task}</Text>
-            </View>
-
-            <View style={styles.textRow}>
+            <View style={styles.textColumn}>
               <Text style={styles.taskText}>Task Name</Text>
               <Text style={styles.taskValue}>{task.taskname}</Text>
             </View>
 
-            <View style={styles.textRow}>
+            <View style={styles.textColumn}>
               <Text style={styles.taskText}>Deadline</Text>
               <Text style={styles.taskValue}>{task.deadline}</Text>
             </View>
 
-            <View style={styles.textRow}>
-              <Text style={styles.taskText}>Doubt</Text>
-              <View style={styles.doubtRight}>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.doubtText}>{task.question}</Text>
+            <View style={styles.textColumn}>
+              <Text style={styles.taskText}>Question</Text>
+              <View style={styles.questionBox}>
+                <Text style={styles.questionText}>{task.question}</Text>
+              </View>
 
-                  {!isCompleted && (
-                    <>
-                      <TouchableOpacity style={styles.uploadButton} onPress={pickDocument}>
-                        <Ionicons name="cloud-upload-outline" size={20} color="#fff" />
-                        <Text style={styles.uploadText}>Upload</Text>
-                      </TouchableOpacity>
+              {!isCompleted && (
+                <>
+                  <TouchableOpacity onPress={pickDocument} style={{ borderRadius: 8, marginTop: 6, alignSelf: 'flex-start' }}>
+                    <LinearGradient
+                      colors={['#7B00FF', '#B200FF']}
+                      start={{ x: 0.134, y: 0.021 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.uploadButtonGradient}>
+                      <Ionicons name="cloud-upload-outline" size={20} color="#fff" />
+                      <Text style={styles.uploadText}>Upload</Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
 
-                      <Text
-                        style={[
-                          styles.fileName,
-                          !selectedFile && { color: '#9CA3AF', fontStyle: 'italic' },
-                        ]}>
-                        {selectedFile ? selectedFile : 'Upload Data'}
-                      </Text>
-                    </>
-                  )}
+
+                  <Text style={[styles.fileName, !selectedFile && { color: '#9CA3AF', fontStyle: 'italic' }]}>
+                    {selectedFile ? selectedFile : 'Upload Notes'}
+                  </Text>
+                </>
+              )}
+            </View>
+
+            <View style={styles.textColumn}>
+              <Text style={styles.taskText}>Status</Text>
+              <View style={styles.taskValueBox}>
+                <View
+                  style={[
+                    styles.statusButtonInsideBox,
+                    task.status === 'Completed' ? styles.completedStatus : styles.pendingStatus,
+                  ]}
+                >
+                  <Text style={styles.statusTextInside}>{task.status}</Text>
                 </View>
               </View>
             </View>
 
-            <View style={styles.textRow}>
-              <Text style={styles.taskText}>Action</Text>
-              <View
-                style={[
-                  styles.statusButton,
-                  task.status === 'Completed' ? styles.completed : styles.pending,
-                ]}>
-                <Text style={styles.statusText}>{task.status}</Text>
-              </View>
+            <View style={styles.textColumn}>
+              <Text style={styles.taskText}>Score</Text>
+              <Text style={styles.taskValue}>
+                <Text style={styles.taskValue}>
+                  {task.score || task.score === 0
+                    ? `${task.score} / 10`
+                    : 'Yet To Complete'}
+                </Text>
+
+              </Text>
+
             </View>
 
+            {isCompleted && (
+              <View style={styles.textColumn}>
+                <Text style={styles.taskText}>Notes</Text>
+                <View style={styles.viewNotesBox}>
+                  <Text style={styles.notesText}>{task.localFilePath}</Text>
+                  <TouchableOpacity
+                    style={{ borderRadius: 8, marginLeft: 10 }}
+                    onPress={() => {
+                      Alert.alert('View Notes', 'Opening notes...');
+                    }}
+                  >
+                    <LinearGradient
+                      colors={['#7B00FF', '#B200FF']}
+                      start={{ x: 0.134, y: 0.021 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.uploadButtonGradient} 
+                    >
+                      <Text style={styles.uploadText}>View</Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
+
+                </View>
+              </View>
+            )}
+
+
             {!isCompleted && (
-              <View style={styles.submitContainer}>
+              <View style={styles.submitContainers}>
                 <TouchableOpacity
-                  style={[styles.submitButton, !selectedFile && styles.submitButtonDisabled]}
+                  style={[styles.cancelButton]}
+                  onPress={() => navigation.goBack()}>
+                  <Text style={styles.cancelText}>Cancel</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  disabled={!selectedFile}
                   onPress={() => {
                     if (!selectedFile) {
                       toast.error('Missing File', 'Please upload a file before submitting.');
@@ -126,11 +172,22 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
                       toast.success('Success', 'File uploaded successfully!');
                       navigation.goBack();
                     }
-                  }}>
-                  <Text style={styles.submitText}>Submit</Text>
+                  }}
+                  style={{ flex: 1, borderRadius: 8 }}
+                >
+                  <LinearGradient
+                    colors={selectedFile ? ['#7B00FF', '#B200FF'] : ['#9CA3AF', '#9CA3AF']}
+                    start={{ x: 0.134, y: 0.021 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.submitButtonGradient}
+                  >
+                    <Text style={styles.submitText}>Submit</Text>
+                  </LinearGradient>
                 </TouchableOpacity>
+
               </View>
             )}
+
           </View>
         </View>
       </SafeAreaView>
@@ -167,26 +224,43 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-  },
-  doubtRight: {
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: 5
   },
+  textColumn: {
+    flexDirection: 'column',
+    marginBottom: 12,
+  },
+  taskText: {
+    fontSize: 14,
+    color: '#000',
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  taskValue: {
+    fontSize: 16,
+    color: '#6B7280',
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+
+
   doubtText: {
-    fontSize: 18,
-    color: '#716F6F',
-    flexShrink: 1,
-    marginRight: 10,
+    fontSize: 16,
+    color: '#6B7280',
+    marginBottom: 6,
   },
-  textRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginVertical: 8,
-  },
-  taskText: { fontSize: 18, color: '#716F6F', width: '35%' },
-  taskValue: { fontSize: 18, color: '#716F6F', flex: 1, flexWrap: 'wrap' },
   uploadButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -221,10 +295,143 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignSelf: 'flex-end',
   },
+  taskValueBox: {
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+    width: '100%',
+    alignSelf: 'stretch',
+  },
   submitText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',
   },
+  submitContainers: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 16,
+    gap: 10,
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: '#E5E7EB',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+
+  cancelText: {
+    color: '#374151',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  statusButtonInsideBox: {
+    paddingVertical: 8,
+    borderRadius: 6,
+    width: '35%',
+    alignItems: 'center',
+  },
+
+
+  completedStatus: {
+    backgroundColor: '#4ADE80',
+  },
+
+  pendingStatus: {
+    backgroundColor: '#9CA3AF',
+  },
+
+  statusTextInside: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  uploadButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+  },
+  submitButtonGradient: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  questionBox: {
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+    width: '100%',
+  },
+
+  questionText: {
+    fontSize: 16,
+    color: '#6B7280',
+  },
+  viewNotesBox: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+    width: '100%',
+  },
+
+  notesText: {
+    fontSize: 16,
+    color: '#6B7280',
+    flex: 1,
+  },
+
+  viewButton: {
+    backgroundColor: '#3B82F6',
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 6,
+    marginLeft: 10,
+  },
+
+  viewButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+
+
+
+
 });
+
