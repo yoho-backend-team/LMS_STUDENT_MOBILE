@@ -18,7 +18,7 @@ export const fetchFaqThunk = (params?: any) => async (dispatch: any) => {
   try {
     dispatch(fetchFaqStart());
     const items = await fetchFaqServices(params);
-    console.log("🟢 Data returned from service:", items);
+    console.log(" Data returned from service:", items);
     dispatch(fetchFaqData(items));
   } catch (error: any) {
     console.log("Error in fetchFaqThunk:", error);

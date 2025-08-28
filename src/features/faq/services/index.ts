@@ -46,14 +46,14 @@
 
 
 // features/faq/services/index.ts
-import httpClient from "../../../api/httpClients";   // ← path to your HttpClient.ts
+import httpClient from "../../../api/httpClients";   
 
 export const fetchFaqServices = async (params?: any) => {
   try {
     const response = await httpClient.get("/institutes/faq/all", params, "student");
-    console.log("🔵 API raw response:", response?.data);
+    console.log(" API raw response:", response?.data);
     const data = (response as any)?.data?.data ?? (response as any)?.data ?? [];
-    return data; // expect FaqItem[]
+    return data; 
   } catch (error) {
     console.log("Error fetching faq services:", error);
     throw error;

@@ -66,14 +66,14 @@ const FAQ = () => {
   const [search, setSearch] = useState("");
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
-  // 🔹 Call API
+  
   useEffect(() => {
-    dispatch(fetchFaqThunk()); // ✅ no params
+    dispatch(fetchFaqThunk());
   }, [dispatch]);
 
-  // 🔹 Debug logs
+  
   useEffect(() => {
-    console.log("🟡 faqData:", faqData, "loading:", loading, "error:", error);
+    console.log(" faqData:", faqData, "loading:", loading, "error:", error);
   }, [faqData, loading, error]);
 
   const filteredFaqs = useMemo<FaqItem[]>(() => {
