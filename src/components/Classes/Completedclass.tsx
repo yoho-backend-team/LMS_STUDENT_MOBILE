@@ -94,7 +94,7 @@ const CompleteClassDetails: React.FC<ClassDataProps> = ({ classData }) => {
 
 const styles = StyleSheet.create({
   screen: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 15,
     backgroundColor: COLORS.white,
   },
   backbutton: {
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
+    marginVertical: 5,
     backgroundColor: COLORS.white,
   },
   backButton: {

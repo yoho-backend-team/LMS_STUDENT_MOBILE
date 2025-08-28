@@ -196,8 +196,6 @@ const Profile = () => {
           image: response?.data?.data?.file,
         });
 
-        console.log(updateResponse, 'profile update response');
-
         if (updateResponse) {
           setIsEditing(false);
           dispatch(getStudentProfileThunk({}));

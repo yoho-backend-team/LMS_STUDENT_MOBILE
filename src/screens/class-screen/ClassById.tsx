@@ -32,8 +32,6 @@ const ClassById = () => {
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
       <SafeAreaView edges={['top']} style={styles.container}>
-        <Header />
-
         {/* code inside the view section*/}
         <View>
           <CompleteClassDetails classData={classIdData} />
@@ -48,7 +46,7 @@ export default ClassById;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 20,
+    paddingTop: 10,
     backgroundColor: COLORS.white,
   },
 });
