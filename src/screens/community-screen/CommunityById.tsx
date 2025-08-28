@@ -247,7 +247,7 @@ const CommunityById: React.FC = () => {
         const heightDifference = contentHeight - previousContentHeight;
         requestAnimationFrame(() => {
           scrollViewRef.current?.scrollTo({
-            y: heightDifference + 50, 
+            y: heightDifference + 50,
             animated: false,
           });
         });
@@ -305,10 +305,8 @@ const CommunityById: React.FC = () => {
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
       <SafeAreaView edges={['top']} style={styles.container}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-          <KeyboardAvoidingView
-            style={{ flex: 1 }}
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
+          <View style={{ flex: 1 }}>
+            {/* Header */}
             <View style={styles.header}>
               <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                 <Ionicons name="arrow-back" size={24} color="#333" />
@@ -324,16 +322,18 @@ const CommunityById: React.FC = () => {
               </View>
             </View>
 
+            {/* Messages */}
             <ScrollView
               ref={scrollViewRef}
-              style={styles.chatContainer}
-              contentContainerStyle={styles.chatContent}
+              style={[styles.chatContainer, { flex: 1 }]}
+              contentContainerStyle={[styles.chatContent, { flexGrow: 1 }]}
               showsVerticalScrollIndicator={false}
               onScroll={handleScroll}
               onContentSizeChange={handleContentSizeChange}
               scrollEventThrottle={16}
               removeClippedSubviews={true}
-              keyboardShouldPersistTaps="handled">
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="interactive">
               {(loadingMore || isLoadingAtTop) && (
                 <View style={styles.loadingContainer}>
                   <ActivityIndicator size="small" color={COLORS.blue_01} />
@@ -356,24 +356,30 @@ const CommunityById: React.FC = () => {
               </TouchableOpacity>
             )}
 
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.textInput}
-                placeholder="Type a Message"
-                placeholderTextColor="#999"
-                value={message}
-                onChangeText={setMessage}
-                multiline
-              />
-              <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
-                <Ionicons name="send" size={20} color="#fff" />
-              </TouchableOpacity>
-            </View>
-          </KeyboardAvoidingView>
+            {/* Input with KeyboardAvoiding */}
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+              keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Type a Message"
+                  placeholderTextColor="#999"
+                  value={message}
+                  onChangeText={setMessage}
+                  multiline
+                />
+                <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+                  <Ionicons name="send" size={20} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            </KeyboardAvoidingView>
+          </View>
         </TouchableWithoutFeedback>
       </SafeAreaView>
     </>
   );
+
 };
 
 export default CommunityById;

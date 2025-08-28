@@ -15,7 +15,7 @@ export const GetallMessageThunks = (params: any) => async (dispatch: any) => {
   try {
     const result = await GetAllMessage(params);
     dispatch(getMessage(result));
-    return result.data;
+    return result?.data;
   } catch (error) {
     console.error('Error in communityThunks', error);
   }
