@@ -95,7 +95,9 @@ const Classcards = () => {
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>Action</Text>
-        <TouchableOpacity onPress={() => Linking.openURL(item.video_url)} style={styles.joinButton}>
+        {/* <TouchableOpacity onPress={() => Linking.openURL(item.video_url)} style={styles.joinButton}> */}
+        <TouchableOpacity onPress={() => navigation.navigate('ClassByIdScreen' as never)}style={styles.joinButton}>
+          {/* <Text style={styles.buttonText}>{item.video_url}</Text> */}
           <Text style={styles.buttonText}>Completed</Text>
         </TouchableOpacity>
       </View>
@@ -122,7 +124,8 @@ const Classcards = () => {
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>Action</Text>
-        <TouchableOpacity onPress={() => Linking.openURL(item.video_url)} style={styles.joinButton}>
+        {/* <TouchableOpacity onPress={() => Linking.openURL(item.video_url)} style={styles.joinButton}> */}
+          <TouchableOpacity onPress={() => navigation.navigate('ClassByIdScreen' as never)} style={styles.joinButton}>
           <Text style={styles.buttonText}>Completed</Text>
         </TouchableOpacity>
       </View>

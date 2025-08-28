@@ -43,7 +43,7 @@ const Routes = () => {
     TicketViewScreen: undefined;
     CreateTicket: undefined;
     ClassesScreen: undefined;
-    ClassByIdScreen:undefined;
+    ClassByIdScreen: undefined;
     ClassViewScreen: undefined;
     CoursesScreen: undefined;
     CourseViewScreen: undefined;

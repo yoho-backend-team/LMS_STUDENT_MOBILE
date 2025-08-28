@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     marginBottom: 24,
-    
+
     shadowColor: '#FFFFFF',
     shadowOffset: { width: -6, height: -6 },
     shadowOpacity: 1,
@@ -284,3 +284,39 @@ const styles = StyleSheet.create({
 });
 
 export default CompleteClassDetails;
+
+
+// import React, { useEffect } from 'react';
+// import { View, Text } from 'react-native';
+// import { useRoute } from '@react-navigation/native';
+// import { useDispatch } from 'react-redux';
+// import { GetClassesByCourseIdThunks } from '../../features/Classes/reducers/thunks';
+// import { AppDispatch } from '../../store/store';
+
+
+// const CompleteClassDetails = () => {
+//   type RouteParams = {
+//     courseId: string;
+//   };
+
+//   const route = useRoute();
+
+//   const { courseId } = route.params as RouteParams;
+//   const dispatch = useDispatch<AppDispatch>();
+//   useEffect(() => {
+//     dispatch(
+//       GetClassesByCourseIdThunks({
+//         courseId,
+//         classType: 'completed',
+//       })
+//     );
+//   }, [courseId]);
+
+//   return (
+//     <View>
+//       <Text>Class Details</Text>
+//     </View>
+//   );
+// };
+
+// export default CompleteClassDetails;

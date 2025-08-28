@@ -38,10 +38,10 @@ const TicketById = () => {
   console.log(ticket, 'ticket data');
 
   return (
-    <>
-      <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
-      <SafeAreaView edges={['top']} style={styles.container}>
-        <Header />
+    // <>
+    //   <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
+    //   <SafeAreaView edges={['top']} style={styles.container}>
+    //     <Header />
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.backContainer}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -83,15 +83,15 @@ const TicketById = () => {
             <Text style={styles.viewValue}>{ticket.id}</Text>
           </View>
         </ScrollView>
-      </SafeAreaView>
-    </>
+    //   </SafeAreaView>
+    // </>
   );
 };
 
 export default TicketById;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 10, backgroundColor: '#d5e2f1ff' },
+  container: { flex: 1, padding: 10, backgroundColor: COLORS.white },
   backContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -102,10 +102,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     marginLeft: 10,
-    
   },
   viewCard: {
-    backgroundColor: '#d5e2f1ff',
+    backgroundColor: '#fff',
     padding: 15,
     borderRadius: 8,
     shadowColor: '#000',

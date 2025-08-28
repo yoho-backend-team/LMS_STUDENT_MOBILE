@@ -93,7 +93,7 @@ const CreateTicket = () => {
         user: '67f3b8feb8d2634300cc8819',
       };
 
-      await createticketdata(ticketData, {});
+     
       toast.success('Success', 'Ticket created successfully');
       navigation.goBack();
     } catch (err) {
@@ -198,7 +198,7 @@ const CreateTicket = () => {
 export default CreateTicket;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: '#d5e2f1ff' },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -215,14 +215,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#cfdeedff',
   },
   textarea: { height: 100, textAlignVertical: 'top' },
   dropdownContainer: {
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 8,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#cfdeedff',
     overflow: 'hidden',
     marginBottom: 15,
   },
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#cfdeedff',
     marginTop: 10,
   },
   attachmentContent: { justifyContent: 'center', alignItems: 'center', gap: 5 },
@@ -250,13 +250,13 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     marginTop: 30,
-    backgroundColor: COLORS.blue_01,
+     backgroundColor: '#7b00ff',
     paddingVertical: 15,
     borderRadius: 8,
     alignItems: 'center',
   },
   submitButtonDisabled: {
-    backgroundColor: COLORS.shadow_01,
+     backgroundColor: '#7b00ff',
   },
   submitText: { color: '#fff', fontSize: 18, fontWeight: '600' },
 });

@@ -24,52 +24,43 @@ const Tickets = () => {
   const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation<any>();
   const dispatch = useDispatch<any>();
-    const tickets ='';
-  const totalPages ='';
-  const totalTickets = '';
+  const tickets = useSelector(GetTicketSelector);
+  const totalPages = tickets?.totalPages || 1;
+  const totalTickets = tickets?.totalTickets || 0;
+
+  const fetchTickets = (page = currentPage) => {
+    dispatch(GetallTicketThunks({ page }));
+  };
+
+  useEffect(() => {
+    fetchTickets(1);
+  }, []);
 
   const onRefresh = () => {
     setRefreshing(true);
+    fetchTickets(currentPage);
     setRefreshing(false);
   };
 
-  const dummyTickets = [
-  {
-    ticket_id: 'TICKET001',
-    createdAt: '2025-08-20T10:00:00Z',
-    query: 'Unable to login to app',
-    description: 'User reports they cannot log into the app using their credentials.',
-    status: 'opened',
-  },
-  {
-    ticket_id: 'TICKET002',
-    createdAt: '2025-08-18T14:30:00Z',
-    query: 'Payment not processed',
-    description: 'Payment for the subscription did not go through for this user.',
-     status: 'opened',
-  },
-  {
-    ticket_id: 'TICKET003',
-    createdAt: '2025-08-15T09:15:00Z',
-    query: 'App crashes on launch',
-    description: 'App crashes immediately when opened on Android 11.',
-     status: 'opened',
-  },
-   {
-    ticket_id: 'TICKET004',
-    createdAt: '2025-08-18T14:30:00Z',
-    query: 'Payment not processed',
-    description: 'Payment for the subscription did not go through for this user.',
-     status: 'closed',
-  },
-  {
-    ticket_id: 'TICKET005',
-    createdAt: '2025-08-15T09:15:00Z',
-    query: 'App crashes on launch',
-    description: 'App crashes immediately when opened on Android 11.',
-     status: 'opened',
-  },
-];
+  const loadNextPage = () => {
+    if (currentPage < totalPages) {
+      const nextPage = currentPage + 1;
+      setCurrentPage(nextPage);
+      fetchTickets(nextPage);
+    }
+  };
+
+  const loadPrevPage = () => {
+    if (currentPage > 1) {
+      const prevPage = currentPage - 1;
+      setCurrentPage(prevPage);
+      fetchTickets(prevPage);
+    }
+  };
+
+  const filteredTickets = tickets?.tickets?.filter((ticket: any) =>
+    filter === 'All' ? true : ticket?.status?.toLowerCase() === filter.toLowerCase()
+  );
 
   return (
     <>
@@ -106,8 +97,8 @@ const Tickets = () => {
           style={styles.cards}
           showsVerticalScrollIndicator={false}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-          {dummyTickets?.length > 0 ? (
-            dummyTickets.map((ticket: any) => (
+          {filteredTickets?.length > 0 ? (
+            filteredTickets.map((ticket: any) => (
               <TouchableOpacity
                 key={ticket.id}
                 style={styles.card}
@@ -131,7 +122,7 @@ const Tickets = () => {
                   }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Icon name="link" size={18} color="gray" />
-                    <Text style={{ marginLeft: 5, color: 'gray' }}>1  {ticket.id}</Text>
+                    <Text style={{ marginLeft: 5, color: 'gray' }}>ID : {ticket.id}</Text>
                   </View>
                   <Text
                     style={[
@@ -152,6 +143,27 @@ const Tickets = () => {
           )}
           <View style={{ marginTop: 15 }}></View>
         </ScrollView>
+
+        {/* Pagination controls */}
+        <View style={styles.pagination}>
+          <TouchableOpacity
+            onPress={loadPrevPage}
+            disabled={currentPage === 1}
+            style={[styles.pageBtn, currentPage === 1 && styles.disabledBtn]}>
+            <Text style={styles.pageText}>Previous</Text>
+          </TouchableOpacity>
+
+          <Text style={styles.pageInfo}>
+            Page {currentPage} of {totalPages}
+          </Text>
+
+          <TouchableOpacity
+            onPress={loadNextPage}
+            disabled={currentPage === totalPages}
+            style={[styles.pageBtn, currentPage === totalPages && styles.disabledBtn]}>
+            <Text style={styles.pageText}>Next</Text>
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
     </>
   );
@@ -160,7 +172,7 @@ const Tickets = () => {
 export default Tickets;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 10, backgroundColor: '#d5e2f1ff' },
+  container: { flex: 1, paddingTop: 10, backgroundColor: COLORS.white },
   headerText: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -182,7 +194,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   creatbutton: {
-    backgroundColor: '#7b00ff',
+    backgroundColor: '#2B00FF',
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
@@ -192,16 +204,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   creatbuttonText: { color: '#fff', fontSize: 14, fontWeight: '600', textAlign: 'center' },
-  activeButton: { backgroundColor: '#7b00ff' },
+  activeButton: { backgroundColor: '#2B00FF' },
   inactiveButton: { backgroundColor: COLORS.shadow_01 },
   activeText: { color: '#fff' },
   cards: { padding: 10, flex: 1 },
   card: {
-    backgroundColor: '#cfdeedff',
+    backgroundColor: '#fff',
     padding: 15,
     marginTop: 15,
     borderRadius: 8,
-    shadowColor: '#594969ff',
+    shadowColor: '#000',
     elevation: 4,
   },
   cardTitle: { fontSize: 15, fontWeight: 'bold', marginVertical: 5 },
@@ -216,7 +228,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   statusOpen: {
-    backgroundColor:'#7B00FF',
+    backgroundColor: COLORS.light_green,
     color: COLORS.white,
   },
   statusClosed: {
