@@ -1,15 +1,3 @@
-// import Client from "../../../api/index"
-
-// export const getcoursedata = async (params: any) => {
-//   try {
-//     const response = await Client.student.course.get(params);
-//     return response?.data; 
-//   } catch (error) {
-//    console.log(" [Service] Calling API with params:",);
-//     console.error('Error in getcoursedata:', error);
-//     throw error;
-//   }
-// }
 
 import Client from "../../../api/index";
 
