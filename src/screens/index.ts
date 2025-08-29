@@ -1,5 +1,5 @@
 import ActivityLogsScreen from './activityLogs-screen/ActivityLogs';
-import AttendanceScreen from './attendance-screen/Attendance';
+// import AttendanceScreen from './attendance-screen/Attendance';
 import EmailVerificationScreen from './auth-screens/EmailVerification';
 import LoginScreen from './auth-screens/Login';
 import OtpVerificationScreen from './auth-screens/OtpVerification';
@@ -20,10 +20,12 @@ import ProfileScreen from './profile-screen/Profile';
 import CreateTicketScreen from './ticket-screen/CreateTicket';
 import TicketByIdScreen from './ticket-screen/TicketById';
 import TicketsScreen from './ticket-screen/Tickets';
+import AttendanceoneScreen from './attendance-screen/Attendanceone';
 
 export {
 	ActivityLogsScreen,
-	AttendanceScreen,
+	// AttendanceScreen,
+	AttendanceoneScreen,
 	ClassByIdScreen,
 	ClassesScreen,
 	CommunitiesScreen,

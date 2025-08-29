@@ -15,7 +15,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 import { bottom_tabs, COLORS, FONTS, screens, SIZES, SPACING } from '../constants';
 import {
-  AttendanceScreen,
+  AttendanceoneScreen,
+  // AttendanceScreen,
   ClassesScreen,
   CommunitiesScreen,
   CouresScreen,
@@ -170,7 +171,8 @@ const MainLayout: React.FC = () => {
                 {item.label === screens.home && <HomeScreen />}
                 {item.label === screens.course && <CouresScreen />}
                 {item.label === screens.classes && <ClassesScreen />}
-                {item.label === screens.attendance && <AttendanceScreen />}
+                {/* {item.label === screens.attendance && <AttendanceScreen />} */}
+                {item.label === screens.attendance && <AttendanceoneScreen />}
                 {item.label === screens.community && <CommunitiesScreen />}
               </View>
             )}

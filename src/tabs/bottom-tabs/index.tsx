@@ -2,11 +2,13 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StyleSheet } from 'react-native';
 import {
   HomeScreen,
-  AttendanceScreen,
+
   ClassesScreen,
   CouresScreen,
   ProfileScreen,
+  AttendanceoneScreen,
 } from '~/screens';
+
 
 const BottomTabs = () => {
   const Tab = createBottomTabNavigator();
@@ -15,7 +17,8 @@ const BottomTabs = () => {
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Courses" component={CouresScreen} />
       <Tab.Screen name="Classes" component={ClassesScreen} />
-      <Tab.Screen name="Attendance" component={AttendanceScreen} />
+      {/* <Tab.Screen name="Attendance" component={AttendanceoneScreen} /> */}
+      <Tab.Screen name="Attendanceone" component={AttendanceoneScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
