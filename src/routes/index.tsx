@@ -1,3 +1,5 @@
+// routes/index.tsx
+
 import { useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
@@ -30,35 +32,42 @@ import ChatbotScreen from '~/screens/ChatbotScreen/chatbot';
 import TaskCard from '~/components/courses/TaskCard';
 import SessionExpiredModal from '~/components/Sessionexpired/sessionexpire';
 
-const Routes = () => {
-  type RootStackParamList = {
-    AuthStackstudent: undefined;
-    Student: undefined;
-    FAQ: undefined;
-    StudentDrawer: undefined;
-    login: undefined;
-    ForgetPassword: undefined;
-    OtpVerification: undefined;
-    ResetPassword: undefined;
-    Payment: undefined;
-    Helpcenter: undefined;
-    ActivityLog: undefined;
-    TicketsScreen: undefined;
-    TicketViewScreen: undefined;
-    CreateTicket: undefined;
-    ClassesScreen: undefined;
-    ClassByIdScreen: undefined;
-    ClassViewScreen: undefined;
-    CoursesScreen: undefined;
-    CourseViewScreen: undefined;
-    Notification: undefined;
-    Placement: undefined;
-    Profile: undefined;
-    CommunitiesScreen: undefined;
-    CommunityViewScreen: undefined;
-  };
+/* -------------------------
+   🔹 Exported RootStackParamList
+-------------------------- */
+export type RootStackParamList = {
+  AuthStackstudent: undefined;
+  Student: undefined;
+  FAQ: undefined;
+  StudentDrawer: undefined;
+  login: undefined;
+  ForgetPassword: undefined;
+  OtpVerification: undefined;
+  ResetPassword: undefined;
+  Payment: undefined;
+  Helpcenter: undefined;
+  ActivityLog: undefined;
+  TicketsScreen: undefined;
+  TicketViewScreen: undefined;
+  CreateTicket: undefined;
+  ClassesScreen: undefined;
+  ClassByIdScreen: undefined;
+  ClassViewScreen: undefined;
+  CoursesScreen: undefined;
+  CourseById: undefined;
+  Notification: undefined;
+  Placement: undefined;
+  Profile: undefined;
+  CommunitiesScreen: undefined;
+  CommunityViewScreen: undefined;
+  SpokenEnglish: undefined;
+  ChatbotScreen: undefined;
+  TaskCard: undefined;
+};
 
-  const Stack: any = createNativeStackNavigator<RootStackParamList>();
+const Stack = createNativeStackNavigator<RootStackParamList>();
+
+const Routes = () => {
   const navigation =
     useNavigation<import('@react-navigation/native').NavigationProp<RootStackParamList>>();
 
@@ -82,7 +91,6 @@ const Routes = () => {
     global.handleSessionExpired = () => {
       setShowSessionModal(true);
     };
-
     return () => {
       delete global.handleSessionExpired;
     };
@@ -116,8 +124,8 @@ const Routes = () => {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="login" component={LoginScreen} />
         <Stack.Screen name="ForgetPassword" component={EmailVerificationScreen} />
-        <Stack.Screen name="OtpVerification" component={OtpVerificationScreen} />
-        <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+        {/* <Stack.Screen name="OtpVerification" component={OtpVerificationScreen} />
+        <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} /> */}
       </Stack.Navigator>
     );
   };
@@ -136,7 +144,7 @@ const Routes = () => {
         <Stack.Screen name="ClassByIdScreen" component={ClassByIdScreen} />
         <Stack.Screen name="ClassViewScreen" component={ClassByIdScreen} />
         <Stack.Screen name="CoursesScreen" component={CouresScreen} />
-        <Stack.Screen name="CourseViewScreen" component={CourseByIdScreen} />
+        <Stack.Screen name="CourseById" component={CourseByIdScreen} />
         <Stack.Screen name="Notification" component={NotificationsScreen} />
         <Stack.Screen name="Placement" component={PlacementScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
@@ -145,7 +153,7 @@ const Routes = () => {
         <Stack.Screen name="CommunityViewScreen" component={CommunityByIdScreen} />
         <Stack.Screen name="SpokenEnglish" component={SpokenEnglishScreen} />
         <Stack.Screen name="ChatbotScreen" component={ChatbotScreen} />
-        <Stack.Screen name="TaskCard" component={TaskCard} />
+        {/* <Stack.Screen name="TaskCard" component={TaskCard} /> */}
       </Stack.Navigator>
     );
   };
@@ -161,4 +169,4 @@ const Routes = () => {
   );
 };
 
-export default Routes;
+export default Routes;

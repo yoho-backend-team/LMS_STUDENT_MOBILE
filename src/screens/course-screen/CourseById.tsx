@@ -736,36 +736,116 @@
 //     color: '#716F6F',
 //   },
 // });
+
+
+// import React from 'react';
+// import { StatusBar, StyleSheet, View } from 'react-native';
+// import { SafeAreaView } from 'react-native-safe-area-context';
+// import Header from '~/components/shared/Header';
+// import { COLORS } from '~/constants';
+
+// export default function CourseById() {
+//   return (
+//     <>
+//       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
+//       <SafeAreaView edges={['top']} style={styles.container}>
+//         <Header />
+//         <View />
+//       </SafeAreaView>
+//     </>
+//   );
+// }
+
+// const styles = StyleSheet.create({
+//   container: { flex: 1, paddingTop: 20, backgroundColor: COLORS.white },
+// });
+
+
+
+
+// src/screens/CourseById.tsx
 import React from 'react';
-import { StatusBar, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Header from '~/components/shared/Header';
-import { COLORS } from '~/constants';
+import {
+  View,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  Dimensions,
+  Platform,
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
+const { width } = Dimensions.get('window');
 
+export default function CourseById() {
+  const navigation = useNavigation();
 
-const CourseById = () => {
-	 return (
-    <>
-      <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
-      <SafeAreaView edges={['top']} style={styles.container}>
-        <Header />
+  return (
+    <View style={styles.root}>
+      {/* Header */}
+      <View style={styles.headerRow}>
+        <TouchableOpacity
+          style={styles.backBtn}
+          activeOpacity={0.8}
+          onPress={() => navigation.goBack()}
+        >
+          <Image
+            source={require('../../assets/courses/arrow.png')}
+            style={styles.backIcon}
+          />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Course Details</Text>
+      </View>
 
-        {/* code inside the view section*/}
-        <View>
-     
-        </View>
-      </SafeAreaView>
-    </>
+      {/* Banner – uses Image2.png */}
+      <View style={styles.bannerCard}>
+        <Image
+          source={require('../../assets/courses/image2.png')}
+          style={styles.bannerImage}
+          resizeMode="cover"
+        />
+      </View>
+    </View>
   );
+}
+
+const CARD_BG = '#FFFFFF';
+const TEXT_DARK = '#292D32';
+
+const SHADOW = {
+  ...Platform.select({
+    ios: {
+      shadowColor: '#000',
+      shadowOpacity: 0.08,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 6 },
+    },
+    android: { elevation: 6 },
+  }),
 };
 
-export default CourseById;
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 20,
-    backgroundColor: COLORS.white,
-  },
+  root: { flex: 1, backgroundColor: '#EBEFF3', padding: 16 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 14 },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: CARD_BG,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+    ...SHADOW,
+  },
+  backIcon: { width: 18, height: 18, resizeMode: 'contain' },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: TEXT_DARK },
+
+  bannerCard: {
+    borderRadius: 14,
+    overflow: 'hidden',
+    backgroundColor: CARD_BG,
+    ...SHADOW,
+  },
+  bannerImage: { width: '100%', height: width * 0.55 },
 });

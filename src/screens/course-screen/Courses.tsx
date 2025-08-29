@@ -1,583 +1,659 @@
-// import React, { useEffect, useState, useCallback } from 'react';
+// import React from 'react';
 // import {
-//   StatusBar,
-//   StyleSheet,
-//   Text,
 //   View,
+//   Text,
 //   Image,
-//   ScrollView,
+//   StyleSheet,
 //   TouchableOpacity,
-//   RefreshControl,
+//   ScrollView,
+//   Dimensions,
+//   Platform,
 // } from 'react-native';
-// import { SafeAreaView } from 'react-native-safe-area-context';
-// import Header from '~/components/shared/Header';
-// import { COLORS } from '~/constants';
-// import { useNavigation } from '@react-navigation/native';
-// import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-// import { useDispatch, useSelector } from 'react-redux';
-// import { AppDispatch } from '~/store/store';
-// import { getStudentcourse } from '~/features/Courses/Reducers/thunks';
-// import { selectCourse } from '~/features/Courses/Reducers/selectors';
-// import { getImageUrl } from '~/utils/imageUtils';
-// import { Ionicons } from '@expo/vector-icons';
 
-// type RootStackParamList = {
-//   Courses: undefined;
-//   CourseViewScreen: { course: Course };
-// };
+// const { width } = Dimensions.get('window');
 
-// type Course = {
-//   id: number;
-//   title: string;
-//   description: string;
-//   modules: string;
-//   duration: string;
-//   image: any;
-// };
+// const items = [
+//   {
+//     title: "HTML, CSS,\nJavascript",
+//     icon: require("../../assets/courses/module1.png"),
+//     iconSide: "left",
+//     active: true,
+//   },
+//   {
+//     title: "Mongodb,\nExpress, Nodejs",
+//     icon: require("../../assets/courses/react1.png"),
+//     iconSide: "right",
+//     active: false,
+//   },
+//   {
+//     title: "React",
+//     icon: require("../../assets/courses/angular1.png"),
+//     iconSide: "left",
+//     active: true,
+//   },
+//   {
+//     title: "Angular",
+//     icon: require("../../assets/courses/google1.png"),
+//     iconSide: "right",
+//     active: false,
+//   },
+//   {
+//     title: "Google Developer",
+//     icon: require("../../assets/courses/js1.png"),
+//     iconSide: "left",
+//     active: true,
+//   },
+//   {
+//     title: "Javascript",
+//     icon: require("../../assets/courses/python1.png"),
+//     iconSide: "right",
+//     active: false,
+//   },
+// ];
 
-// type CoursesScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Courses'>;
-
-// const Courses = () => {
-//   const navigation = useNavigation<any>();
-//   const dispatch = useDispatch<AppDispatch>();
-//   const coursedata = useSelector(selectCourse);
-
-//   const [refreshing, setRefreshing] = useState(false);
-
-//   const fetchData = useCallback(async () => {
-//     try {
-//       const params = {
-//         courseId: '67f3b7fcb8d2634300cc87b6',
-//       };
-//       await dispatch(getStudentcourse(params));
-//     } catch (error) {
-//       console.error('Course fetch error:', error);
-//     }
-//   }, [dispatch]);
-
-//   useEffect(() => {
-//     fetchData();
-//   }, [fetchData]);
-
-//   const onRefresh = async () => {
-//     setRefreshing(true);
-//     await fetchData();
-//     setRefreshing(false);
-//   };
-//   const course = coursedata?.data;
-
+// const Courses: React.FC = () => {
 //   return (
-//     <>
-//       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
-//       <SafeAreaView edges={['top']} style={styles.container}>
-//         <Header />
+//     <View style={styles.root}>
+//       <ScrollView
+//         style={styles.container}
+//         contentContainerStyle={{ paddingBottom: 32 }}
+//         showsVerticalScrollIndicator={false}
+//       >
+//         {/* Header */}
+//         <View style={styles.headerRow}>
+//           <TouchableOpacity style={styles.backBtn} activeOpacity={0.8}>
+//             <Image
+//               source={require("../../assets/courses/arrow.png")}
+//               style={styles.backIcon}
+//             />
+//           </TouchableOpacity>
 
-//         <ScrollView
-//           style={styles.scrollContainer}
-//           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-//           <Text style={styles.heading}>Courses</Text>
+//           {/* Tabs */}
+//           <View style={styles.tabsWrap}>
+//             <View style={styles.tabsBg}>
+//               <TouchableOpacity style={styles.inactiveTab} activeOpacity={0.9}>
+//                 <Text style={styles.inactiveTabText}>Task & Projects</Text>
+//               </TouchableOpacity>
 
-//           {course && (
-//             <TouchableOpacity
-//               style={styles.card}
-//               onPress={() => navigation.navigate('CourseViewScreen', { course })}>
-//               <View style={styles.card}>
+//               <View style={styles.activeTab}>
+//                 <Text style={styles.activeTabText}>Course Track</Text>
+//               </View>
+//             </View>
+//           </View>
+//         </View>
+
+//         {/* Title */}
+//         <Text style={styles.screenTitle}>Course Tracks</Text>
+
+//         {/* Banner */}
+//         <View style={styles.bannerCard}>
+//           <Image
+//             source={require("../../assets/courses/image1.png")}
+//             style={styles.bannerImage}
+//             resizeMode="cover"
+//           />
+//         </View>
+
+//         {/* Timeline Card */}
+//         <View style={styles.card}>
+//           <View style={styles.spine} />
+//           {items.map((row, idx) => (
+//             <View key={idx} style={styles.row}>
+//               {/* LEFT SIDE */}
+//               <View style={styles.side}>
+//                 {/* Show title on left if icon is on right */}
+//                 {row.iconSide === 'right' && (
+//                   <Text style={styles.sideText} numberOfLines={2}>
+//                     {row.title}
+//                   </Text>
+//                 )}
+//                 {/* Keep icon on left */}
+//                 {row.iconSide === 'left' && (
+//                   <View style={styles.sideInner}>
+//                     <View style={styles.curvedIconWrap}>
+//                       <Image source={row.icon} style={styles.curvedIcon} />
+//                     </View>
+//                   </View>
+//                 )}
+//               </View>
+
+//               {/* DOT */}
+//               <View style={styles.dotWrap}>
 //                 <Image
-//                   source={{ uri: getImageUrl(course?.image) }}
-//                   style={styles.courseImage}
-//                   resizeMode="contain"
+//                   source={
+//                     row.active
+//                       ? require("../../assets/courses/Vector.png")
+//                       : require("../../assets/courses/Vector 1.png")
+//                   }
+//                   style={styles.dotImage}
 //                 />
 //               </View>
 
-//               <Text style={styles.title}>{course.course_name}</Text>
-//               <Text style={styles.description}>
-//                 {course.description ?? 'No description available'}
-//               </Text>
-
-//               <View style={styles.footer}>
-//                 <View style={styles.footerItem}>
-//                   <Image
-//                     source={require('../../assets/courses/modules.png')}
-//                     style={{ width: 24, height: 24 }}
-//                   />
-//                   <Text style={styles.footerText}>
-//                     {course.coursemodules.length ?? '0'} modules
+//               {/* RIGHT SIDE */}
+//               <View style={styles.side}>
+//                 {/* Show title on right if icon is on left */}
+//                 {row.iconSide === 'left' && (
+//                   <Text style={styles.sideText} numberOfLines={2}>
+//                     {row.title}
 //                   </Text>
-//                 </View>
-
-//                 <View style={styles.footerItem}>
-//                   <Image
-//                     source={require('../../assets/courses/Alarm.png')}
-//                     style={{ width: 24, height: 24 }}
-//                   />
-//                   <Text style={styles.footerText}>{course.duration ?? 'N/A'}</Text>
-//                 </View>
+//                 )}
+//                 {/* Keep icon on right */}
+//                 {row.iconSide === 'right' && (
+//                   <View style={styles.sideInner}>
+//                     <View style={styles.curvedIconWrap}>
+//                       <Image source={row.icon} style={styles.curvedIcon} />
+//                     </View>
+//                   </View>
+//                 )}
 //               </View>
-//             </TouchableOpacity>
-//           )}
-//         </ScrollView>
-
-//         <TouchableOpacity
-//           style={styles.chatbotBtn}
-//           onPress={() => navigation.navigate('ChatbotScreen')}>
-//           <Ionicons name="chatbubble-ellipses" size={28} color="#fff" />
-//         </TouchableOpacity>
-//       </SafeAreaView>
-//     </>
+//             </View>
+//           ))}
+//         </View>
+//       </ScrollView>
+//     </View>
 //   );
 // };
 
 // export default Courses;
 
+// const CARD_BG = '#FFFFFF';
+// const TEXT_DARK = '#292D32';
+// const TEXT_MUTED = '#6B6E76';
+
+// const SHADOW = {
+//   ...Platform.select({
+//     ios: {
+//       shadowColor: '#000',
+//       shadowOpacity: 0.08,
+//       shadowRadius: 12,
+//       shadowOffset: { width: 0, height: 6 },
+//     },
+//     android: { elevation: 6 },
+//   }),
+// };
+
 // const styles = StyleSheet.create({
+//   root: { flex: 1, backgroundColor: '#EBEFF3' },
+
 //   container: {
 //     flex: 1,
-//     paddingTop: 10,
-//     backgroundColor: '#ebeff3',
+//     paddingHorizontal: 14,
+//     paddingTop: 14,
 //   },
-//   scrollContainer: {
-//     flex: 1,
-//     backgroundColor: '#ebeff3',
-//     padding: 18,
-//     marginTop: 10,
+
+//   headerRow: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
 //   },
-//   heading: {
-//     fontSize: 22,
-//     fontWeight: 'bold',
-//     color: '#1F2937',
-//     marginBottom: 16,
+//   backBtn: {
+//     width: 36,
+//     height: 36,
+//     borderRadius: 10,
+//     backgroundColor: CARD_BG,
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//     marginRight: 10,
+//     ...SHADOW,
 //   },
-//   card: {
-//     backgroundColor: '#ebeff3',
+//   backIcon: { width: 18, height: 18, resizeMode: 'contain' },
+
+//   tabsWrap: { flex: 1 },
+//   tabsBg: {
+//     flexDirection: 'row',
+//     backgroundColor: '#EDEDF3',
+//     padding: 4,
 //     borderRadius: 16,
-//     shadowColor: '#000',
-//     shadowOpacity: 0.1,
-//     shadowRadius: 6,
-//     shadowOffset: { width: 0, height: 2 },
-//     elevation: 3,
-//     padding: 16,
-//     marginBottom: 22,
 //   },
-//   courseImage: {
-//     width: '100%',
-//     height: 160,
+//   inactiveTab: {
+//     flex: 1,
 //     borderRadius: 12,
-//     marginBottom: 12,
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//     paddingVertical: 8,
 //   },
-//   title: {
-//     fontSize: 16,
-//     fontWeight: 'bold',
-//     color: '#2A2A2A',
+//   inactiveTabText: {
+//     color: TEXT_MUTED,
+//     fontSize: 12.5,
+//     fontWeight: '700',
+//   },
+//   activeTab: {
+//     flex: 1,
+//     borderRadius: 12,
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//     paddingVertical: 8,
+//     backgroundColor: '#8E2DE2',
+//   },
+//   activeTabText: {
+//     color: '#FFFFFF',
+//     fontSize: 12.5,
+//     fontWeight: '700',
+//   },
+
+//   screenTitle: {
+//     marginTop: 14,
+//     marginBottom: 10,
+//     fontSize: 18.5,
+//     fontWeight: '800',
+//     color: TEXT_DARK,
+//   },
+
+//   bannerCard: {
+//     borderRadius: 14,
+//     overflow: 'hidden',
+//     backgroundColor: CARD_BG,
+//     ...SHADOW,
+//   },
+//   bannerImage: {
+//     width: '100%',
+//     height: width * 0.36,
+//   },
+
+//   card: {
+//     marginTop: 16,
+//     paddingVertical: 18,
+//     paddingHorizontal: 12,
+//     borderRadius: 18,
+//     backgroundColor: '#F3F4F8',
+//     ...SHADOW,
+//   },
+
+//   spine: {
+//     position: 'absolute',
+//     left: '50%',
+//     width: 2,
+//     top: 18,
+//     bottom: 18,
+//     backgroundColor: '#D3D6DE',
+//     transform: [{ translateX: -1 }],
+//   },
+
+//   row: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     justifyContent: 'space-between',
+//     minHeight: 140,
+//   },
+
+//   side: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+//   sideInner: {
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//   },
+//   sideSpacer: { height: 100 },
+
+//   curvedIconWrap: {
+//     width: 80,
+//     height: 80,
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//     shadowColor: '#000',
+//     shadowOpacity: 0.06,
+//     shadowRadius: 8,
+//     shadowOffset: { width: 0, height: 3 },
+//     elevation: 4,
 //     marginBottom: 8,
 //   },
-//   description: {
-//     fontSize: 14,
-//     color: '#716F6F',
-//     lineHeight: 20,
-//     marginBottom: 16,
+
+//   curvedIcon: {
+//     width: 90,
+//     height: 90,
+//     resizeMode: 'contain',
 //   },
-//   footer: {
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
+
+//   sideText: {
+//     color: TEXT_DARK,
+//     fontSize: 13,
+//     fontWeight: '600',
+//     textAlign: 'center',
+//   },
+
+//   dotWrap: {
+//     width: 36,
 //     alignItems: 'center',
+//     justifyContent: 'center',
+//     marginLeft: -20,
 //   },
-//   footerItem: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//   },
-//   footerText: {
-//     marginLeft: 4,
-//     fontSize: 12,
-//     color: '#716F6F',
-//   },
-//   chatbotBtn: {
-//     position: 'absolute',
-//     bottom: 80,
-//     right: 20,
-//     backgroundColor: '#7B00FF',
-//     padding: 16,
-//     borderRadius: 50,
-//     shadowColor: '#000',
-//     shadowOpacity: 0.2,
-//     shadowRadius: 4,
-//     shadowOffset: { width: 0, height: 2 },
-//     elevation: 5,
-//   },
+//   dotImage: {
+//     width: 24,
+//     height: 24,
+//   },
 // });
 
 
 
-// Course.tsx
-import React from "react";
+
+import React from 'react';
 import {
-  Image,
-  ImageSourcePropType,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
   View,
-  Dimensions,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
   ScrollView,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
-import { useNavigation } from "@react-navigation/native";
+  Dimensions,
+  Platform,
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../routes/index';
 
-// ======== ASSETS (edit paths to match your project) ========
-const ASSETS = {
-  back: require("../../assets/icons/back.png"),
-  hero: require("../../assets/images/hero.jpg"),
+const { width } = Dimensions.get('window');
 
-  // left/right skill icons
-  htmlcssjs: require("../../assets/icons/htmlcssjs.png"),
-  react: require("../../assets/icons/react.png"),
-  angular: require("../../assets/icons/angular.png"),
-  node: require("../../assets/icons/node.png"),
-  google: require("../../assets/icons/google.png"),
-  python: require("../../assets/icons/python.png"),
-  js: require("../../assets/icons/js.png"),
-
-  // center timeline parts
-  dotPurple: require("../../assets/dots/dot-purple.png"), // the small purple dot image
-};
-
-// ======== TYPES ========
-type Side =
-  | { kind: "icon"; icon: ImageSourcePropType; label?: string }
-  | { kind: "text"; text: string };
-
-type Step = {
-  id: string;
-  left: Side;
-  right: Side;
-  /** Position along the card (0 => top, 1 => bottom) */
-  position: number;
-};
-
-// ======== DATA (edit labels per your need) ========
-const STEPS: Step[] = [
+const items = [
   {
-    id: "s1",
-    left: { kind: "icon", icon: ASSETS.htmlcssjs },
-    right: { kind: "text", text: "HTML, CSS,\nJavascript" },
-    position: 0.11,
+    title: "HTML, CSS,\nJavascript",
+    icon: require("../../assets/courses/module1.png"),
+    iconSide: "left",
+    active: true,
   },
   {
-    id: "s2",
-    left: { kind: "text", text: "MongoDB,\nExpress, Node" },
-    right: { kind: "icon", icon: ASSETS.react, label: "React" },
-    position: 0.30,
+    title: "Mongodb,\nExpress, Nodejs",
+    icon: require("../../assets/courses/react1.png"),
+    iconSide: "right",
+    active: false,
   },
   {
-    id: "s3",
-    left: { kind: "icon", icon: ASSETS.angular, label: "Angular" },
-    right: { kind: "text", text: "React" },
-    position: 0.50,
+    title: "React",
+    icon: require("../../assets/courses/angular1.png"),
+    iconSide: "left",
+    active: true,
   },
   {
-    id: "s4",
-    left: { kind: "text", text: "Javascript" },
-    right: { kind: "icon", icon: ASSETS.google, label: "Google\nDeveloper" },
-    position: 0.70,
+    title: "Angular",
+    icon: require("../../assets/courses/google1.png"),
+    iconSide: "right",
+    active: false,
   },
   {
-    id: "s5",
-    left: { kind: "icon", icon: ASSETS.js, label: "Javascript" },
-    right: { kind: "icon", icon: ASSETS.python, label: "Python" },
-    position: 0.89,
+    title: "Google Developer",
+    icon: require("../../assets/courses/js1.png"),
+    iconSide: "left",
+    active: true,
+  },
+  {
+    title: "Javascript",
+    icon: require("../../assets/courses/python1.png"),
+    iconSide: "right",
+    active: false,
   },
 ];
 
-// ======== LAYOUT CONSTANTS ========
-const { width } = Dimensions.get("window");
-const SCREEN_PADDING_H = 12;
-const CARD_PADDING = 16;
-const CARD_HEIGHT = 520; // controls card height & dot positions
-const TIMELINE_WIDTH = 10;
+const CARD_BG = '#FFFFFF';
+const TEXT_DARK = '#292D32';
+const TEXT_MUTED = '#6B6E76';
 
-export default function Course() {
-  const navigation = useNavigation<any>();
+const SHADOW = {
+  ...Platform.select({
+    ios: {
+      shadowColor: '#000',
+      shadowOpacity: 0.08,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 6 },
+    },
+    android: { elevation: 6 },
+  }),
+};
+
+type Nav = NativeStackNavigationProp<RootStackParamList, 'CoursesScreen'>;
+
+const Courses: React.FC = () => {
+  const navigation = useNavigation<Nav>();
 
   return (
-    <SafeAreaView style={styles.safe} edges={["top"]}>
-      <StatusBar barStyle="dark-content" />
-
+    <View style={styles.root}>
       <ScrollView
         style={styles.container}
-        contentContainerStyle={{ paddingBottom: 24 }}
+        contentContainerStyle={{ paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Top Bar */}
-        <View style={styles.topBar}>
-          <TouchableOpacity
-            activeOpacity={0.8}
-            style={styles.backBtn}
-            onPress={() => navigation?.goBack?.()}
-          >
-            <Image source={ASSETS.back} style={{ width: 20, height: 20 }} />
+        {/* Header */}
+        <View style={styles.headerRow}>
+          <TouchableOpacity style={styles.backBtn} activeOpacity={0.8}>
+            <Image
+              source={require("../../assets/courses/arrow.png")}
+              style={styles.backIcon}
+            />
           </TouchableOpacity>
 
-          <View style={styles.tabs}>
-            <TouchableOpacity activeOpacity={0.9} style={styles.tab}>
-              <Text style={styles.tabTextDim}>Task & Projects</Text>
-            </TouchableOpacity>
+          {/* Tabs */}
+          <View style={styles.tabsWrap}>
+            <View style={styles.tabsBg}>
+              {/* Course task button → navigate to CourseById */}
+              <TouchableOpacity
+                style={styles.inactiveTab}
+                activeOpacity={0.9}
+                onPress={() => navigation.navigate('CourseById')}
+              >
+                <Text style={styles.inactiveTabText}>Task & Projects</Text>
+              </TouchableOpacity>
 
-            <LinearGradient
-              colors={["#8E2DE2", "#4A00E0"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={[styles.tab, styles.tabActive]}
-            >
-              <Text style={styles.tabTextActive}>Course Track</Text>
-            </LinearGradient>
+              <View style={styles.activeTab}>
+
+                
+                <Text style={styles.activeTabText}>Course Track</Text>
+              </View>
+            </View>
           </View>
         </View>
 
         {/* Title */}
-        <Text style={styles.title}>Course Tracks</Text>
+        <Text style={styles.screenTitle}>Course Tracks</Text>
 
-        {/* Hero image */}
-        <View style={styles.heroWrap}>
-          <Image source={ASSETS.hero} style={styles.hero} resizeMode="cover" />
+        {/* Banner */}
+        <View style={styles.bannerCard}>
+          <Image
+            source={require("../../assets/courses/image1.png")}
+            style={styles.bannerImage}
+            resizeMode="cover"
+          />
         </View>
 
-        {/* Track Card */}
+        {/* Timeline Card */}
         <View style={styles.card}>
-          {/* CENTER LINE + DOTS */}
-          <View style={styles.timelineWrap}>
-            <View style={styles.timelineLine} />
-            {STEPS.map((s) => (
-              <Image
-                key={`dot-${s.id}`}
-                source={ASSETS.dotPurple}
-                style={[
-                  styles.timelineDot,
-                  {
-                    top: s.position * (CARD_HEIGHT - 2 * CARD_PADDING), // position within the inner area
-                  },
-                ]}
-                resizeMode="contain"
-              />
-            ))}
-          </View>
+          <View style={styles.spine} />
+          {items.map((row, idx) => (
+            <View key={idx} style={styles.row}>
+              {/* LEFT SIDE */}
+              <View style={styles.side}>
+                {/* Show title on left if icon is on right */}
+                {row.iconSide === 'right' && (
+                  <Text style={styles.sideText} numberOfLines={2}>
+                    {row.title}
+                  </Text>
+                )}
+                {/* Keep icon on left */}
+                {row.iconSide === 'left' && (
+                  <View style={styles.sideInner}>
+                    <View style={styles.curvedIconWrap}>
+                      <Image source={row.icon} style={styles.curvedIcon} />
+                    </View>
+                  </View>
+                )}
+              </View>
 
-          {/* LEFT + RIGHT columns */}
-          <View style={styles.columns}>
-            {/* LEFT */}
-            <View style={styles.colLeft}>
-              {STEPS.map((s) => (
-                <Row key={`l-${s.id}`} side={s.left} />
-              ))}
-            </View>
+              {/* DOT */}
+              <View style={styles.dotWrap}>
+                <Image
+                  source={
+                    row.active
+                      ? require("../../assets/courses/Vector.png")
+                      : require("../../assets/courses/Vector 1.png")
+                  }
+                  style={styles.dotImage}
+                />
+              </View>
 
-            {/* RIGHT */}
-            <View style={styles.colRight}>
-              {STEPS.map((s) => (
-                <Row key={`r-${s.id}`} side={s.right} align="right" />
-              ))}
+              {/* RIGHT SIDE */}
+              <View style={styles.side}>
+                {/* Show title on right if icon is on left */}
+                {row.iconSide === 'left' && (
+                  <Text style={styles.sideText} numberOfLines={2}>
+                    {row.title}
+                  </Text>
+                )}
+                {/* Keep icon on right */}
+                {row.iconSide === 'right' && (
+                  <View style={styles.sideInner}>
+                    <View style={styles.curvedIconWrap}>
+                      <Image source={row.icon} style={styles.curvedIcon} />
+                    </View>
+                  </View>
+                )}
+              </View>
             </View>
-          </View>
+          ))}
         </View>
       </ScrollView>
-    </SafeAreaView>
-  );
-}
-
-// ======== Row component (left/right items) ========
-const Row = ({
-  side,
-  align = "left",
-}: {
-  side: Side;
-  align?: "left" | "right";
-}) => {
-  const isIcon = side.kind === "icon";
-  return (
-    <View
-      style={[
-        styles.row,
-        align === "right"
-          ? { justifyContent: "flex-start" }
-          : { justifyContent: "flex-end" },
-      ]}
-    >
-      {isIcon ? (
-        <View style={styles.iconPill}>
-          <Image source={side.icon} style={styles.icon} resizeMode="contain" />
-          {/* Optional label under icon */}
-          {"label" in side && side.label ? (
-            <Text style={styles.iconLabel} numberOfLines={2}>
-              {side.label}
-            </Text>
-          ) : null}
-        </View>
-      ) : (
-        <Text
-          style={[
-            styles.rowText,
-            align === "right" ? { textAlign: "left" } : { textAlign: "right" },
-          ]}
-          numberOfLines={2}
-        >
-          {"text" in side ? side.text : ""}
-        </Text>
-      )}
     </View>
   );
 };
 
-// ======== STYLES ========
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#F3F4F6" },
-  container: { flex: 1, paddingHorizontal: SCREEN_PADDING_H },
+export default Courses;
 
-  topBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 4,
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: '#EBEFF3' },
+
+  container: {
+    flex: 1,
+    paddingHorizontal: 14,
+    paddingTop: 14,
+  },
+
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   backBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 8,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  tabs: { flexDirection: "row", gap: 10, flex: 1 },
-  tab: {
-    flex: 1,
+    width: 36,
     height: 36,
-    borderRadius: 12,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 1,
+    borderRadius: 10,
+    backgroundColor: CARD_BG,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+    ...SHADOW,
   },
-  tabActive: {
-    shadowOpacity: 0.15,
-    elevation: 3,
-  },
-  tabTextDim: { color: "#7C7C8A", fontSize: 12, fontWeight: "600" },
-  tabTextActive: { color: "#fff", fontSize: 12, fontWeight: "700" },
+  backIcon: { width: 18, height: 18, resizeMode: 'contain' },
 
-  title: {
-    marginTop: 14,
-    marginBottom: 8,
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#202124",
-  },
-
-  heroWrap: {
-    width: "100%",
-    height: (width - SCREEN_PADDING_H * 2) * 0.45,
+  tabsWrap: { flex: 1 },
+  tabsBg: {
+    flexDirection: 'row',
+    backgroundColor: '#EDEDF3',
+    padding: 4,
     borderRadius: 16,
-    overflow: "hidden",
-    backgroundColor: "#E9EDF3",
-    borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.05)",
   },
-  hero: { width: "100%", height: "100%" },
+  inactiveTab: {
+    flex: 1,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+  },
+  inactiveTabText: {
+    color: TEXT_MUTED,
+    fontSize: 12.5,
+    fontWeight: '700',
+  },
+  activeTab: {
+    flex: 1,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    backgroundColor: '#8E2DE2',
+  },
+  activeTabText: {
+    color: '#FFFFFF',
+    fontSize: 12.5,
+    fontWeight: '700',
+  },
+
+  screenTitle: {
+    marginTop: 14,
+    marginBottom: 10,
+    fontSize: 18.5,
+    fontWeight: '800',
+    color: TEXT_DARK,
+  },
+
+  bannerCard: {
+    borderRadius: 14,
+    overflow: 'hidden',
+    backgroundColor: CARD_BG,
+    ...SHADOW,
+  },
+  bannerImage: {
+    width: '100%',
+    height: width * 0.36,
+  },
 
   card: {
     marginTop: 16,
-    width: "100%",
-    height: CARD_HEIGHT,
+    paddingVertical: 18,
+    paddingHorizontal: 12,
     borderRadius: 18,
-    backgroundColor: "#fff",
-    padding: CARD_PADDING,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 2,
+    backgroundColor: '#F3F4F8',
+    ...SHADOW,
   },
 
-  columns: {
-    flexDirection: "row",
-    width: "100%",
-    height: "100%",
-  },
-  colLeft: {
-    width:
-      (width - SCREEN_PADDING_H * 2 - CARD_PADDING * 2 - TIMELINE_WIDTH) / 2,
-    paddingRight: 10,
-    justifyContent: "space-between",
-  },
-  colRight: {
-    width:
-      (width - SCREEN_PADDING_H * 2 - CARD_PADDING * 2 - TIMELINE_WIDTH) / 2,
-    paddingLeft: 10,
-    justifyContent: "space-between",
-  },
-
-  // vertical timeline (absolute center)
-  timelineWrap: {
-    position: "absolute",
-    top: CARD_PADDING,
-    bottom: CARD_PADDING,
-    left:
-      (width - SCREEN_PADDING_H * 2) / 2 - // inner content width center
-      TIMELINE_WIDTH / 2,
-    width: TIMELINE_WIDTH,
-    alignItems: "center",
-    zIndex: 0,
-  },
-  timelineLine: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
+  spine: {
+    position: 'absolute',
+    left: '50%',
     width: 2,
-    backgroundColor: "#E3E3EA",
-    borderRadius: 2,
-  },
-  timelineDot: {
-    position: "absolute",
-    left: -7,
-    width: 24,
-    height: 24,
+    top: 18,
+    bottom: 18,
+    backgroundColor: '#D3D6DE',
+    transform: [{ translateX: -1 }],
   },
 
   row: {
-    height: 90,
-    alignItems: "center",
-    flexDirection: "row",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    minHeight: 140,
   },
-  iconPill: {
-    minWidth: 58,
-    height: 58,
-    borderRadius: 58,
-    backgroundColor: "#F4F7FB",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 8,
-    shadowColor: "#000",
+
+  side: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  sideInner: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  curvedIconWrap: {
+    width: 80,
+    height: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
     shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 1,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 4,
+    marginBottom: 8,
   },
-  icon: { width: 34, height: 34 },
-  iconLabel: {
-    fontSize: 10,
-    color: "#4A4E57",
-    fontWeight: "600",
-    textAlign: "center",
-    marginTop: 4,
-    lineHeight: 12,
+
+  curvedIcon: {
+    width: 90,
+    height: 90,
+    resizeMode: 'contain',
   },
-  rowText: {
+
+  sideText: {
+    color: TEXT_DARK,
     fontSize: 13,
-    color: "#4A4E57",
-    fontWeight: "600",
-    lineHeight: 18,
+    fontWeight: '600',
+    textAlign: 'center',
   },
+
+  dotWrap: {
+    width: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: -20,
+  },
+  dotImage: {
+    width: 24,
+    height: 24,
+  },
 });
