@@ -1,0 +1,1 @@
+export const selectIdClass = (state: any) => state.ClassIdSlice.data
