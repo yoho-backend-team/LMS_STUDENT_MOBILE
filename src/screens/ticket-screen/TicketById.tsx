@@ -57,7 +57,7 @@ const TicketById = () => {
             <Text style={styles.viewLabel}>Query</Text>
             <Text style={styles.viewValue}>{ticket.query}</Text>
 
-            <Text style={styles.viewLabel}>Description</Text>
+            <Text style={styles.viewLabel}>Issue Description</Text>
             <Text style={[styles.viewValue, styles.textArea]}>{ticket.description}</Text>
 
             <Text style={styles.viewLabel}>Priority</Text>
@@ -66,7 +66,7 @@ const TicketById = () => {
             <Text style={styles.viewLabel}>Status</Text>
             <Text style={styles.viewValue}>{ticket.status}</Text>
 
-            <Text style={styles.viewLabel}>Attachment</Text>
+            <Text style={styles.viewLabel}>Attachments</Text>
             {ticket?.file ? (
               <View style={styles.attachmentRow}>
                 <Text style={styles.fileName}>{ticket?.file}</Text>
@@ -79,7 +79,7 @@ const TicketById = () => {
             ) : (
               <Text style={styles.viewValue}>No attachment</Text>
             )}
-            <Text style={styles.viewLabel}>Count</Text>
+            <Text style={styles.viewLabel}>Attempt</Text>
             <Text style={styles.viewValue}>{ticket.id}</Text>
           </View>
         </ScrollView>
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     fontWeight: 500,
   },
   viewButton: {
-    backgroundColor: COLORS.blue_01,
+    backgroundColor: '#7B00FF',
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 6,

@@ -93,7 +93,7 @@ const CreateTicket = () => {
         user: '67f3b8feb8d2634300cc8819',
       };
 
-     
+     await createticketdata(ticketData, {});
       toast.success('Success', 'Ticket created successfully');
       navigation.goBack();
     } catch (err) {
