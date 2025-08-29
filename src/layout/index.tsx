@@ -8,12 +8,15 @@ import {
   useWindowDimensions,
   View,
   Image,
+  TouchableOpacity,
+  StyleSheet,
 } from 'react-native';
 import Animated, { interpolate, useAnimatedStyle } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import PagerView from 'react-native-pager-view';
 import { useDispatch, useSelector } from 'react-redux';
-import { bottom_tabs, COLORS, FONTS, screens, SIZES, SPACING } from '../constants';
+import { Ionicons } from '@expo/vector-icons';
+import { bottom_tabs, COLORS, FONTS, screens, SIZES } from '../constants';
 import {
   AttendanceScreen,
   ClassesScreen,
@@ -22,6 +25,7 @@ import {
   HomeScreen,
 } from '../screens';
 import { setSelectedTab } from '../store/tab/tabSlice';
+import { useNavigation } from '@react-navigation/native';
 
 type TabButtonProps = {
   label: string;
@@ -32,61 +36,53 @@ type TabButtonProps = {
   innerContainerStyle?: any;
 };
 
-const TabButton: React.FC<TabButtonProps> = ({
-  label,
-  icon,
-  isFocused,
-  onPress,
-}) => {
+const TabButton: React.FC<TabButtonProps> = ({ label, icon, isFocused, onPress }) => {
   return (
     <TouchableWithoutFeedback onPress={onPress}>
       <View
         style={{
-          alignItems: "center",
-          justifyContent: "center",
-          width: 60, 
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: 60,
           height: 65,
-          marginTop: -10, 
+          marginTop: -10,
           marginBottom: -5,
-        }}
-      >
+        }}>
         {/* Outer white container */}
         <View
           style={{
-            backgroundColor: "#fff", 
-            borderRadius: 12, 
+            backgroundColor: '#fff',
+            borderRadius: 12,
             padding: 6,
-            justifyContent: "center",
-            alignItems: "center",
-            shadowColor: "#000",
+            justifyContent: 'center',
+            alignItems: 'center',
+            shadowColor: '#000',
             shadowOpacity: 0.1,
             shadowRadius: 5,
             elevation: 4,
-            width: 40, 
-            height: 40, 
-          }}
-        >
+            width: 40,
+            height: 40,
+          }}>
           {/* Icon */}
           <Image
             source={icon}
-            style={{ 
+            style={{
               width: 18,
-              height: 18, 
-              tintColor: isFocused ? "#7B00FF" : "#777" 
+              height: 18,
+              tintColor: isFocused ? '#7B00FF' : '#777',
             }}
           />
         </View>
-        
-        {/* Text - Outside the white container, below it */}
+
+        {/* Text */}
         <Text
           style={{
-            marginTop: 6, 
-            color: isFocused ? "#B200FF" : "#777", 
+            marginTop: 6,
+            color: isFocused ? '#B200FF' : '#777',
             ...FONTS.h7,
-            fontWeight: "600",
-            textAlign: "center",
-          }}
-        >
+            fontWeight: '600',
+            textAlign: 'center',
+          }}>
           {label}
         </Text>
       </View>
@@ -96,11 +92,12 @@ const TabButton: React.FC<TabButtonProps> = ({
 
 const MainLayout: React.FC = () => {
   const dispatch = useDispatch();
+  const navigation = useNavigation<any>();
   const progress = useDrawerProgress();
   const { width } = useWindowDimensions();
   const pagerRef = useRef<PagerView>(null);
   const selectedTab = useSelector((state: any) => state.tabReducer.selectedTab);
-  
+
   const [currentPage, setCurrentPage] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
 
@@ -127,27 +124,30 @@ const MainLayout: React.FC = () => {
   }));
 
   useEffect(() => {
-  if (!isScrolling && selectedTab) {
-    const index = bottom_tabs.findIndex((t) => t.label === selectedTab);
-    if (index !== -1 && index !== currentPage && pagerRef.current) {
-      setCurrentPage(index);
-      pagerRef.current.setPageWithoutAnimation(index); 
-    }
-  }
-}, [selectedTab, currentPage, isScrolling]);
-
-  const handlePageSelected = useCallback((event: any) => {
-    const index = event.nativeEvent.position;
-    const newTab = bottom_tabs[index]?.label;
-    
-    if (newTab && index >= 0 && index < bottom_tabs.length) {
-      setCurrentPage(index);
-      if (newTab !== selectedTab) {
-        dispatch(setSelectedTab(newTab));
+    if (!isScrolling && selectedTab) {
+      const index = bottom_tabs.findIndex((t: any) => t.label === selectedTab);
+      if (index !== -1 && index !== currentPage && pagerRef.current) {
+        setCurrentPage(index);
+        pagerRef.current.setPageWithoutAnimation(index);
       }
     }
-    setIsScrolling(false);
-  }, [selectedTab, dispatch]);
+  }, [selectedTab, currentPage, isScrolling]);
+
+  const handlePageSelected = useCallback(
+    (event: any) => {
+      const index = event.nativeEvent.position;
+      const newTab = bottom_tabs[index]?.label;
+
+      if (newTab && index >= 0 && index < bottom_tabs.length) {
+        setCurrentPage(index);
+        if (newTab !== selectedTab) {
+          dispatch(setSelectedTab(newTab));
+        }
+      }
+      setIsScrolling(false);
+    },
+    [selectedTab, dispatch]
+  );
 
   const handlePageScrollStateChanged = useCallback((event: any) => {
     const state = event.nativeEvent.pageScrollState;
@@ -158,25 +158,37 @@ const MainLayout: React.FC = () => {
     }
   }, []);
 
-  const handleTabPress = useCallback((tabLabel: string) => {
-    if (isScrolling) return; 
-    const index = bottom_tabs.findIndex((t) => t.label === tabLabel);
-    if (index !== -1 && index !== currentPage && pagerRef.current) {
-      setCurrentPage(index);
-      pagerRef.current.setPage(index);
-      dispatch(setSelectedTab(tabLabel));
-    }
-  }, [currentPage, isScrolling, dispatch]);
+  const handleTabPress = useCallback(
+    (tabLabel: string) => {
+      if (isScrolling) return;
+      const index = bottom_tabs.findIndex((t: any) => t.label === tabLabel);
+      if (index !== -1 && index !== currentPage && pagerRef.current) {
+        setCurrentPage(index);
+        pagerRef.current.setPage(index);
+        dispatch(setSelectedTab(tabLabel));
+      }
+    },
+    [currentPage, isScrolling, dispatch]
+  );
 
   useEffect(() => {
     if (!isScrolling && selectedTab) {
-      const index = bottom_tabs.findIndex((t) => t.label === selectedTab);
+      const index = bottom_tabs.findIndex((t: any) => t.label === selectedTab);
       if (index !== -1 && index !== currentPage && pagerRef.current) {
         setCurrentPage(index);
         pagerRef.current.setPage(index);
       }
     }
   }, [selectedTab, currentPage, isScrolling]);
+
+  // Tabs where chatbot should appear
+  const chatbotVisibleTabs = [
+    screens.home,
+    screens.course,
+    screens.classes,
+    screens.attendance,
+    screens.community,
+  ];
 
   return (
     <Animated.View style={[{ flex: 1, backgroundColor: COLORS.white }, animatedStyle]}>
@@ -195,10 +207,9 @@ const MainLayout: React.FC = () => {
             scrollEnabled={true}
             overdrag={false}
             offscreenPageLimit={1}
-            pageMargin={0} 
-            orientation="horizontal" 
-          >
-            {bottom_tabs.map((item, index) => (
+            pageMargin={0}
+            orientation="horizontal">
+            {bottom_tabs.map((item: any, index: any) => (
               <View key={`${item.id}-${index}`} style={{ width: SIZES.width, height: '100%' }}>
                 {item.label === screens.home && <HomeScreen />}
                 {item.label === screens.course && <CouresScreen />}
@@ -208,9 +219,20 @@ const MainLayout: React.FC = () => {
               </View>
             ))}
           </PagerView>
+
+          {/* Chatbot button only for selected tabs */}
+          {chatbotVisibleTabs.includes(selectedTab) && (
+            <>
+              <TouchableOpacity
+                style={styles.chatbotBtn}
+                onPress={() => navigation.navigate('ChatbotScreen')}>
+                <Ionicons name="chatbubble-ellipses" size={28} color="#fff" />
+              </TouchableOpacity>
+            </>
+          )}
         </View>
 
-        {/* Bottom Tab Bar - Fixed at bottom */}
+        {/* Bottom Tab Bar */}
         <SafeAreaView edges={['bottom']} style={{ backgroundColor: COLORS.white }}>
           <View
             style={{
@@ -233,12 +255,12 @@ const MainLayout: React.FC = () => {
               shadowOpacity: 0.1,
               shadowRadius: 8,
             }}>
-            {bottom_tabs.map((tab, index) => {
+            {bottom_tabs.map((tab: any, index: any) => {
               const isFocused = currentPage === index;
 
               return (
                 <View
-                  key={`${tab.id}-tab-${index}`}  
+                  key={`${tab.id}-tab-${index}`}
                   style={{
                     flex: 1,
                     alignItems: 'center',
@@ -261,5 +283,21 @@ const MainLayout: React.FC = () => {
     </Animated.View>
   );
 };
+
+const styles = StyleSheet.create({
+  chatbotBtn: {
+    position: 'absolute',
+    bottom: 80,
+    right: 20,
+    backgroundColor: '#7B00FF',
+    padding: 16,
+    borderRadius: 50,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 5,
+  },
+});
 
 export default MainLayout;
