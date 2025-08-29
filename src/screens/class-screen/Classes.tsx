@@ -1,12 +1,8 @@
-import React, { useState } from 'react';
-import { TouchableOpacity, Dimensions, StyleSheet, Text, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import {  StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'react-native';
 import { COLORS } from '~/constants';
 import Classcards from '~/components/Classes/Onlineclasses';
-import ClassById from './ClassById';
-import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import Header from '~/components/shared/Header';
 

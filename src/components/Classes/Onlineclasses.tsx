@@ -13,13 +13,13 @@ const Classcards = () => {
   const dispatch = useDispatch<AppDispatch>();
   const classData = useSelector(selectClass) || { data: [] };
   const navigation = useNavigation<any>();
-  const [activeTab, setActiveTab] = useState<'live' | 'upcoming' | 'completed'>('live');
+  const [activeTab, setActiveTab] = useState<'live' | 'upcoming' | 'completed'>('completed');
   const scrollRef = useRef<ScrollView>(null);
 
   const tabs = [
-    { key: 'live', label: 'Live Class' },
-    { key: 'upcoming', label: 'Upcoming Class' },
     { key: 'completed', label: 'Completed Class' },
+    { key: 'upcoming', label: 'Upcoming Class' },
+    { key: 'live', label: 'Live Class' },
   ];
 
   const fetchClassData = (type: 'live' | 'upcoming' | 'completed') => {
