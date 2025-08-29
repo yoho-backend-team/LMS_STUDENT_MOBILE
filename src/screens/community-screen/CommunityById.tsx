@@ -1,5 +1,3 @@
-'use client';
-
 import type React from 'react';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import {
@@ -15,11 +13,12 @@ import {
   TouchableWithoutFeedback,
   Image,
   ActivityIndicator,
+  ImageBackground,
+  StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { getImageUrl } from '~/utils/imageUtils';
-import { StyleSheet } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { GetallMessageThunks } from '../../features/Community/reducers.ts/thunks';
 import { GetCommuntiyIdSelector } from '~/features/Community/reducers.ts/selectore';
@@ -60,7 +59,6 @@ const getColorForSender = (senderName: string) => {
 // Date formatting functions
 const formatTime = (timestamp: any | number | Date): string => {
   if (!timestamp) return '';
-
   const messageDate = new Date(timestamp);
   return messageDate.toLocaleTimeString('en-US', {
     hour: '2-digit',
@@ -81,19 +79,15 @@ const formatMessageDate = (timestamp: string | number | Date): string => {
     (now.getTime() - messageDate.getTime()) / (1000 * 60 * 60 * 24)
   );
 
-  if (isToday) {
-    return 'Today';
-  } else if (isYesterday) {
-    return 'Yesterday';
-  } else if (daysDifference < 7) {
-    return messageDate.toLocaleDateString('en-US', { weekday: 'long' });
-  } else {
+  if (isToday) return 'Today';
+  else if (isYesterday) return 'Yesterday';
+  else if (daysDifference < 7) return messageDate.toLocaleDateString('en-US', { weekday: 'long' });
+  else
     return messageDate.toLocaleDateString('en-GB', {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
     });
-  }
 };
 
 const isSameDay = (date1: Date, date2: Date): boolean => {
@@ -247,7 +241,7 @@ const CommunityById: React.FC = () => {
         const heightDifference = contentHeight - previousContentHeight;
         requestAnimationFrame(() => {
           scrollViewRef.current?.scrollTo({
-            y: heightDifference + 50, 
+            y: heightDifference + 50,
             animated: false,
           });
         });
@@ -307,8 +301,9 @@ const CommunityById: React.FC = () => {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           <KeyboardAvoidingView
             style={{ flex: 1 }}
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
+            {/* HEADER */}
             <View style={styles.header}>
               <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                 <Ionicons name="arrow-back" size={24} color="#333" />
@@ -324,38 +319,45 @@ const CommunityById: React.FC = () => {
               </View>
             </View>
 
-            <ScrollView
-              ref={scrollViewRef}
-              style={styles.chatContainer}
-              contentContainerStyle={styles.chatContent}
-              showsVerticalScrollIndicator={false}
-              onScroll={handleScroll}
-              onContentSizeChange={handleContentSizeChange}
-              scrollEventThrottle={16}
-              removeClippedSubviews={true}
-              keyboardShouldPersistTaps="handled">
-              {(loadingMore || isLoadingAtTop) && (
-                <View style={styles.loadingContainer}>
-                  <ActivityIndicator size="small" color={COLORS.blue_01} />
-                  <Text style={styles.loadingText}>Loading more messages...</Text>
-                </View>
-              )}
+            {/* CHAT */}
+            <ImageBackground
+              source={require('../../assets/chatbg.png')}
+              style={{ flex: 1 }}
+              resizeMode="cover">
+              <ScrollView
+                ref={scrollViewRef}
+                contentContainerStyle={styles.chatContent}
+                showsVerticalScrollIndicator={false}
+                onScroll={handleScroll}
+                onContentSizeChange={handleContentSizeChange}
+                scrollEventThrottle={16}
+                removeClippedSubviews={true}
+                keyboardShouldPersistTaps="handled">
+                {(loadingMore || isLoadingAtTop) && (
+                  <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="small" color={COLORS.blue_01} />
+                    <Text style={styles.loadingText}>Loading more messages...</Text>
+                  </View>
+                )}
 
-              {!hasMoreMessages && messages.length > 15 && (
-                <View style={styles.noMoreMessagesContainer}>
-                  <Text style={styles.noMoreMessagesText}>No more messages</Text>
-                </View>
-              )}
+                {!hasMoreMessages && messages.length > 15 && (
+                  <View style={styles.noMoreMessagesContainer}>
+                    <Text style={styles.noMoreMessagesText}>No more messages</Text>
+                  </View>
+                )}
 
-              {messages.map((msg, index) => renderMessage(msg, index))}
-            </ScrollView>
+                {messages.map((msg, index) => renderMessage(msg, index))}
+              </ScrollView>
+            </ImageBackground>
 
+            {/* SCROLL TO BOTTOM */}
             {showScrollToBottom && (
               <TouchableOpacity style={styles.scrollToBottomButton} onPress={scrollToBottom}>
                 <Ionicons name="arrow-down" size={24} color="#fff" />
               </TouchableOpacity>
             )}
 
+            {/* INPUT */}
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.textInput}
@@ -379,17 +381,8 @@ const CommunityById: React.FC = () => {
 export default CommunityById;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  avatar: {
-    width: 40,
-    height: 40,
-    backgroundColor: '#000',
-    borderRadius: 20,
-    marginRight: 12,
-  },
+  container: { flex: 1, backgroundColor: '#f5f5f5' },
+  avatar: { width: 40, height: 40, backgroundColor: '#000', borderRadius: 20, marginRight: 12 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -399,87 +392,23 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
-  backButton: {
-    marginRight: 12,
-  },
-  profileContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  profileIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#333',
-    marginRight: 12,
-  },
-  headerText: {
-    flex: 1,
-  },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
-  headerSubtitle: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 2,
-  },
-  chatContainer: {
-    flex: 1,
-    backgroundColor: '#1a4a47',
-  },
-  chatContent: {
-    padding: 16,
-    paddingBottom: 20,
-  },
-  messageContainer: {
-    marginVertical: 4,
-  },
-  outgoingMessage: {
-    alignItems: 'flex-end',
-  },
-  incomingMessage: {
-    alignItems: 'flex-start',
-  },
-  messageBubble: {
-    maxWidth: '80%',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 16,
-  },
-  outgoingBubble: {
-    backgroundColor: '#7ed321',
-    borderBottomRightRadius: 4,
-  },
-  incomingBubble: {
-    backgroundColor: '#ffffff',
-    borderBottomLeftRadius: 4,
-  },
-  messageText: {
-    fontSize: 14,
-    lineHeight: 18,
-  },
-  outgoingText: {
-    color: '#000',
-  },
-  incomingText: {
-    color: '#333',
-  },
-  senderName: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#444',
-    marginBottom: 2,
-  },
-  timeText: {
-    fontSize: 10,
-    color: '#666',
-    marginTop: 4,
-    textAlign: 'right',
-  },
+  backButton: { marginRight: 12 },
+  profileContainer: { flexDirection: 'row', alignItems: 'center', flex: 1 },
+  headerText: { flex: 1 },
+  headerTitle: { fontSize: 16, fontWeight: '600', color: '#333' },
+  headerSubtitle: { fontSize: 12, color: '#666', marginTop: 2 },
+  chatContent: { padding: 16, paddingBottom: 20 },
+  messageContainer: { marginVertical: 4 },
+  outgoingMessage: { alignItems: 'flex-end' },
+  incomingMessage: { alignItems: 'flex-start' },
+  messageBubble: { maxWidth: '80%', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 16 },
+  outgoingBubble: { backgroundColor: '#7ed321', borderBottomRightRadius: 4 },
+  incomingBubble: { backgroundColor: '#ffffff', borderBottomLeftRadius: 4 },
+  messageText: { fontSize: 14, lineHeight: 18 },
+  outgoingText: { color: '#000' },
+  incomingText: { color: '#333' },
+  senderName: { fontSize: 12, fontWeight: '600', marginBottom: 2 },
+  timeText: { fontSize: 10, color: '#666', marginTop: 4, textAlign: 'right' },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
@@ -509,13 +438,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  dateDivider: {
-    alignItems: 'center',
-    marginVertical: 16,
-  },
+  dateDivider: { alignItems: 'center', marginVertical: 16 },
   dateDividerText: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    color: '#fff',
+    backgroundColor: '#e0e0e0',
+    color: '#000',
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
@@ -528,19 +454,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
   },
-  loadingText: {
-    marginLeft: 8,
-    color: '#ccc',
-    fontSize: 12,
-  },
-  noMoreMessagesContainer: {
-    padding: 16,
-    alignItems: 'center',
-  },
-  noMoreMessagesText: {
-    color: '#ccc',
-    fontSize: 12,
-  },
+  loadingText: { marginLeft: 8, color: '#ccc', fontSize: 12 },
+  noMoreMessagesContainer: { padding: 16, alignItems: 'center' },
+  noMoreMessagesText: { color: '#ccc', fontSize: 12 },
   scrollToBottomButton: {
     position: 'absolute',
     right: 20,
