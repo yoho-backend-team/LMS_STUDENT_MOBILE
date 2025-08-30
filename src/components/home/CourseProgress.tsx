@@ -15,7 +15,7 @@ const CHART_COLORS = {
 };
 
 interface CourseProgressData {
-  progress: number; // Progress percentage (0-100)
+  progress: number; 
   batchName: string;
 }
 

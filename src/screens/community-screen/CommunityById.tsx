@@ -401,50 +401,43 @@ const CommunityById: React.FC = () => {
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
       <SafeAreaView edges={['top']} style={styles.container}>
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 30}>
-          <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-            <View style={{ flex: 1 }}>
-              {/* HEADER */}
-              <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                  <Ionicons name="arrow-back" size={24} color="#333" />
-                </TouchableOpacity>
-                <View style={styles.profileContainer}>
-                  <Image
-                    style={styles.avatar}
-                    source={{ uri: getImageUrl(community?.groupimage) }}
-                  />
-                  <View style={styles.headerText}>
-                    <Text style={styles.headerTitle}>{community?.group}</Text>
-                    <Text style={styles.headerSubtitle}>
-                      {community?.users?.length || '0'} Members
-                    </Text>
-                  </View>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+          <View style={{ flex: 1 }}>
+            {/* HEADER */}
+            <View style={styles.header}>
+              <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                <Ionicons name="arrow-back" size={24} color="#333" />
+              </TouchableOpacity>
+              <View style={styles.profileContainer}>
+                <Image style={styles.avatar} source={{ uri: getImageUrl(community?.groupimage) }} />
+                <View style={styles.headerText}>
+                  <Text style={styles.headerTitle}>{community?.group}</Text>
+                  <Text style={styles.headerSubtitle}>
+                    {community?.users?.length || '0'} Members
+                  </Text>
                 </View>
               </View>
+            </View>
 
-              {/* CHAT */}
-              <ImageBackground
-                source={require('../../assets/chatbg.png')}
-                style={{ flex: 1 }}
-                resizeMode="cover">
-                <ScrollView
-                  ref={scrollViewRef}
-                  contentContainerStyle={styles.chatContent}
-                  showsVerticalScrollIndicator={false}
-                  onScroll={handleScroll}
-                  onContentSizeChange={handleContentSizeChange}
-                  scrollEventThrottle={16}
-                  keyboardShouldPersistTaps="handled">
-                  {(loadingMore || isLoadingAtTop) && (
-                    <View style={styles.loadingContainer}>
-                      <ActivityIndicator size="small" color={COLORS.blue_01} />
-                      <Text style={styles.loadingText}>Loading more messages...</Text>
-                    </View>
-                  )}
+            {/* CHAT LIST */}
+            <ImageBackground
+              source={require('../../assets/chatbg.png')}
+              style={{ flex: 1 }}
+              resizeMode="cover">
+              <ScrollView
+                ref={scrollViewRef}
+                contentContainerStyle={styles.chatContent}
+                showsVerticalScrollIndicator={false}
+                onScroll={handleScroll}
+                onContentSizeChange={handleContentSizeChange}
+                scrollEventThrottle={16}
+                keyboardShouldPersistTaps="handled">
+                {(loadingMore || isLoadingAtTop) && (
+                  <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="small" color={COLORS.blue_01} />
+                    <Text style={styles.loadingText}>Loading more messages...</Text>
+                  </View>
+                )}
 
                   {!hasMoreMessages && messages.length > 15 && (
                     <View style={styles.noMoreMessagesContainer}>
@@ -456,14 +449,16 @@ const CommunityById: React.FC = () => {
                 </ScrollView>
               </ImageBackground>
 
-              {/* SCROLL TO BOTTOM */}
-              {showScrollToBottom && (
-                <TouchableOpacity style={styles.scrollToBottomButton} onPress={scrollToBottom}>
-                  <Ionicons name="arrow-down" size={24} color="#fff" />
-                </TouchableOpacity>
-              )}
+            {showScrollToBottom && (
+              <TouchableOpacity style={styles.scrollToBottomButton} onPress={scrollToBottom}>
+                <Ionicons name="arrow-down" size={24} color="#fff" />
+              </TouchableOpacity>
+            )}
 
-              {/* INPUT */}
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+              keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0} 
+            >
               <View style={styles.inputContainer}>
                 <TextInput
                   style={styles.textInput}
@@ -479,9 +474,9 @@ const CommunityById: React.FC = () => {
                   <Ionicons name="send" size={20} color="#fff" />
                 </TouchableOpacity>
               </View>
-            </View>
-          </TouchableWithoutFeedback>
-        </KeyboardAvoidingView>
+            </KeyboardAvoidingView>
+          </View>
+        </TouchableWithoutFeedback>
       </SafeAreaView>
     </>
   );
