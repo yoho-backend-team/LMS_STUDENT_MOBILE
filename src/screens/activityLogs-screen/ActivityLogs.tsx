@@ -1,133 +1,74 @@
-import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   FlatList,
   Image,
+  Modal,
   StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Header from '~/components/shared/Header';
-import { COLORS, FONTS, icons } from '~/constants';
-import { formatDateandTime, formatDate } from '~/utils/formatDate';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { useNavigation } from '@react-navigation/native';
-import { useDispatch, useSelector } from 'react-redux';
-import { getAllActivityData } from '~/features/reducer/activitylog/reducers/Thunks';
-import { ActivitySelector } from '~/features/reducer/activitylog/reducers/Selector';
+import { Calendar } from 'react-native-calendars';
 
-type Log = {
-  id: string;
-  message: string;
-  email: string;
-  date: string;
-  title: string;
-  user: any;
-  timestamp: any;
-};
+
+const dummyLogs = [
+  { id: '1', title: 'Dashboard Logout Successfully', email: 'Dashboard logout Successfully Musk@Gmail.Com', timestamp: '2025-06-25T09:40:00' },
+  { id: '2', title: 'Dashboard Logout Successfully', email: 'Dashboard logout Successfully Musk@Gmail.Com', timestamp: '2025-06-25T09:40:00' },
+  { id: '3', title: 'Dashboard Logout Successfully', email: 'Dashboard logout Successfully Musk@Gmail.Com', timestamp: '2025-06-25T09:40:00' },
+  { id: '4', title: 'Dashboard Logout Successfully', email: 'Dashboard logout Successfully Musk@Gmail.Com', timestamp: '2025-06-25T09:40:00' },
+];
 
 const ActivityLogs = () => {
   const [filterVisible, setFilterVisible] = useState(false);
-  const [fromDate, setFromDate] = useState<any>(null);
-  const [toDate, setToDate] = useState<any>(null);
+  const [fromDate, setFromDate] = useState<string | null>(null);
+  const [toDate, setToDate] = useState<string | null>(null);
   const [showPicker, setShowPicker] = useState(false);
   const [pickerMode, setPickerMode] = useState<'from' | 'to'>('from');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation<any>();
+
   const toggleFilter = () => setFilterVisible((prev) => !prev);
-  const dispatch = useDispatch<any>();
-  const getActivtiy = useSelector(ActivitySelector);
-  const totalPages = getActivtiy?.pagination?.totalPages || 1;
-  const allData = getActivtiy?.data || [];
 
-  useEffect(() => {
-    dispatch(getAllActivityData({ page: currentPage }));
-  }, [currentPage]);
-
-  const onRefresh = () => {
-    setRefreshing(true);
-    dispatch(getAllActivityData({ page: currentPage })).then(() => {
-      setRefreshing(false);
-    });
+  const formatDate = (date: string | Date) => {
+    const d = new Date(date);
+    const day = d.getDate().toString().padStart(2, '0');
+    const month = (d.getMonth() + 1).toString().padStart(2, '0');
+    const year = d.getFullYear().toString().slice(-2);
+    return `${day}-${month}-${year}`;
   };
 
-  const handleConfirm = (date: Date) => {
-    const dateWithoutTime = new Date(date);
-    dateWithoutTime.setHours(0, 0, 0, 0);
+  const handleDateSelect = (day: any) => {
+    if (pickerMode === 'from') setFromDate(day.dateString);
+    else setToDate(day.dateString);
+  };
 
-    if (pickerMode === 'from') {
-      setFromDate(dateWithoutTime);
-    } else {
-      const endOfDay = new Date(date);
-      endOfDay.setHours(23, 59, 59, 999);
-      setToDate(endOfDay);
-    }
+  const handleOkPress = () => {
     setShowPicker(false);
   };
 
-  const resetFilter = () => {
-    setFromDate(null);
-    setToDate(null);
-  };
-
-  const loadNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  const loadPrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  const filteredLogs = allData.filter((log: any) => {
-    if (!fromDate && !toDate) return true;
-
-    const logDate = new Date(log.timestamp);
-
-    if (fromDate && toDate) {
-      return logDate >= fromDate && logDate <= toDate;
-    } else if (fromDate) {
-      return logDate >= fromDate;
-    } else if (toDate) {
-      return logDate <= toDate;
-    }
-
-    return true;
-  });
-
-  const renderItem = ({ item }: { item: Log }) => {
-    return (
-      <View style={styles.logContainer}>
-        <Image source={icons.barLine} style={styles.barLine} />
-        <View style={styles.timelineRow}>
-          <View style={styles.timeline}>
-            <Image source={icons.greenCircle} style={styles.dot} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <View>
-              <Text style={styles.message}>{item.title}</Text>
-            </View>
-            <View style={styles.logCard}>
-              <Text style={styles.email}>{item.user?.email}</Text>
-              <Text style={styles.time}>{formatDateandTime(item.timestamp)}</Text>
-            </View>
+  const renderItem = ({ item }: { item: any }) => (
+    <View style={styles.logContainer}>
+      <View style={styles.timelineRow}>
+        <View style={styles.timeline}>
+          <Image source={require('../../assets/icons/green circle.png')} style={styles.dot} />
+          <Image source={require('../../assets/icons/barLine.png')} style={styles.barLine} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.message}>{item.title}</Text>
+          <View style={styles.logCard}>
+            <Text style={styles.email}>{item.email}</Text>
+            <Text style={styles.time}>{formatDate(item.timestamp)}</Text>
           </View>
         </View>
       </View>
-    );
-  };
+    </View>
+  );
 
   return (
     <>
-      <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
+      <StatusBar backgroundColor={'#000'} barStyle="light-content" />
       <SafeAreaView edges={['top']} style={styles.container}>
         <View style={styles.container1}>
           {/* Header */}
@@ -138,90 +79,86 @@ const ActivityLogs = () => {
             <Text style={styles.header}>Activity Log</Text>
           </View>
 
-          {/* Filter toggle */}
+         
           <TouchableOpacity style={styles.filterBtn} onPress={toggleFilter}>
-            <Image source={icons.filter} style={{ width: 25, height: 25 }} />
+            <Image source={require('../../assets/icons/Frame.png')} style={{ width: 35, height: 35 }} />
           </TouchableOpacity>
 
-          {/* Date filter section */}
+         
           {filterVisible && (
-            <View style={styles.dateFilter}>
+            <View style={styles.dateBoxWrapper}>
               <TouchableOpacity
-                style={styles.dateInput}
+                style={styles.dateBox}
                 onPress={() => {
                   setPickerMode('from');
                   setShowPicker(true);
                 }}>
-                <Text style={{ ...FONTS.h5, fontWeight: 500, textAlign: 'center' }}>
-                  {fromDate ? formatDate(fromDate) : 'From Date: DD-MM-YYYY'}
-                </Text>
+                <Text style={styles.dateLabel}>From</Text>
+                <Text style={styles.dateValue}>{fromDate ? formatDate(fromDate) : 'DD-MM-YY'}</Text>
               </TouchableOpacity>
+
               <TouchableOpacity
-                style={styles.dateInput}
+                style={styles.dateBox}
                 onPress={() => {
                   setPickerMode('to');
                   setShowPicker(true);
                 }}>
-                <Text style={{ ...FONTS.h5, fontWeight: 500, textAlign: 'center' }}>
-                  {toDate ? formatDate(toDate) : 'To Date: DD-MM-YYYY'}
-                </Text>
+                <Text style={styles.dateLabel}>To</Text>
+                <Text style={styles.dateValue}>{toDate ? formatDate(toDate) : 'DD-MM-YY'}</Text>
               </TouchableOpacity>
-
-              {(fromDate || toDate) && (
-                <TouchableOpacity onPress={resetFilter} style={styles.resetBtn}>
-                  <Ionicons name="refresh" size={18} color={COLORS.white} />
-                </TouchableOpacity>
-              )}
             </View>
           )}
 
-          {/* Logs list */}
+          {/* Logs */}
           <FlatList
-            data={filteredLogs}
+            data={dummyLogs}
             keyExtractor={(item) => item.id}
             renderItem={renderItem}
             contentContainerStyle={{ paddingBottom: 20 }}
             showsVerticalScrollIndicator={false}
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-            ListEmptyComponent={
-              <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>
-                  {fromDate || toDate
-                    ? 'No logs found for the selected date range'
-                    : 'No activity logs found'}
+          />
+
+          <Modal visible={showPicker} transparent animationType="fade">
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalBox}>
+                <Text style={styles.modalTitle}>
+                  Select {pickerMode === 'from' ? 'From' : 'To'} Date
                 </Text>
+
+                <View style={styles.calendarWrapper}>
+                  <Calendar
+                    onDayPress={handleDateSelect}
+                    markedDates={{
+                      [fromDate || '']: { selected: true, selectedColor: '#8E2DE2' },
+                      [toDate || '']: { selected: true, selectedColor: '#4A90E2' },
+                    }}
+                    theme={{
+                      backgroundColor: '#EBEFF3',
+                      calendarBackground: '#EBEFF3',
+                      textSectionTitleColor: '#6B7280',
+                      dayTextColor: '#111827',
+                      todayTextColor: '#8E2DE2',
+                      selectedDayBackgroundColor: '#8E2DE2',
+                      selectedDayTextColor: '#FFFFFF',
+                      monthTextColor: '#111827',
+                      arrowColor: '#8E2DE2',
+                    }}
+                  />
+                </View>
+
+               
+                <View style={styles.btnRow}>
+                  <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowPicker(false)}>
+                    <Text style={styles.btnText}>Cancel</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity style={styles.okBtn} onPress={handleOkPress}>
+                    <Text style={styles.okBtnText}>OK</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            }
-          />
-
-          {/* Pagination controls */}
-          <View style={styles.pagination}>
-            <TouchableOpacity
-              onPress={loadPrevPage}
-              disabled={currentPage === 1}
-              style={[styles.pageBtn, currentPage === 1 && styles.disabledBtn]}>
-              <Text style={styles.pageText}>Previous</Text>
-            </TouchableOpacity>
-
-            <Text style={styles.pageInfo}>
-              Page {currentPage} of {totalPages}
-            </Text>
-
-            <TouchableOpacity
-              onPress={loadNextPage}
-              disabled={currentPage === totalPages}
-              style={[styles.pageBtn, currentPage === totalPages && styles.disabledBtn]}>
-              <Text style={styles.pageText}>Next</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Date Picker Modal */}
-          <DateTimePickerModal
-            isVisible={showPicker}
-            mode="date"
-            onConfirm={handleConfirm}
-            onCancel={() => setShowPicker(false)}
-          />
+            </View>
+          </Modal>
         </View>
       </SafeAreaView>
     </>
@@ -231,109 +168,118 @@ const ActivityLogs = () => {
 export default ActivityLogs;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 10,
-    backgroundColor: COLORS.bg_Colour,
-  },
+  container: { flex: 1, paddingTop: 10, backgroundColor: '#EBEFF3' },
   container1: { flex: 1, paddingHorizontal: 15 },
+
   headerRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   header: { fontSize: 20, fontWeight: 'bold', marginLeft: 10 },
-  backbutton: {
-    width: 48,
-    height: 48,
-    resizeMode: 'contain',
-  },
-  filterBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    marginBottom: 10,
-  },
-  dateFilter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  dateInput: {
-    borderWidth: 1,
-    borderColor: COLORS.white,
-    backgroundColor: COLORS.white,
-    borderRadius: 8,
-    padding: 8,
-    paddingVertical: 10,
-    marginRight: 8,
+  backbutton: { width: 48, height: 48, resizeMode: 'contain' },
+
+  filterBtn: { flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 10 },
+
+  dateBoxWrapper: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 },
+  dateBox: {
     flex: 1,
-  },
-  resetBtn: {
-    padding: 5,
-    backgroundColor: COLORS.text_desc,
-    borderRadius: 50,
-  },
-  logContainer: { marginBottom: 20 },
-  timelineRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 15 },
-  timeline: {
-    width: 20,
-    alignItems: 'center',
-    position: 'relative',
-  },
-  dot: {
-    width: 45,
-    height: 35,
-    borderRadius: 50,
-    marginTop: -7,
-  },
-  barLine: {
-    width: 35,
-    position: 'absolute',
-    zIndex: -1,
-    left: -2,
-    top: -550,
-  },
-  logCard: {
-    backgroundColor: COLORS.bg_Colour,
-    padding: 10,
-    borderRadius: 12,
-    flex: 1,
-    elevation: 5,
-  },
-  message: { fontWeight: 'bold', marginBottom: 8, color: COLORS.text_title },
-  email: { fontSize: 12, color: COLORS.green_text, marginBottom: 5 },
-  time: { fontSize: 10, color: COLORS.text_desc, textAlign: 'right' },
-  pagination: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.blue_02,
-  },
-  pageBtn: {
-    padding: 10,
-    backgroundColor: COLORS.blue_01,
-    borderRadius: 5,
-    width: '25%',
-  },
-  disabledBtn: {
-    backgroundColor: COLORS.text_desc,
-  },
-  pageText: {
-    color: COLORS.white,
-    textAlign: 'center',
-    fontWeight: 500,
-  },
-  pageInfo: {
-    fontSize: 14,
-    color: COLORS.text_title,
-  },
-  emptyContainer: {
+    backgroundColor: '#EBEFF3',
+    borderRadius: 14,
+    paddingVertical: 14,
+    marginHorizontal: 6,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 185,
+    shadowColor: '#A3B1C6',
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 6,
+    elevation: 6,
   },
-  emptyText: {
-    fontSize: 16,
-    color: COLORS.text_desc,
-    textAlign: 'center',
+  dateLabel: { fontSize: 13, color: '#6B7280', fontWeight: '600', marginBottom: 4 },
+  dateValue: { fontSize: 14, color: '#716F6F', fontWeight: '500' },
+
+  logContainer: { marginBottom: 20 },
+  timelineRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 15 },
+  timeline: { width: 30, alignItems: 'center', position: 'relative' },
+  dot: { width: 50, height: 50, borderRadius: 50, zIndex: 2 },
+  barLine: { position: 'absolute', top: 25, width: 20, height: '100%', resizeMode: 'stretch', zIndex: 1 },
+  logCard: {
+    backgroundColor: '#EBEFF3',
+    padding: 12,
+    borderRadius: 14,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 5,
   },
+  message: { fontWeight: 'bold', marginBottom: 8, color: '#111827' },
+  email: { fontSize: 13, color: 'green', marginBottom: 5 },
+  time: { fontSize: 11, color: '#6B7280', textAlign: 'right' },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalBox: {
+    backgroundColor: '#EBEFF3',
+    borderRadius: 16,
+    padding: 20,
+    width: '90%',
+    shadowColor: '#A3B1C6',
+    shadowOffset: { width: 6, height: 6 },
+    shadowOpacity: 1,
+    shadowRadius: 6,
+    elevation: 10,
+    alignItems: 'center',
+  },
+  modalTitle: { fontSize: 16, fontWeight: '700', marginBottom: 10, color: '#111' },
+
+  calendarWrapper: {
+    backgroundColor: '#EBEFF3',
+    borderRadius: 16,
+    marginVertical: 12,
+    padding: 8,
+    shadowColor: '#A3B1C6',
+    shadowOffset: { width: 6, height: 6 },
+    shadowOpacity: 1,
+    shadowRadius: 6,
+    elevation: 10,
+  },
+
+ 
+  btnRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginTop: 10,
+  },
+  cancelBtn: {
+    flex: 1,
+    marginHorizontal: 6,
+    backgroundColor: '#EBEFF3',
+    borderRadius: 14,
+    paddingVertical: 12,
+    alignItems: 'center',
+    shadowColor: '#A3B1C6',
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 6,
+    elevation: 6,
+  },
+  okBtn: {
+    flex: 1,
+    marginHorizontal: 6,
+    backgroundColor: '#8E2DE2',
+    borderRadius: 14,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#A3B1C6',
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  btnText: { color: '#111827', fontWeight: '600', fontSize: 14 },
+  okBtnText: { color: '#FFF', fontWeight: '700', fontSize: 14 },
 });
