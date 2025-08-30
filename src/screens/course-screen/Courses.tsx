@@ -116,12 +116,6 @@ const Courses = () => {
             </TouchableOpacity>
           )}
         </ScrollView>
-
-        <TouchableOpacity
-          style={styles.chatbotBtn}
-          onPress={() => navigation.navigate('ChatbotScreen')}>
-          <Ionicons name="chatbubble-ellipses" size={28} color="#fff" />
-        </TouchableOpacity>
       </SafeAreaView>
     </>
   );
@@ -189,18 +183,5 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     fontSize: 12,
     color: '#716F6F',
-  },
-  chatbotBtn: {
-    position: 'absolute',
-    bottom: 80,
-    right: 20,
-    backgroundColor: '#7B00FF',
-    padding: 16,
-    borderRadius: 50,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 5,
   },
 });
