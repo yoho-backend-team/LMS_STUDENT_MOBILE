@@ -9,6 +9,7 @@ import helpReducer from '../features/HelpCenter/Reducer/HelpSlice';
 import NotificationSlice from '../features/notification/reducers/notificationSlice';
 import ActivitySlice from '../features/reducer/activitylog/reducers/ActivitySlice';
 import PaymentSlice from '../features/payments/reducer/paymentSlice';
+import PlacementSlice from '../features/placements/reducer/placementSlice';
 import ClassSlice from '../features/classes/reducers/classslice';
 import ClassIdSlice from '../features/classid/reducers/classidslice';
 import FaqSlice from '../features/faq/reducers/faqSlice';
@@ -27,6 +28,7 @@ const store = configureStore({
     NotificationSlice: NotificationSlice,
     ActivitySlice: ActivitySlice,
     PaymentSlice: PaymentSlice,
+    PlacementSlice:PlacementSlice,
     ClassSlice: ClassSlice,
     ClassIdSlice: ClassIdSlice,
     faqSlice: FaqSlice,

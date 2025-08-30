@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   StatusBar,
   StyleSheet,
@@ -11,8 +11,26 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import placementimg from '../../assets/icons/Placement/placementimg.png';
 import backIcon from '../../assets/icons/Placement/back.png';
+import { useDispatch, useSelector } from 'react-redux';
+import { getPlacementthunks } from '~/features/placements/reducer/thunks';
+import { selectPlacementData } from '~/features/placements/reducer/selectors';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Placement = ({ navigation }: any) => {
+
+const fetchPlacement = async ()=>{
+        const stuId = JSON.parse(await AsyncStorage.getItem("StudentData"))
+        console.log(stuId._id, 'student')
+        dispatch(getPlacementthunks({studentId: stuId._id}) as any);
+}
+
+
+  const dispatch = useDispatch();
+  const placementData = useSelector(selectPlacementData);
+  console.log('data', placementData)
+    useEffect(() => {
+      fetchPlacement()
+    }, [dispatch]);
   return (
     <>
       <StatusBar backgroundColor="#000" barStyle="light-content" />
@@ -35,22 +53,22 @@ const Placement = ({ navigation }: any) => {
             <View style={styles.row}>
               <Text style={styles.label}>Company Name</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>Yoho Tech</Text>
+              <Text style={styles.value}>{placementData?.Company?.name}</Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Company Address</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>2, Main Road Chennai</Text>
+              <Text style={styles.value}>{placementData?.Company?.address}</Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Contact Email</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>yohotech@gmail.com</Text>
+              <Text style={styles.value}>{placementData?.Company?.email}</Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Contact Number</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>8975894567</Text>
+              <Text style={styles.value}>{placementData?.Company?.phone}</Text>
             </View>
           </View>
 
@@ -60,17 +78,17 @@ const Placement = ({ navigation }: any) => {
             <View style={styles.row}>
               <Text style={styles.label}>Job Name</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>UI Developer</Text>
+              <Text style={styles.value}>{placementData?.job?.name}</Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Job Description</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>Front - End Developer</Text>
+              <Text style={styles.value}>{placementData?.job?.description}</Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Skills</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>Figma</Text>
+              <Text style={styles.value}>{placementData?.job?.skills?.map((data:any)=>{data}).join(",")}</Text>
             </View>
           </View>
 
@@ -80,17 +98,17 @@ const Placement = ({ navigation }: any) => {
             <View style={styles.row}>
               <Text style={styles.label}>Interview Date</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>28-08-2025</Text>
+              <Text style={styles.value}>{placementData?.schedule?.interviewDate}</Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Venue</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>wewjuioc/.mnb</Text>
+              <Text style={styles.value}>{placementData?.schedule?.venue}</Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Address</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>OMR, Chennai</Text>
+              <Text style={styles.value}>{placementData?.schedule?.address}</Text>
             </View>
           </View>
         </ScrollView>

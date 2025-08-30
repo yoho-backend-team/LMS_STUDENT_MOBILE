@@ -1,0 +1,1 @@
+export const selectPlacementData = (state: any) => state.PlacementSlice?.data;
