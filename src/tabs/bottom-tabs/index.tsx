@@ -13,9 +13,9 @@ const BottomTabs = () => {
   return (
     <Tab.Navigator>
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Courses" component={CouresScreen} />
+      <Tab.Screen name="Course" component={CouresScreen} />
       <Tab.Screen name="Classes" component={ClassesScreen} />
-      <Tab.Screen name="Attendance" component={AttendanceScreen} />
+      <Tab.Screen name="Attend" component={AttendanceScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );

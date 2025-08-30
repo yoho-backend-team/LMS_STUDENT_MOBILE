@@ -21,6 +21,7 @@ import CreateTicketScreen from './ticket-screen/CreateTicket';
 import TicketByIdScreen from './ticket-screen/TicketById';
 import TicketsScreen from './ticket-screen/Tickets';
 import SpokenEnglishScreen from './spoken-english-screen/SpokenEnglish';
+import Notify from './notification-screen/Notify';
 
 export {
   ActivityLogsScreen,
@@ -46,4 +47,5 @@ export {
   TicketByIdScreen,
   TicketsScreen,
   SpokenEnglishScreen,
+  Notify,
 };
