@@ -36,7 +36,6 @@ const COLORS = {
   background: '#f9fafb',
 };
 
-// Helper function to format date as DD-MM-YYYY
 const formatDateToDDMMYYYY = (date: Date | string | null): string => {
   if (!date) return '';
 
@@ -51,7 +50,6 @@ const formatDateToDDMMYYYY = (date: Date | string | null): string => {
   return `${day}-${month}-${year}`;
 };
 
-// Helper function to convert DD-MM-YYYY to timestamp
 const convertDDMMYYYYToTimestamp = (dateString: string): string | null => {
   if (!dateString) return null;
 
@@ -197,8 +195,6 @@ const Profile = () => {
         const updateResponse = await updateStudentProfile({
           image: response?.data?.data?.file,
         });
-
-        console.log(updateResponse, 'profile update response');
 
         if (updateResponse) {
           setIsEditing(false);
@@ -696,7 +692,7 @@ const Profile = () => {
           showsVerticalScrollIndicator={false}
           style={styles.scrollSection}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-          {renderProfileContent()}
+          {renderContent()}
         </ScrollView>
       </SafeAreaView>
     </>

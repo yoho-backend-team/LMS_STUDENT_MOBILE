@@ -1,7 +1,10 @@
+
+
 import { useState, useEffect } from 'react';
 import {
   StatusBar,
   StyleSheet,
+  Image,
   Text,
   TouchableOpacity,
   View,
@@ -11,12 +14,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
-import Header from '~/components/shared/Header';
-import { COLORS, FONTS } from '~/constants';
+import { COLORS, FONTS, icons } from '~/constants';
 import Icon from 'react-native-vector-icons/Feather';
 import { GetallTicketThunks } from '../../features/Ticket/reducers/Thunks';
 import { GetTicketSelector } from '~/features/Ticket/reducers/Selectors';
 import { formatDateandmonth } from '../../utils/formatDate';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const Tickets = () => {
   const [filter, setFilter] = useState('All');
@@ -26,7 +29,6 @@ const Tickets = () => {
   const dispatch = useDispatch<any>();
   const tickets = useSelector(GetTicketSelector);
   const totalPages = tickets?.totalPages || 1;
-  const totalTickets = tickets?.totalTickets || 0;
 
   const fetchTickets = (page = currentPage) => {
     dispatch(GetallTicketThunks({ page }));
@@ -66,30 +68,55 @@ const Tickets = () => {
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
       <SafeAreaView edges={['top']} style={styles.container}>
-        <Header />
+        {/* <Header /> */}
 
-        <View style={styles.ticketRow}>
-          <Text style={styles.headerText}>Tickets</Text>
-          <TouchableOpacity
-            style={styles.creatbutton}
-            onPress={() => navigation.navigate('CreateTicket' as never)}>
-            <Text style={styles.creatbuttonText}>Create Ticket</Text>
+        <View style={[styles.ticketRow, { justifyContent: 'flex-start' }]}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Image
+              source={icons.back_arrow}
+              style={{ width: 25, height: 25, marginLeft: 15 }}
+            />
           </TouchableOpacity>
+          <Text style={styles.headerText}>Tickets</Text>
+          <View style={{ flex: 1 }} />
+          <LinearGradient
+            colors={['#7B00FF', '#B200FF']}
+            start={{ x: 0.134, y: 0.021 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.gradientButton}>
+            <TouchableOpacity
+              style={styles.buttonInner}
+              onPress={() => navigation.navigate('CreateTicket' as never)}>
+              <Text style={styles.buttonText}>Create Ticket</Text>
+            </TouchableOpacity>
+          </LinearGradient>
         </View>
+
 
         <View style={styles.filterContainer}>
           {['All', 'Opened', 'Closed'].map((option) => (
-            <TouchableOpacity
+            <LinearGradient
               key={option}
-              style={[
-                styles.filterButton,
-                filter === option ? styles.activeButton : styles.inactiveButton,
-              ]}
-              onPress={() => setFilter(option)}>
-              <Text style={[styles.filterText, filter === option && styles.activeText]}>
-                {option}
-              </Text>
-            </TouchableOpacity>
+              colors={
+                filter === option
+                  ? ['#7B00FF', '#B200FF']
+                  : ['#E0E0E0', '#E0E0E0']
+              }
+              start={{ x: 0.134, y: 0.021 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.filterGradient}>
+              <TouchableOpacity
+                style={styles.buttonInner}
+                onPress={() => setFilter(option)}>
+                <Text
+                  style={[
+                    styles.filterText,
+                    filter === option && { color: '#fff' },
+                  ]}>
+                  {option}
+                </Text>
+              </TouchableOpacity>
+            </LinearGradient>
           ))}
         </View>
 
@@ -146,23 +173,43 @@ const Tickets = () => {
 
         {/* Pagination controls */}
         <View style={styles.pagination}>
-          <TouchableOpacity
-            onPress={loadPrevPage}
-            disabled={currentPage === 1}
-            style={[styles.pageBtn, currentPage === 1 && styles.disabledBtn]}>
-            <Text style={styles.pageText}>Previous</Text>
-          </TouchableOpacity>
+          <LinearGradient
+            colors={
+              currentPage === 1
+                ? ['#E0E0E0', '#E0E0E0']
+                : ['#7B00FF', '#B200FF']
+            }
+            start={{ x: 0.134, y: 0.021 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.pageGradient}>
+            <TouchableOpacity
+              onPress={loadPrevPage}
+              disabled={currentPage === 1}
+              style={styles.buttonInner}>
+              <Text style={styles.buttonText}>Previous</Text>
+            </TouchableOpacity>
+          </LinearGradient>
 
           <Text style={styles.pageInfo}>
             Page {currentPage} of {totalPages}
           </Text>
 
-          <TouchableOpacity
-            onPress={loadNextPage}
-            disabled={currentPage === totalPages}
-            style={[styles.pageBtn, currentPage === totalPages && styles.disabledBtn]}>
-            <Text style={styles.pageText}>Next</Text>
-          </TouchableOpacity>
+          <LinearGradient
+            colors={
+              currentPage === totalPages
+                ? ['#E0E0E0', '#E0E0E0']
+                : ['#7B00FF', '#B200FF']
+            }
+            start={{ x: 0.134, y: 0.021 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.pageGradient}>
+            <TouchableOpacity
+              onPress={loadNextPage}
+              disabled={currentPage === totalPages}
+              style={styles.buttonInner}>
+              <Text style={styles.buttonText}>Next</Text>
+            </TouchableOpacity>
+          </LinearGradient>
         </View>
       </SafeAreaView>
     </>
@@ -172,41 +219,20 @@ const Tickets = () => {
 export default Tickets;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 10, backgroundColor: COLORS.white },
+  container: { flex: 1, paddingTop: 10, backgroundColor: COLORS.white, },
   headerText: {
     fontSize: 20,
     fontWeight: 'bold',
-    padding: 10,
+    marginLeft: 10
   },
   filterContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: 10,
     gap: 4,
+
   },
-  filterText: { ...FONTS.body4, color: COLORS.text_title, fontWeight: 500 },
-  filterButton: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    width: '31%',
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  creatbutton: {
-    backgroundColor: '#2B00FF',
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: '#fff',
-    marginRight: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-  },
-  creatbuttonText: { color: '#fff', fontSize: 14, fontWeight: '600', textAlign: 'center' },
-  activeButton: { backgroundColor: '#2B00FF' },
-  inactiveButton: { backgroundColor: COLORS.shadow_01 },
-  activeText: { color: '#fff' },
+  filterText: { ...FONTS.body4, color: COLORS.text_title, fontWeight: '500' },
   cards: { padding: 10, flex: 1 },
   card: {
     backgroundColor: '#fff',
@@ -222,7 +248,7 @@ const styles = StyleSheet.create({
   cardStatus: {
     marginTop: 5,
     textAlign: 'right',
-    fontWeight: 500,
+    fontWeight: '500',
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 8,
@@ -250,20 +276,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: COLORS.blue_02,
   },
-  pageBtn: {
-    padding: 10,
-    backgroundColor: COLORS.blue_01,
-    borderRadius: 5,
-    minWidth: 80,
-    alignItems: 'center',
-  },
-  disabledBtn: {
-    backgroundColor: COLORS.text_desc,
-  },
-  pageText: {
-    color: COLORS.white,
-    fontWeight: 'bold',
-  },
   pageInfo: {
     fontSize: 14,
     color: COLORS.text_title,
@@ -278,5 +290,34 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.text_desc,
     textAlign: 'center',
+  },
+
+  gradientButton: {
+    borderRadius: 10,
+    overflow: 'hidden',
+    marginRight: 10,
+  },
+  filterGradient: {
+    flex: 1,
+    borderRadius: 10,
+    overflow: 'hidden',
+    marginHorizontal: 3,
+  },
+  pageGradient: {
+    borderRadius: 6,
+    overflow: 'hidden',
+    minWidth: 90,
+    marginHorizontal: 5,
+  },
+  buttonInner: {
+    paddingVertical: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 110
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

@@ -3,7 +3,7 @@ export const formatDate = (iosString: string): string => {
   const format: Intl.DateTimeFormatOptions = {
     day: 'numeric',
     month: 'short',
-    year: 'numeric',
+    year: '2-digit',
   };
   return date.toLocaleDateString('en-GB', format);
 };

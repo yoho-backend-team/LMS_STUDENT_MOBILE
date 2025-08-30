@@ -7,22 +7,24 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { WebView } from 'react-native-webview';
 import { getFileUrl, getImageUrl } from '~/utils/imageUtils';
 import { formatDateMonthandYear } from '~/utils/formatDate';
-import {  Linking, Alert } from "react-native";
+import { Linking, Alert } from 'react-native';
+import TaskCard from '../../components/courses/TaskCard';
 
 type RootStackParamList = {
   Courses: undefined;
-  CourseViewScreen: { course: Course };
+  CourseViewScreen: { course: any };
+  TaskCard: { task: Task };
 };
 
-type Course = {
+type Task = {
   id: number;
   course_name: string;
   description: string;
   coursemodules: string;
   duration: string;
-  class_type:string;
+  class_type: string;
   image: any;
-  notes:any;
+  notes: any;
 };
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CourseViewScreen'>;
@@ -39,54 +41,66 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
   const [showVideo, setShowVideo] = useState(false);
   const { course } = route.params;
   const [activeTab, setActiveTab] = useState<'about' | 'notes' | 'tasks' | 'track'>('about');
+  const [selectedTask, setSelectedTask] = useState<any | null>(null);
 
-  
   const downloadPdf = async (fileUrl: string) => {
-  const PDF_URL = getFileUrl(fileUrl)
-  try {
-    const supported = await Linking.canOpenURL(PDF_URL);
-    if (supported) {
-      await Linking.openURL(PDF_URL); 
-    } else {
-      Alert.alert("Error", "Cannot open this PDF URL");
+    const PDF_URL = getFileUrl(fileUrl);
+    try {
+      const supported = await Linking.canOpenURL(PDF_URL);
+      if (supported) {
+        await Linking.openURL(PDF_URL);
+      } else {
+        Alert.alert('Error', 'Cannot open this PDF URL');
+      }
+    } catch (error) {
+      console.error('Linking error:', error);
     }
-  } catch (error) {
-    console.error("Linking error:", error);
-  }
-};
+  };
 
   const tasksData = [
     {
       id: 1,
-      name: 'Rajesh',
-      task: 'Lorem Ipsum',
+      instructorname: 'Kamal',
+      task: 'for dashboard we need schema',
+      taskname: 'Creat schema',
       deadline: '26-06-2025',
       status: 'Completed',
+      question: 'why we use mongo db insted of sql',
+      score:'8',
+      localFilePath: 'IMG-202033885599'
     },
     {
       id: 2,
-      name: 'Rajesh',
-      task: 'Lorem Ipsum',
+      instructorname: 'Abishek',
+      task: 'Creat Api for integration',
+      taskname: 'API',
       deadline: '26-06-2025',
       status: 'Pending',
+      question: 'why we use reacenative  insted of java',
+      score:''
     },
     {
       id: 3,
-      name: 'Rajesh',
-      task: 'Lorem Ipsum',
+      instructorname: 'Prakash',
+      task: 'Need auth for login,logout ',
+      taskname: 'Auth',
       deadline: '26-06-2025',
       status: 'Completed',
+      question: 'what is the future scope of mongo db',
+      score:'8'
     },
     {
       id: 4,
-      name: 'Rajesh',
-      task: 'Lorem Ipsum',
+      instructorname: 'Ram',
+      task: 'Creat scocket for conversation',
+      taskname: 'Creat scocket',
       deadline: '26-06-2025',
       status: 'Completed',
+      question: 'what is the future scope of react native',
+      score:'8',
     },
   ];
 
-  // ✅ Timeline steps
   const steps = [
     {
       id: 1,
@@ -126,7 +140,6 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
     },
   ];
 
-  // Function to handle back button press when video is playing
   const handleBackPress = () => {
     if (showVideo) {
       setShowVideo(false);
@@ -138,7 +151,6 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scroll}>
-        {/* Back Button */}
         <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
           <Image
             source={require('../../assets/courses/arrow.png')}
@@ -146,44 +158,34 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
           />
         </TouchableOpacity>
 
-        {/* Scrollable Tabs */}
-       <ScrollView
-  horizontal
-  showsHorizontalScrollIndicator={false}
-  style={styles.tabScroll}
-  contentContainerStyle={{ flexGrow: 1 }}
->
-  {['about', 'notes', 'tasks', 'track'].map((tab) => (
-    <TouchableOpacity
-      key={tab}
-      style={[
-        styles.tabButton,
-        activeTab === tab && styles.activeTab,
-      ]}
-      onPress={() => {
-        if (showVideo && tab !== 'track') {
-          setShowVideo(false);
-        }
-        setActiveTab(tab as any);
-      }}
-    >
-      <Text
-        style={[
-          styles.tabText,
-          activeTab === tab && styles.activeTabText,
-        ]}
-      >
-        {tab === 'about'
-          ? 'About'
-          : tab === 'notes'
-          ? 'Notes & Materials'
-          : tab === 'tasks'
-          ? 'Tasks & Projects'
-          : 'Course Track'}
-      </Text>
-    </TouchableOpacity>
-  ))}
-</ScrollView>
+      
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.tabScroll}
+          contentContainerStyle={{ flexGrow: 1 }}>
+          {['about', 'notes', 'tasks', 'track'].map((tab) => (
+            <TouchableOpacity
+              key={tab}
+              style={[styles.tabButton, activeTab === tab && styles.activeTab]}
+              onPress={() => {
+                if (showVideo && tab !== 'track') {
+                  setShowVideo(false);
+                }
+                setActiveTab(tab as any);
+              }}>
+              <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
+                {tab === 'about'
+                  ? 'About'
+                  : tab === 'notes'
+                    ? 'Notes & Materials'
+                    : tab === 'tasks'
+                      ? 'Tasks & Projects'
+                      : 'Course Track'}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
         {/* ABOUT TAB */}
         {activeTab === 'about' && (
           <>
@@ -191,16 +193,13 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
               <Text style={styles.sectionTitle}>About Course</Text>
               <View style={styles.card}>
                 <Image
-                                  source={
-                                   { uri: getImageUrl(course?.image)  }
-                                  }
-                                  style={styles.image}
-                                  resizeMode="contain"
-                                />
+                  source={{ uri: getImageUrl(course?.image) }}
+                  style={styles.image}
+                  resizeMode="contain"
+                />
               </View>
               <Text style={styles.title}>{course?.course_name}</Text>
               <Text style={styles.description}>{course?.description}</Text>
-              
 
               <View style={styles.footer}>
                 <View style={styles.footerItem}>
@@ -208,14 +207,17 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
                     source={require('../../assets/courses/modules.png')}
                     style={{ width: 24, height: 24 }}
                   />
-                  <Text style={styles.footerText}> {course.coursemodules?.length ?? '0'} modules</Text>
+                  <Text style={styles.footerText}>
+                    {' '}
+                    {course.coursemodules?.length ?? '0'} modules
+                  </Text>
                 </View>
                 <View style={styles.footerItem}>
                   <Image
                     source={require('../../assets/courses/Alarm.png')}
                     style={{ width: 24, height: 24 }}
                   />
-                  <Text style={styles.footerText}>  {course.duration ?? 'N/A'}</Text>
+                  <Text style={styles.footerText}> {course.duration ?? 'N/A'}</Text>
                 </View>
               </View>
             </View>
@@ -224,9 +226,7 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
               <View style={styles.infoCard}>
                 <Text style={styles.infoLabel}>Course Name</Text>
                 <View style={styles.card1}>
-                  <Text style={styles.infoValue}>
-                    {course?.course_name ?? ''}
-                  </Text>
+                  <Text style={styles.infoValue}>{course?.course_name ?? ''}</Text>
                 </View>
               </View>
               <View style={styles.infoCard}>
@@ -238,9 +238,7 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
               <View style={styles.infoCard}>
                 <Text style={styles.infoLabel}>Class Type</Text>
                 <View style={styles.card1}>
-                  <Text style={styles.infoValue}>
-                   {course?.class_type[0] ?? ''} 
-                  </Text>
+                  <Text style={styles.infoValue}>{course?.class_type[0] ?? ''}</Text>
                 </View>
               </View>
             </View>
@@ -250,36 +248,43 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
         {activeTab === 'notes' && (
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>Notes & Materials</Text>
-            {course?.notes?.length ? 
-            course?.notes?.map((note:any) => (
-              <View key={note.id} style={styles.noteCard}>
-                {/* Name Row */}
-                <View style={styles.textRow}>
-                  <Text style={styles.labelText}>File</Text>
-                  <Image source={icons.pdf} />
-                </View>
+            {course?.notes?.length ? (
+              course?.notes?.map((note: any) => (
+                <View key={note.id} style={styles.noteCard}>
+                  {/* Name Row */}
+                  <View style={styles.textRow}>
+                    <Text style={styles.labelText}>File</Text>
+                    <Image source={icons.pdf} />
+                  </View>
 
-                {/* Date Row */}
-                <View style={styles.textRow}>
-                  <Text style={styles.labelText}>Date</Text>
-                  <Text style={styles.valueText}>{formatDateMonthandYear(note?.createdAt)}</Text>
-                </View>
+                  {/* Date Row */}
+                  <View style={styles.textRow}>
+                    <Text style={styles.labelText}>Date</Text>
+                    <Text style={styles.valueText}>{formatDateMonthandYear(note?.createdAt)}</Text>
+                  </View>
 
-                {/* Chapter Row */}
-                <View style={styles.textRow}>
-                  <Text style={styles.labelText}>Chapter</Text>
-                  <Text style={styles.valueText}>{note?.title}</Text>
-                </View>
+                  {/* Chapter Row */}
+                  <View style={styles.textRow}>
+                    <Text style={styles.labelText}>Chapter</Text>
+                    <Text style={styles.valueText}>{note?.title}</Text>
+                  </View>
 
-                {/* Download Row */}
-               <TouchableOpacity style={styles.downloadRow} onPress={()=>downloadPdf(note?.file)}>
-      <Text style={styles.labelText}>PDF Download</Text>
-      <Image source={icons.download} style={{ width: 55, height: 55 }} />
-    </TouchableOpacity>
+                  {/* Download Row */}
+                  <TouchableOpacity
+                    style={styles.downloadRow}
+                    onPress={() => downloadPdf(note?.file)}>
+                    <Text style={styles.labelText}>PDF Download</Text>
+                    <Image source={icons.download} style={{ width: 55, height: 55 }} />
+                  </TouchableOpacity>
+                </View>
+              ))
+            ) : (
+              <View>
+                <Text style={{ textAlign: 'center', marginTop: 200, marginBottom: 350 }}>
+                  "No notes and materials available"
+                </Text>
               </View>
-            )) : <View> 
-              <Text style = {{textAlign:"center",marginTop:200,marginBottom:350}}>"No notes and materials available"</Text>
-              </View>}
+            )}
           </View>
         )}
 
@@ -287,16 +292,19 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
         {activeTab === 'tasks' && (
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>Tasks & Projects</Text>
-            {tasksData.map((task) => (
-              <View key={task.id} style={styles.taskCard}>
+            {tasksData?.map((task) => (
+              <TouchableOpacity
+                key={task.id}
+                style={styles.taskCard}
+                onPress={() => navigation.navigate('TaskCard', { task })}>
                 <View style={styles.textRow}>
                   <Text style={styles.taskText}>Name</Text>
-                  <Text style={styles.taskValue}>{task.name}</Text>
+                  <Text style={styles.taskValue}>{task.instructorname}</Text>
                 </View>
 
                 <View style={styles.textRow}>
                   <Text style={styles.taskText}>Task Name</Text>
-                  <Text style={styles.taskValue}>{task.task}</Text>
+                  <Text style={styles.taskValue}>{task.taskname}</Text>
                 </View>
 
                 <View style={styles.textRow}>
@@ -314,7 +322,7 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
                     <Text style={styles.statusText}>{task.status}</Text>
                   </View>
                 </View>
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         )}
@@ -544,16 +552,16 @@ const styles = StyleSheet.create({
   backButton: { marginBottom: 10 },
 
   tabScroll: { marginBottom: 16 },
- tabButton: {
-  flex: 1,                 
-  minWidth: 130,          
-  justifyContent: 'center',
-  alignItems: 'center',
-  paddingVertical: 10,
-  marginRight: 8,
-  borderRadius: 8,
-  backgroundColor: '#fff',
-},
+  tabButton: {
+    flex: 1,
+    minWidth: 130,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 10,
+    marginRight: 8,
+    borderRadius: 8,
+    backgroundColor: '#fff',
+  },
   activeTab: { backgroundColor: '#7B00FF' },
   tabText: { color: '#374151', fontSize: 14 },
   activeTabText: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
@@ -615,7 +623,7 @@ const styles = StyleSheet.create({
     ...SHADOW,
   },
   taskText: { fontSize: 18, color: '#716F6F', marginBottom: 6, width: '50%' },
-  actionRow: { flexDirection: 'row', alignItems: 'center', },
+  actionRow: { flexDirection: 'row', alignItems: 'center' },
   statusButton: {
     marginLeft: 8,
     paddingVertical: 4,

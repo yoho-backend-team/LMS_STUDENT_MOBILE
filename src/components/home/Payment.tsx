@@ -1,10 +1,19 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectPaymentData } from '~/features/payments/reducer/selectors';
+import { getPaymentthunks } from '~/features/payments/reducer/thunks';
 
 const PaymentCard = () => {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const paymentData = useSelector(selectPaymentData);
+
+  useEffect(() => {
+    dispatch(getPaymentthunks({}) as any);
+  }, [dispatch]);
   return (
     <View style={styles.card}>
       {/* Title */}
@@ -17,7 +26,7 @@ const PaymentCard = () => {
       <Text style={styles.amountLabel}>Amount to pay :</Text>
 
       {/* Amount */}
-      <Text style={styles.amount}>₹90000</Text>
+      <Text style={styles.amount}>{paymentData?.balance || '₹0'}</Text>
 
       {/* Gradient Button */}
       <TouchableOpacity

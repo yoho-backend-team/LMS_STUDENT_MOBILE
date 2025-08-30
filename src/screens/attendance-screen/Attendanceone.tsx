@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   StatusBar,
   StyleSheet,
@@ -6,108 +6,144 @@ import {
   View,
   TouchableOpacity,
   ScrollView,
-  Modal,
+  Dimensions,
+  Animated,
   FlatList,
-
-  // ActivityIndicator,
+  Modal
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "~/components/shared/Header";
 import { COLORS } from "~/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllAttendanceThunk } from "~/features/Attendance/reducers/thunks";
-import { selectAllAttendance } from "~/features/Attendance/reducers/selectors";
 import { AppDispatch } from "~/store/store";
-import { LineChart } from "react-native-chart-kit";
+import { getStudentattendance } from '~/features/Attendanceone/reducers/thunks';
+import { selectAttendance } from '~/features/Attendanceone/reducers/selectors';
+import Svg, { Path, Defs, LinearGradient, Stop, G } from "react-native-svg";
 
+const { width: screenWidth } = Dimensions.get("window");
+const cardWidth = screenWidth * 0.85;
+
+const MinimalWave = ({ percentage, color, cardId }: { percentage: number; color: string; cardId: number }) => {
+  const animatedValue = useRef(new Animated.Value(0)).current;
+
+  
+
+  const waveHeight = 45;
+  const waveWidth = cardWidth - 80;
+  const amplitude = 6 + (percentage / 100) * 8;
+
+  const translateX = animatedValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -25],
+  });
+
+  const path = `M0,${waveHeight / 2} ${Array.from({ length: 100 }, (_, i) => {
+    const x = (waveWidth / 100) * i;
+    const y = waveHeight / 2 + Math.sin(x * 0.03 + percentage * 0.01) * amplitude;
+    return `L${x},${y}`;
+  }).join(" ")} L${waveWidth},${waveHeight} L0,${waveHeight} Z`;
+
+  const strokePath = `M0,${waveHeight / 2} ${Array.from({ length: 100 }, (_, i) => {
+    const x = (waveWidth / 100) * i;
+    const y = waveHeight / 2 + Math.sin(x * 0.03 + percentage * 0.01) * amplitude;
+    return `L${x},${y}`;
+  }).join(" ")}`;
+
+  return (
+    <View style={{ height: waveHeight, alignItems: "center", overflow: "hidden" }}>
+      <Animated.View style={{ transform: [{ translateX }] }}>
+        <Svg height={waveHeight} width={waveWidth}>
+          <Defs>
+            <LinearGradient id={`minimal${cardId}`} x1="0%" y1="0%" x2="100%" y2="0%">
+              <Stop offset="0%" stopColor={color} stopOpacity="0.1" />
+              <Stop offset="50%" stopColor={color} stopOpacity="0.6" />
+              <Stop offset="100%" stopColor={color} stopOpacity="0.1" />
+            </LinearGradient>
+          </Defs>
+          <G>
+            <Path d={path} fill={`url(#minimal${cardId})`} />
+            <Path d={strokePath} stroke={color} strokeWidth="2" fill="none" />
+          </G>
+        </Svg>
+      </Animated.View>
+    </View>
+  );
+};
 
 const Attendanceone = () => {
   const dispatch = useDispatch<AppDispatch>();
-   const attendanceData = useSelector(selectAllAttendance);
-  // const [loading, setLoading] = useState(false);
-  // const [error, setError] = useState("");
-
+  const attendance = useSelector(selectAttendance);
+  
   const [showFilter, setShowFilter] = useState(false);
-  const [showMonthDropdown, setShowMonthDropdown] = useState(false);
-  const [showYearDropdown, setShowYearDropdown] = useState(false);
-
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-
+  const [showMonthDropdown, setShowMonthDropdown] = useState(false);
+  const [showYearDropdown, setShowYearDropdown] = useState(false);
+  
   const today = new Date();
-
   const monthNames = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December",
   ];
-  const years = Array.from({ length: 11 }, (_, i) => new Date().getFullYear() - 5 + i);
-
+  
+  const years = Array.from({ length: 11 }, (_, i) => today.getFullYear() - 5 + i);
   const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
   const firstDay = new Date(selectedYear, selectedMonth, 1).getDay();
 
   useEffect(() => {
-    const fetchAttendanceData = async () => {
-      // setLoading(true);
-      // setError("");
-      try {
-        await dispatch(getAllAttendanceThunk({
-          month: selectedMonth + 1,
-          year: String(selectedYear),
-        }));
-      } catch (err) {
-        // setError("Failed to fetch attendance data");
-        console.log('Error fetching attendance:', err);
-      } finally {
-        // setLoading(false);
-      }
+    const fetchAttendance = async () => {
+      const payload = {
+        userId: "60d59242-f922-4c34-8974-ea207acadeec",
+        month: selectedMonth,
+        year: selectedYear,
+        instituteId: "973195c0-66ed-47c2-b098-d8989d3e4529",
+      };
+      await dispatch(getStudentattendance(payload));
     };
 
-    fetchAttendanceData();
+    fetchAttendance();
   }, [selectedMonth, selectedYear, dispatch]);
 
-  const cards = [
-    {
-      id: 1,
-      title: "Classes Attended",
-      attended: attendanceData?.classesAttended ?? 0,
-      total: attendanceData?.totalClasses ?? 0,
-    },
-    {
-      id: 2,
-      title: "Present Days",
-      attended: attendanceData?.presentDays ?? 0,
-      total: attendanceData?.workingDays ?? 0,
-    },
-    {
-      id: 3,
-      title: "Absent Days",
-      attended: attendanceData?.absentDays ?? 0,
-      total: attendanceData?.workingDays ?? 0,
-    },
-  ];
 
-  const generateChartData = (attended: number, total: number) => {
-    const ratio = total > 0 ? attended / total : 0;
-    const points = [0, ratio * 0.3, ratio * 0.6, ratio, ratio * 1.05];
-    return points.map((p) => Math.max(0, Math.min(total, p * total)));
-  };
+useEffect(() => {
+  console.log("Attendance raw from Redux:", attendance);
 
-  // if (loading) {
-  //   return (
-  //     <SafeAreaView style={styles.container}>
-  //       <ActivityIndicator size="large" color={COLORS.purple_01} />
-  //     </SafeAreaView>
-  //   );
-  // }
+  if (attendance?.data) {
+    console.log("Attendance data structure:", attendance.data);
+    console.log("Total Working Days:", attendance.data.totalWorkingDays);
+    console.log("Attended:", attendance.data.attendedClassCount);
+  }
+}, [attendance]);
 
-  // if (error) {
-  //   return (
-  //     <SafeAreaView style={styles.container}>
-  //       <Text style={styles.errorText}>{error}</Text>
-  //     </SafeAreaView>
-  //   );
-  // }
+
+
+const cards = [
+  {
+    id: 1,
+    title: "Classes Attended",
+    attended: attendance?.data?.attendedClassCount ?? 0,
+    total: attendance?.data?.totalWorkingDays ?? 0,
+    color: "#6366F1",
+    
+  },
+  {
+    id: 2,
+    title: "Present Days",
+    attended: attendance?.data?.totalPresentDays ?? 0,
+    total: attendance?.data?.totalWorkingDays ?? 0,
+    color: "#059669",
+  
+  },
+  {
+    id: 3,
+    title: "Absent Days",
+    attended: attendance?.data?.totalAbsentDays ?? 0,
+    total: attendance?.data?.totalWorkingDays ?? 0,
+    color: "#DC2626",
+   
+  },
+];
 
   return (
     <>
@@ -115,16 +151,15 @@ const Attendanceone = () => {
       <SafeAreaView edges={["top"]} style={styles.container}>
         <Header />
 
+        
         <View style={styles.headerRow}>
           <Text style={styles.headerTitle}>Attendance</Text>
-          <TouchableOpacity
-            style={styles.filterBtn}
-            onPress={() => setShowFilter((s) => !s)}
-          >
+          <TouchableOpacity style={styles.filterBtn} onPress={() => setShowFilter(!showFilter)}>
             <Ionicons name="filter" size={20} color="#555" />
           </TouchableOpacity>
         </View>
 
+      
         {showFilter && (
           <View style={styles.filterContainer}>
             <TouchableOpacity
@@ -145,12 +180,13 @@ const Attendanceone = () => {
           </View>
         )}
 
+      
         <Modal visible={showMonthDropdown} transparent animationType="slide">
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <FlatList
                 data={monthNames}
-                keyExtractor={(_, idx) => idx.toString()}
+                keyExtractor={(item, index) => index.toString()}
                 renderItem={({ item, index }) => (
                   <TouchableOpacity
                     style={styles.modalItem}
@@ -167,6 +203,7 @@ const Attendanceone = () => {
           </View>
         </Modal>
 
+      
         <Modal visible={showYearDropdown} transparent animationType="slide">
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
@@ -189,191 +226,155 @@ const Attendanceone = () => {
           </View>
         </Modal>
 
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          pagingEnabled
-          contentContainerStyle={{ paddingVertical: 6 }}
-        >
-          {cards.map((card, index) => {
-            const colors = ["#7B2FF7", "#FF2FBF", "#23D3F7"];
-            const chartColor = colors[index % colors.length];
-
-            const chartData = generateChartData(card.attended, card.total);
-            const chartWidth = 350;
-            const chartHeight = 90;
-
-            const badgeIndex = chartData.length - 1;
-            const maxValue = Math.max(...chartData, 1); // Avoid division by zero
-            const badgeTop = chartHeight - (chartData[badgeIndex] / maxValue) * chartHeight - 20;
-
+        
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} pagingEnabled style={{ paddingHorizontal: 5 }} contentContainerStyle={{ paddingRight: 20 }}>
+          {cards.map((card) => {
+            const percentage = card.total > 0 ? (card.attended / card.total) * 100 : 0;
             return (
-              <View key={card.id} style={[styles.card, { position: "relative" }]}>
-                <View style={styles.row}>
-                  <Text style={styles.title}>{card.title}</Text>
-                  <Text style={styles.attendanceText}>
-                    <Text style={[styles.attended, { color: chartColor }]}>{card.attended}</Text> / {card.total}
-                  </Text>
+              <View key={card.id} style={[styles.card,]}>
+                <View style={styles.cardHeader}>
+                  <Text style={styles.cardTitle}>{card.title}</Text>
                 </View>
 
-                <View style={{ justifyContent: "center", alignItems: "center", paddingTop: 10 }}>
-                  <LineChart
-                    data={{
-                      labels: ["", "", "", "", ""],
-                      datasets: [{ data: chartData }],
-                    }}
-                    width={chartWidth}
-                    height={chartHeight}
-                    chartConfig={{
-                      backgroundGradientFrom: "white",
-                      backgroundGradientTo: "white",
-                      decimalPlaces: 0,
-                      color: () => chartColor,
-                      propsForDots: { r: "3", strokeWidth: "2", stroke: chartColor, fill: chartColor },
-                    }}
-                    withInnerLines={false}
-                    withOuterLines={false}
-                    withVerticalLabels={false}
-                    withHorizontalLabels={false}
-                    withShadow={false}
-                    bezier
-                    style={{ borderRadius: 12 }}
-                  />
+                <View style={styles.attendedRow}>
+                  <Text style={[styles.attendedText, { color: card.color }]}>{card.attended}</Text>
+                  <Text style={styles.totalText}>/ {card.total}</Text>
+                </View>
 
-                  <View
-                    style={{
-                      position: "absolute",
-                      top: badgeTop,
-                      backgroundColor: chartColor,
-                      paddingHorizontal: 8,
-                      paddingVertical: 4,
-                      borderRadius: 12,
-                    }}
-                  >
-                    <Text style={{ color: "#fff", fontWeight: "700", fontSize: 12 }}>
-                      {card.attended}
-                    </Text>
-                  </View>
+                <MinimalWave percentage={percentage} color={card.color} cardId={card.id} />
+
+                <View style={styles.percentageContainer}>
+                  <Text style={[styles.percentageText, { color: card.color }]}>{Math.round(percentage)}%</Text>
+                </View>
+
+                <View style={styles.statusContainer}>
+                  <View style={[styles.statusIndicator, { 
+                    backgroundColor: percentage >= 75 ? '#10B981' : percentage >= 50 ? '#F59E0B' : '#EF4444' 
+                  }]} />
+                  <Text style={styles.statusText}>
+                    {percentage >= 75 ? 'Excellent' : percentage >= 50 ? 'Good' : 'Low'}
+                  </Text>
                 </View>
               </View>
             );
           })}
         </ScrollView>
 
+        
         <Text style={styles.calendarTitle}>Calendar</Text>
-        <View style={styles.calendarCard}>
-          <View style={styles.calendarHeader}>
-            <TouchableOpacity
-              style={styles.arrowBtn}
-              onPress={() => {
-                if (selectedMonth === 0) {
-                  setSelectedMonth(11);
-                  setSelectedYear((y) => y - 1);
-                } else {
-                  setSelectedMonth((m) => m - 1);
-                }
-              }}
-            >
-              <Ionicons name="chevron-back" size={20} color="#555" />
-            </TouchableOpacity>
-
-            <Text style={styles.monthText}>
-              {monthNames[selectedMonth]} {selectedYear}
-            </Text>
-
-            <TouchableOpacity
-              style={styles.arrowBtn}
-              onPress={() => {
-                if (selectedMonth === 11) {
-                  setSelectedMonth(0);
-                  setSelectedYear((y) => y + 1);
-                } else {
-                  setSelectedMonth((m) => m + 1);
-                }
-              }}
-            >
-              <Ionicons name="chevron-forward" size={20} color="#555" />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.weekRow}>
-            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-              <Text key={day} style={styles.weekDay}>
-                {day}
+        
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View style={styles.calendarCard}>
+            <View style={styles.calendarHeader}>
+              <TouchableOpacity
+                style={styles.arrowBtn}
+                onPress={() => {
+                  if (selectedMonth === 0) {
+                    setSelectedMonth(11);
+                    setSelectedYear(selectedYear - 1);
+                  } else {
+                    setSelectedMonth(selectedMonth - 1);
+                  }
+                }}
+              >
+                <Ionicons name="chevron-back" size={20} color="#555" />
+              </TouchableOpacity>
+              
+              <Text style={styles.monthText}>
+                {monthNames[selectedMonth]} {selectedYear}
               </Text>
-            ))}
-          </View>
 
-          <View style={styles.datesGrid}>
-            {(() => {
-              const totalSlots = firstDay + daysInMonth;
-              const weeks = [];
-              let currentWeek = [];
+              <TouchableOpacity
+                style={styles.arrowBtn}
+                onPress={() => {
+                  if (selectedMonth === 11) {
+                    setSelectedMonth(0);
+                    setSelectedYear(selectedYear + 1);
+                  } else {
+                    setSelectedMonth(selectedMonth + 1);
+                  }
+                }}
+              >
+                <Ionicons name="chevron-forward" size={20} color="#555" />
+              </TouchableOpacity>
+            </View>
 
-              for (let i = 0; i < totalSlots; i++) {
-                if (i < firstDay) {
-                  currentWeek.push(<View key={`empty-${i}`} style={styles.dateCell} />);
-                } else {
-                  const date = i - firstDay + 1;
-                  const isToday =
-                    date === today.getDate() &&
-                    selectedMonth === today.getMonth() &&
-                    selectedYear === today.getFullYear();
+           
+            <View style={styles.weekRow}>
+              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                <Text key={day} style={styles.weekDay}>
+                  {day}
+                </Text>
+              ))}
+            </View>
 
-                  currentWeek.push(
-                    <TouchableOpacity
-                      key={date}
-                      style={[styles.dateCell, isToday && styles.selectedDate]}
-                    >
-                      <Text
-                        style={[styles.dateText, isToday && styles.selectedDateText]}
-                      >
-                        {date}
-                      </Text>
-                    </TouchableOpacity>
-                  );
+          
+            <View style={styles.datesGrid}>
+
+              {(() => {
+                const totalSlots = firstDay + daysInMonth;
+                const totalWeeks = Math.ceil(totalSlots / 7);
+                const weeks = [];
+
+                for (let w = 0; w < totalWeeks; w++) {
+                  const currentWeek: React.ReactElement[] = [];
+
+                  for (let d = 0; d < 7; d++) {
+                    const cellIndex = w * 7 + d;
+
+                    if (cellIndex < firstDay || cellIndex >= firstDay + daysInMonth) {
+                      
+                      currentWeek.push(
+                        <View key={`empty-${cellIndex}`} style={styles.dateCell} />
+                      );
+                    } else {
+                      const date = cellIndex - firstDay + 1;
+                      const isToday =
+                        date === today.getDate() &&
+                        selectedMonth === today.getMonth() &&
+                        selectedYear === today.getFullYear();
+
+                      currentWeek.push(
+                        <TouchableOpacity
+                          key={date}
+                          style={[styles.dateCell, isToday && styles.selectedDate]}
+                        >
+                          <Text
+                            style={[
+                              styles.dateText,
+                              isToday && styles.selectedDateText,
+                            ]}
+                          >
+                            {date}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    }
+                  }
+
+                 weeks.push(
+  <View key={w} style={styles.weekRowDates}>
+    {currentWeek}
+  </View>
+);
                 }
 
-                if ((i + 1) % 7 === 0) {
-                  weeks.push(
-                    <View key={`week-${i}`} style={styles.weekRowDates}>
-                      {currentWeek}
-                    </View>
-                  );
-                  currentWeek = [];
-                }
-              }
-
-              if (currentWeek.length > 0) {
-                weeks.push(
-                  <View key="last-week" style={styles.weekRowDates}>
-                    {currentWeek}
-                  </View>
-                );
-              }
-
-              return weeks;
-            })()}
+                return weeks;
+              })()}
+            </View>
           </View>
-        </View>
+        </ScrollView>
       </SafeAreaView>
     </>
   );
 };
 
-export default Attendanceone;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 28,
+    padding: 15,
     backgroundColor: COLORS.white,
-    justifyContent: 'center',
-  },
-  errorText: {
-    color: 'red',
-    textAlign: 'center',
-    fontSize: 16,
+    paddingBottom: 60,
   },
   headerRow: {
     flexDirection: "row",
@@ -382,9 +383,21 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     marginTop: 25,
   },
-  headerTitle: { fontSize: 20, fontWeight: "700", color: COLORS.black },
-  filterBtn: { backgroundColor: "#f4f5f7", padding: 10, borderRadius: 12 },
-  filterContainer: { flexDirection: "row", gap: 10, marginBottom: 15 },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: COLORS.black,
+  },
+  filterBtn: {
+    backgroundColor: "#f4f5f7",
+    padding: 10,
+    borderRadius: 12,
+  },
+  filterContainer: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 15,
+  },
   dropdownBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -393,8 +406,12 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 12,
   },
-  dropdownText: { fontSize: 14, fontWeight: "500", color: "#444", marginRight: 6 },
-
+  dropdownText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#444",
+    marginRight: 6,
+  },
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.3)",
@@ -408,49 +425,93 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 10,
   },
-  modalItem: { padding: 12, borderBottomWidth: 1, borderBottomColor: "#ddd" },
-  modalItemText: { fontSize: 16, color: "#333" },
-
+  modalItem: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+  },
+  modalItemText: {
+    fontSize: 16,
+    color: "#333",
+  },
   card: {
-    backgroundColor: "#ffffff",
-    padding: 20,
+    width: cardWidth,
+    height: 240,
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    marginRight: 15,
-    height: 175,
-    width: 370,
+    padding: 20,
+    marginHorizontal: 10,
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
     borderWidth: 1,
-    borderColor: "#E0E0E0",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 5,
-    elevation: 6,
+    borderColor: '#F1F5F9',
   },
-
-  row: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  title: { fontSize: 16, fontWeight: "600" },
-  attendanceText: { fontSize: 20, fontWeight: "500", color: "#555" },
-  attended: { fontSize: 28, fontWeight: "700" },
-
-  badge: {
-    position: "absolute",
-    top: 0,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+  cardHeader: {
+    marginBottom: 12,
   },
-  badgeText: { color: "#fff", fontWeight: "700", fontSize: 12 },
-
-  calendarTitle: { fontSize: 18, fontWeight: "600", color: "#333", marginTop: 1 },
-
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#475569',
+  },
+  attendedRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginBottom: 12,
+  },
+  attendedText: {
+    fontSize: 22,
+    fontWeight: '700',
+  },
+  totalText: {
+    fontSize: 14,
+    color: '#94A3B8',
+    alignSelf: 'flex-end',
+  },
+  percentageContainer: {
+    alignItems: 'center',
+    marginTop: 8,
+    marginBottom: 5,
+  },
+  percentageText: {
+    fontSize: 22,
+    fontWeight: '800',
+  },
+  statusContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 0.5,
+    borderTopColor: '#E2E8F0',
+  },
+  statusIndicator: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginRight: 6,
+  },
+  statusText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  calendarTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+    marginTop: 20,
+    marginBottom: 10,
+  },
   calendarCard: {
     backgroundColor: "#ffffff",
     padding: 15,
     borderRadius: 16,
-    marginTop: 10,
-    marginBottom: 50,
-    height: 382,
-    width: 370,
+    marginBottom: 20,
     borderWidth: 1,
     borderColor: "#E0E0E0",
     shadowColor: "#000",
@@ -459,7 +520,17 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 5,
   },
-
+  calendarHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  monthText: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#333",
+  },
   arrowBtn: {
     width: 40,
     height: 40,
@@ -467,20 +538,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
-    marginHorizontal: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.12,
     shadowRadius: 4,
     elevation: 4,
   },
-
-  calendarHeader: { flexDirection: "row", justifyContent: "space-between", marginBottom: 20 },
-  monthText: { fontSize: 18, fontWeight: "700", color: "#333", alignItems: 'center' },
-  weekRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 4 },
+  weekRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 5,
+  },
   weekDay: {
-    width: 40,
-    height: 40,
+    flex: 1,
+    aspectRatio: 1,
     textAlign: "center",
     textAlignVertical: "center",
     fontWeight: "600",
@@ -496,25 +567,42 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 3,
   },
-  dateText: { fontSize: 14, color: "#333" },
-  selectedDate: { backgroundColor: "#7B2FF7", borderColor: "#7B2FF7" },
-  selectedDateText: { color: "#fff", fontWeight: "700" },
-  weekRowDates: { flexDirection: "row", marginBottom: 4 },
-  datesGrid: { flexDirection: "column" },
+  datesGrid: {
+    flexDirection: "column",
+  },
+  weekRowDates: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 5,
+  },
   dateCell: {
-    width: 40,
-    height: 34,
+    flex: 1,
+    aspectRatio: 1,
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#fff",
     borderWidth: 1,
     borderColor: "#E0E0E0",
-    marginHorizontal: 4,
+    margin: 2,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 3,
   },
+  dateText: {
+    fontSize: 14,
+    color: "#333",
+  },
+  selectedDate: {
+    backgroundColor: "#7B2FF7",
+    borderColor: "#7B2FF7",
+  },
+  selectedDateText: {
+    color: "#fff",
+    fontWeight: "700",
+  },
 });
+
+export default Attendanceone;
