@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ScrollView,
   StatusBar,
@@ -18,9 +18,6 @@ import { WebView } from 'react-native-webview';
 import { Entypo } from '@expo/vector-icons';
 import Header from '~/components/shared/Header';
 import { COLORS, FONTS } from '~/constants';
-import { useDispatch, useSelector } from 'react-redux';
-import { selectHelpCenterData } from '~/features/HelpCenter/Reducer/Selector';
-import { fetchHelpCenterThunk } from '~/features/HelpCenter/Reducer/HelpThunk';
 
 type HelpItem = {
   id: string;
@@ -30,49 +27,37 @@ type HelpItem = {
   category: string;
 };
 
+const helpItems1 = [
+  { id: '1', question: 'How to Reset password', answer: 'go to settings', videolink: 'http://ww.google.com', category: 'Profile' },
+  { id: '2', question: 'Class Enrollment Issue', answer: 'go to settings', videolink: 'http://ww.google.com', category: 'Mail' },
+  { id: '3', question: 'Payment Methods', answer: 'go to settings', videolink: 'http://ww.google.com', category: 'Mail' },
+  { id: '4', question: 'Attendance Tracking', answer: 'go to settings', videolink: 'http://ww.google.com', category: 'Mail' },
+  { id: '5', question: 'Email Notifications', answer: 'go to settings', videolink: 'http://ww.google.com', category: 'Mail' },
+  { id: '6', question: 'Profile Not Updating', answer: 'go to settings', videolink: 'http://ww.google.com', category: 'Profile' },
+];
+
+
 const HelpCenter = () => {
   const [selectedTab, setSelectedTab] = useState(0);
-  const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedItem, setSelectedItem] = useState<HelpItem | null>(null);
   const [showVideo, setShowVideo] = useState(false);
   const pagerRef = useRef<PagerView>(null);
   const scrollViewRef = useRef<ScrollView>(null);
-  const dispatch = useDispatch<any>();
-  const helpData = useSelector(selectHelpCenterData);
 
-  useEffect(() => {
-    const instituteid = '973195c0-66ed-47c2-b098-d8989d3e4529';
-    dispatch(fetchHelpCenterThunk({ instituteid }));
-  }, [dispatch]);
+  const tabData1 = ['Mail', 'Profile', 'Classes', 'Password', 'Attedance', 'Payment', 'Login and Signup',].map((category) => ({
+    key: category,
+    category,
+    data: helpItems1.filter((item) => item.category === category),
+  }));
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    const instituteid = '973195c0-66ed-47c2-b098-d8989d3e4529';
-    await dispatch(fetchHelpCenterThunk({ instituteid }));
-    setRefreshing(false);
-  };
+  const filteredData = tabData1[selectedTab]?.data.filter(
+    (item) =>
+      item.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.answer?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-  const categories = Array.from(new Set(helpData?.map((item: any) => item.category)));
-
-  const tabData = categories.map((category) => {
-    const data: HelpItem[] =
-      helpData
-        ?.filter((item: any) => item.category === category)
-        .map((item: any) => ({
-          id: item.id.toString(),
-          question: item.question || 'No Title',
-          answer: item.answer || 'No Answer',
-          videolink: item.videolink,
-          category: item.category,
-        })) || [];
-
-    return {
-      key: category,
-      category,
-      data,
-    };
-  });
+  const hasData = filteredData.length > 0;
 
   const scrollToTab = (index: number) => {
     const tabWidth = 200;
@@ -83,7 +68,6 @@ const HelpCenter = () => {
     });
   };
 
-  // === Detail page ===
   if (selectedItem) {
     return (
       <SafeAreaView style={{ flex: 1 }}>
@@ -156,7 +140,7 @@ const HelpCenter = () => {
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}>
-          {tabData?.map(({ key, category, data }, index) => {
+          {tabData1?.map(({ key, category, data }, index) => {
             const count = data.length;
             const isActive = selectedTab === index;
             return (
@@ -203,55 +187,100 @@ const HelpCenter = () => {
         />
       </View>
 
-      {/* Pager */}
-      <PagerView
-        ref={pagerRef}
-        style={{ flex: 1 }}
-        initialPage={selectedTab}
-        onPageSelected={(e) => {
-          const index = e.nativeEvent.position;
-          setSelectedTab(index);
-          scrollToTab(index);
-        }}>
-        {tabData?.map((tab, index) => {
-          const filteredData = tab.data.filter(
-            (item) =>
-              item.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              item.answer.toLowerCase().includes(searchQuery.toLowerCase())
-          );
+{/* ..Card view................................ */}
+      {hasData ? (
+        <PagerView
+          ref={pagerRef}
+          style={{ flex: 1 }}
+          initialPage={selectedTab}
+          onPageSelected={(e) => {
+            const index = e.nativeEvent.position;
+            setSelectedTab(index);
+            scrollToTab(index);
+          }}>
+          {tabData1.map((tab, index) => {
+            const filteredData = tab.data.filter(
+              (item) =>
+                item.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                item.answer?.toLowerCase().includes(searchQuery.toLowerCase())
+            );
 
-          return (
-            <ScrollView
-              key={index}
-              style={styles.contentArea}
-              refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-              {filteredData?.map((item) => (
-                <View key={item.id} style={styles.card}>
-                  <View style={styles.tag}>
-                    <Text style={styles.tagText}>{item?.category}</Text>
+            return (
+              <ScrollView key={index} style={styles.contentArea}>
+                {filteredData.map((item) => (
+                  <View key={item.id} style={styles.card}>
+                    <View style={styles.tag}>
+                      <Text style={styles.tagText}>{item.category}</Text>
+                    </View>
+                    <Text style={styles.title}>{item.question}</Text>
+                    {item.answer && <Text style={styles.subtitle}>{item.answer}</Text>}
+                    <TouchableOpacity
+                      activeOpacity={0.8}
+                      style={styles.buttonContainer}
+                      onPress={() => setSelectedItem(item)}>
+                      <LinearGradient
+                        colors={['#7B00FF', '#B200FF']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={styles.button}>
+                        <Text style={styles.buttonText}>View Details</Text>
+                      </LinearGradient>
+                    </TouchableOpacity>
                   </View>
+                ))}
+              </ScrollView>
+            );
+          })}
+        </PagerView>
+      ) : (
+        <View>
+          <Text style={styles.noDataText}>Help Centre</Text>
+          <View style={styles.searchContainer}>
+            <TextInput
+              placeholder="How to Reset password"
+              style={styles.searchInput}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
 
-                  <Text style={styles.title}>{item.question}</Text>
-                  {item.answer && <Text style={styles.subtitle}>{item?.answer}</Text>}
+          <View style={styles.searchContainer}>
+            <TextInput
+              placeholder="Class Enrollment Issue"
+              style={styles.searchInput}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
 
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    style={styles.buttonContainer}
-                    onPress={() => setSelectedItem(item)}>
-                    <LinearGradient
-                      colors={['#7B00FF', '#B200FF']}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                      style={styles.button}>
-                      <Text style={styles.buttonText}>View Details</Text>
-                    </LinearGradient>
-                  </TouchableOpacity>
-                </View>
-              ))}
-            </ScrollView>
-          );
-        })}
-      </PagerView>
+          <View style={styles.searchContainer}>
+            <TextInput
+              placeholder="Payment Method"
+              style={styles.searchInput}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
+
+          <View style={styles.searchContainer}>
+            <TextInput
+              placeholder="Attendence Tracking"
+              style={styles.searchInput}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
+
+          <View style={styles.searchContainer}>
+            <TextInput
+              placeholder="Email Notifications"
+              style={styles.searchInput}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -259,7 +288,7 @@ const HelpCenter = () => {
 export default HelpCenter;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 15, backgroundColor: '#F8FAFC' },
+  container: { flex: 1, padding: 15, backgroundColor: '#cfdeedff' },
   headerText: { paddingHorizontal: 20, paddingVertical: 10, fontSize: 22, fontWeight: 'bold' },
   scrollContent: { paddingHorizontal: 10, gap: 10 },
   box: {
@@ -270,6 +299,18 @@ const styles = StyleSheet.create({
     width: 200,
     justifyContent: 'space-between',
     borderRadius: 8,
+  },
+  noDataContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  noDataText: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 10,
+    textAlign: 'center',
   },
   activeBoxGradient: {
     flexDirection: 'row',
@@ -311,15 +352,15 @@ const styles = StyleSheet.create({
   searchContainer: { paddingHorizontal: 15, marginVertical: 10 },
   searchInput: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#e4e2e2ff',
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 8,
     fontSize: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#EBEFF3',
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: '#EBEFF3',
     borderRadius: 12,
     padding: 16,
     marginBottom: 15,
@@ -364,3 +405,4 @@ const styles = StyleSheet.create({
   playBtn: { position: 'absolute', top: '40%', left: '45%' },
   webview: { width: '100%', height: '100%' },
 });
+

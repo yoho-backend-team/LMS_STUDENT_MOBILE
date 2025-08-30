@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { View, Text, TouchableOpacity, StyleSheet, Linking, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';  
 import { LinearGradient } from 'expo-linear-gradient';
