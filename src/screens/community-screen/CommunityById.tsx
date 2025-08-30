@@ -24,6 +24,8 @@ import { GetallMessageThunks } from '../../features/Community/reducers.ts/thunks
 import { GetCommuntiyIdSelector } from '~/features/Community/reducers.ts/selectore';
 import { COLORS } from '~/constants';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import socket from '~/utils/socket';
 
 interface Message {
   id: string;
@@ -31,6 +33,13 @@ interface Message {
   isOutgoing: boolean;
   senderName?: string;
   createdAt?: string;
+  sender?: string;
+  _id?: string;
+  uuid?: string;
+  message?: string;
+  sender_name?: string;
+  timestamp?: string;
+  read?: boolean;
 }
 
 const COLORS_LIST = [
@@ -117,22 +126,60 @@ const CommunityById: React.FC = () => {
   const [isLoadingAtTop, setIsLoadingAtTop] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
   const messagelist = useSelector(GetCommuntiyIdSelector);
+  const [userId, setUserId] = useState('');
+  const [student, setStudent] = useState<any>(null);
+
+  const getStudentId = async () => {
+    try {
+      const data = await AsyncStorage.getItem('StudentData');
+      if (data) {
+        const parsed = JSON.parse(data);
+        setUserId(parsed._id);
+        setStudent(parsed);
+        return parsed;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error reading StudentData:', error);
+      return null;
+    }
+  };
+  useEffect(() => {
+    const initializeSocket = async () => {
+      const studentData = await getStudentId();
+      
+      if (community?._id && studentData?._id) {
+        socket.emit('joinGroup', { groupId: community._id, userId: studentData._id });
+      }
+    };
+
+    initializeSocket();
+
+    return () => {
+      if (community?._id && userId) {
+        socket.emit('leaveGroup', { groupId: community._id, userId: userId });
+      }
+    };
+  }, [community?._id]);
 
   useEffect(() => {
-    dispatch<any>(GetallMessageThunks({ community: community?._id, page: 1, limit: 15 }));
+    if (community?._id) {
+      dispatch<any>(GetallMessageThunks({ community: community._id, page: 1, limit: 15 }));
+    }
   }, [community?._id, dispatch]);
-
   useEffect(() => {
     if (messagelist) {
       const list = Array.isArray(messagelist) ? messagelist : messagelist.messages || [];
 
       const formatted = list
         .map((msg: any) => ({
-          id: msg.uuid || msg._id,
-          text: msg.message,
-          isOutgoing: msg.sender === 'me',
+          id: msg.uuid || msg._id || Date.now().toString(),
+          text: msg.message || msg.content,
+          isOutgoing: msg.sender === userId,
           senderName: msg.sender_name || 'Unknown',
-          createdAt: msg.createdAt || new Date().toISOString(),
+          createdAt: msg.createdAt || msg.timestamp || new Date().toISOString(),
+          sender: msg.sender,
+          _id: msg._id,
         }))
         .sort(
           (a: Message, b: Message) =>
@@ -150,7 +197,7 @@ const CommunityById: React.FC = () => {
 
       setHasMoreMessages(Array.isArray(messagelist) ? false : (messagelist.hasMore ?? false));
     }
-  }, [messagelist, page]);
+  }, [messagelist, page, userId]);
 
   useEffect(() => {
     if (shouldAutoScroll && messages.length > 0) {
@@ -161,20 +208,81 @@ const CommunityById: React.FC = () => {
     }
   }, [messages, shouldAutoScroll, isInitialLoad]);
 
-  const handleSend = () => {
-    if (message.trim()) {
-      const newMsg: Message = {
-        id: Date.now().toString(),
-        text: message,
-        isOutgoing: true,
-        senderName: 'Me',
-        createdAt: new Date().toISOString(),
+  useEffect(() => {
+    if (!userId) return;
+    const handleIncomingMessage = (msg: any) => {
+      const incomingMsg: Message = {
+        id: msg.uuid || msg._id || Date.now().toString(),
+        text: msg.message || msg.content,
+        isOutgoing: msg.sender === userId || msg.senderId === userId,
+        senderName: msg.sender_name || msg.name || 'Unknown',
+        createdAt: msg.createdAt || msg.timestamp || new Date().toISOString(),
+        sender: msg.sender || msg.senderId,
+        _id: msg._id,
       };
-      setMessages((prev) => [...prev, newMsg]);
-      setMessage('');
-      setShouldAutoScroll(true);
+
+      setMessages((prev) => [...prev, incomingMsg]);
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+    };
+    socket.on('receiveMessage', handleIncomingMessage);
+    socket.on('newMessage', handleIncomingMessage);
+    socket.on('messageDelivered', (messageId) => {
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg._id === messageId || msg.id === messageId 
+            ? { ...msg, delivered: true } 
+            : msg
+        )
+      );
+    });
+
+    socket.on('messageRead', (messageId) => {
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg._id === messageId || msg.id === messageId 
+            ? { ...msg, read: true } 
+            : msg
+        )
+      );
+    });
+
+    return () => {
+      socket.off('receiveMessage', handleIncomingMessage);
+      socket.off('newMessage', handleIncomingMessage);
+      socket.off('messageDelivered');
+      socket.off('messageRead');
+    };
+  }, [userId]);
+
+  useEffect(() => {
+    if (messages?.length > 0 && userId) {
+      messages?.forEach((msg) => {
+        if (!msg.read && msg.sender !== userId) {
+          socket.emit('messageRead', { messageId: msg._id || msg.id, groupId: community?._id });
+        }
+      });
     }
+  }, [messages, userId, community?._id]);
+
+
+const handleSend = () => {
+  if (!message.trim() || !community?._id || !userId) return;
+
+  const messageToSend = message.trim();
+  setMessage(''); 
+  const messageData = {
+    content: messageToSend,
+    groupId: community._id,
+    senderId: userId,
+    name: student?.full_name || student?.first_name || 'You',
+    message: messageToSend,
   };
+
+  socket.emit('sendMessage', messageData);
+  setShouldAutoScroll(true);
+};
 
   const loadMoreMessages = useCallback(() => {
     if (loadingMore || !hasMoreMessages || isLoadingAtTop) return;
@@ -295,14 +403,16 @@ const CommunityById: React.FC = () => {
   };
 
   return (
-    <>
-      <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
-      <SafeAreaView edges={['top']} style={styles.container}>
+  <>
+    <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
+    <SafeAreaView edges={['top']} style={styles.container}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0} 
+      >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-          <KeyboardAvoidingView
-            style={{ flex: 1 }}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
+          <View style={{ flex: 1 }}>
             {/* HEADER */}
             <View style={styles.header}>
               <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
@@ -313,7 +423,7 @@ const CommunityById: React.FC = () => {
                 <View style={styles.headerText}>
                   <Text style={styles.headerTitle}>{community?.group}</Text>
                   <Text style={styles.headerSubtitle}>
-                    {community?.users?.length || '0'} Members
+                    {community?.users?.length || "0"} Members
                   </Text>
                 </View>
               </View>
@@ -321,9 +431,10 @@ const CommunityById: React.FC = () => {
 
             {/* CHAT */}
             <ImageBackground
-              source={require('../../assets/chatbg.png')}
+              source={require("../../assets/chatbg.png")}
               style={{ flex: 1 }}
-              resizeMode="cover">
+              resizeMode="cover"
+            >
               <ScrollView
                 ref={scrollViewRef}
                 contentContainerStyle={styles.chatContent}
@@ -331,8 +442,8 @@ const CommunityById: React.FC = () => {
                 onScroll={handleScroll}
                 onContentSizeChange={handleContentSizeChange}
                 scrollEventThrottle={16}
-                removeClippedSubviews={true}
-                keyboardShouldPersistTaps="handled">
+                keyboardShouldPersistTaps="handled"
+              >
                 {(loadingMore || isLoadingAtTop) && (
                   <View style={styles.loadingContainer}>
                     <ActivityIndicator size="small" color={COLORS.blue_01} />
@@ -366,16 +477,20 @@ const CommunityById: React.FC = () => {
                 value={message}
                 onChangeText={setMessage}
                 multiline
+                returnKeyType="send"
+                onSubmitEditing={handleSend}
               />
               <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
                 <Ionicons name="send" size={20} color="#fff" />
               </TouchableOpacity>
             </View>
-          </KeyboardAvoidingView>
+          </View>
         </TouchableWithoutFeedback>
-      </SafeAreaView>
-    </>
-  );
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  </>
+);
+
 };
 
 export default CommunityById;
