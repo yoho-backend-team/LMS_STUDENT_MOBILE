@@ -147,7 +147,7 @@ const CommunityById: React.FC = () => {
   useEffect(() => {
     const initializeSocket = async () => {
       const studentData = await getStudentId();
-      
+
       if (community?._id && studentData?._id) {
         socket.emit('joinGroup', { groupId: community._id, userId: studentData._id });
       }
@@ -231,9 +231,7 @@ const CommunityById: React.FC = () => {
     socket.on('messageDelivered', (messageId) => {
       setMessages((prevMessages) =>
         prevMessages.map((msg) =>
-          msg._id === messageId || msg.id === messageId 
-            ? { ...msg, delivered: true } 
-            : msg
+          msg._id === messageId || msg.id === messageId ? { ...msg, delivered: true } : msg
         )
       );
     });
@@ -241,9 +239,7 @@ const CommunityById: React.FC = () => {
     socket.on('messageRead', (messageId) => {
       setMessages((prevMessages) =>
         prevMessages.map((msg) =>
-          msg._id === messageId || msg.id === messageId 
-            ? { ...msg, read: true } 
-            : msg
+          msg._id === messageId || msg.id === messageId ? { ...msg, read: true } : msg
         )
       );
     });
@@ -266,23 +262,22 @@ const CommunityById: React.FC = () => {
     }
   }, [messages, userId, community?._id]);
 
+  const handleSend = () => {
+    if (!message.trim() || !community?._id || !userId) return;
 
-const handleSend = () => {
-  if (!message.trim() || !community?._id || !userId) return;
+    const messageToSend = message.trim();
+    setMessage('');
+    const messageData = {
+      content: messageToSend,
+      groupId: community._id,
+      senderId: userId,
+      name: student?.full_name || student?.first_name || 'You',
+      message: messageToSend,
+    };
 
-  const messageToSend = message.trim();
-  setMessage(''); 
-  const messageData = {
-    content: messageToSend,
-    groupId: community._id,
-    senderId: userId,
-    name: student?.full_name || student?.first_name || 'You',
-    message: messageToSend,
+    socket.emit('sendMessage', messageData);
+    setShouldAutoScroll(true);
   };
-
-  socket.emit('sendMessage', messageData);
-  setShouldAutoScroll(true);
-};
 
   const loadMoreMessages = useCallback(() => {
     if (loadingMore || !hasMoreMessages || isLoadingAtTop) return;
@@ -403,14 +398,9 @@ const handleSend = () => {
   };
 
   return (
-  <>
-    <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
-    <SafeAreaView edges={['top']} style={styles.container}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0} 
-      >
+    <>
+      <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
+      <SafeAreaView edges={['top']} style={styles.container}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           <View style={{ flex: 1 }}>
             {/* HEADER */}
@@ -423,18 +413,17 @@ const handleSend = () => {
                 <View style={styles.headerText}>
                   <Text style={styles.headerTitle}>{community?.group}</Text>
                   <Text style={styles.headerSubtitle}>
-                    {community?.users?.length || "0"} Members
+                    {community?.users?.length || '0'} Members
                   </Text>
                 </View>
               </View>
             </View>
 
-            {/* CHAT */}
+            {/* CHAT LIST */}
             <ImageBackground
-              source={require("../../assets/chatbg.png")}
+              source={require('../../assets/chatbg.png')}
               style={{ flex: 1 }}
-              resizeMode="cover"
-            >
+              resizeMode="cover">
               <ScrollView
                 ref={scrollViewRef}
                 contentContainerStyle={styles.chatContent}
@@ -442,8 +431,7 @@ const handleSend = () => {
                 onScroll={handleScroll}
                 onContentSizeChange={handleContentSizeChange}
                 scrollEventThrottle={16}
-                keyboardShouldPersistTaps="handled"
-              >
+                keyboardShouldPersistTaps="handled">
                 {(loadingMore || isLoadingAtTop) && (
                   <View style={styles.loadingContainer}>
                     <ActivityIndicator size="small" color={COLORS.blue_01} />
@@ -461,36 +449,37 @@ const handleSend = () => {
               </ScrollView>
             </ImageBackground>
 
-            {/* SCROLL TO BOTTOM */}
             {showScrollToBottom && (
               <TouchableOpacity style={styles.scrollToBottomButton} onPress={scrollToBottom}>
                 <Ionicons name="arrow-down" size={24} color="#fff" />
               </TouchableOpacity>
             )}
 
-            {/* INPUT */}
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.textInput}
-                placeholder="Type a Message"
-                placeholderTextColor="#999"
-                value={message}
-                onChangeText={setMessage}
-                multiline
-                returnKeyType="send"
-                onSubmitEditing={handleSend}
-              />
-              <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
-                <Ionicons name="send" size={20} color="#fff" />
-              </TouchableOpacity>
-            </View>
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+              keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0} 
+            >
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Type a Message"
+                  placeholderTextColor="#999"
+                  value={message}
+                  onChangeText={setMessage}
+                  multiline
+                  returnKeyType="send"
+                  onSubmitEditing={handleSend}
+                />
+                <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+                  <Ionicons name="send" size={20} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            </KeyboardAvoidingView>
           </View>
         </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
-  </>
-);
-
+      </SafeAreaView>
+    </>
+  );
 };
 
 export default CommunityById;
