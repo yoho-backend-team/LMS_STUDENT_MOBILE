@@ -12,6 +12,7 @@ export default function App() {
     QuicksandBold: require('./src/assets/fonts/Quicksand-Bold.ttf'),
     QuicksandSemiBold: require('./src/assets/fonts/Quicksand-SemiBold.ttf'),
   });
+  
   return (
     <>
       <Provider store={store}>
