@@ -61,4 +61,8 @@ export type Endpoints = {
   notificationSubscription: {
     post: string;
   };
+
+  placement: {
+    get: string;
+  };
 };

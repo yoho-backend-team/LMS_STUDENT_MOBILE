@@ -68,6 +68,9 @@ const getEndpoints = (): Endpoints => {
     notificationSubscription: {
       post: '/notification/subscribe',
     },
+    placement: {
+      get: `/api/placements/fetch`,
+    },
   };
 };
 

@@ -14,37 +14,30 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
-import { COLORS, FONTS, icons } from '~/constants';
-import Header from '~/components/shared/Header';
+import { COLORS, FONTS } from '~/constants';
+import { formatDateandTime, formatMessageDate } from '../../utils/formatDate';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllNotificationsThunk } from '~/features/notification/reducers/thunks';
 import { selectNotifications } from '~/features/notification/reducers/selectors';
-import { deleteNotification, updateNotificationStatus } from '~/features/notification/services';
-import toast from '~/utils/toasts';
-import { formatDateandTime, formatMessageDate } from '../../utils/formatDate';
 
 const Notifications = () => {
   const navigation = useNavigation();
-  const dispatch: any = useDispatch();
-  const notifications = useSelector(selectNotifications);
   const [activeTab, setActiveTab] = useState('All');
   const [search, setSearch] = useState('');
   const [selectedNotification, setSelectedNotification] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const notificationsPerPage = 5;
+  const dispatch = useDispatch();
+ const notifications = useSelector(selectNotifications);
 
-  useEffect(() => {
+ useEffect(() => {
     loadNotifications();
   }, [dispatch]);
 
-  const loadNotifications = () => {
-    dispatch(getAllNotificationsThunk({}));
-  };
-
-  const onRefresh = React.useCallback(() => {
+    const onRefresh = React.useCallback(() => {
     setRefreshing(true);
-    dispatch(getAllNotificationsThunk({}))
+    (dispatch(getAllNotificationsThunk({}) as any) as Promise<void>)
       .then(() => {
         setRefreshing(false);
       })
@@ -53,9 +46,27 @@ const Notifications = () => {
       });
   }, [dispatch]);
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [activeTab, search]);
+  const loadNotifications = () => {
+    dispatch(getAllNotificationsThunk({}) as any);
+  };
+
+  
+  const dummyNotifications = [
+    {
+      uuid: '1',
+      title: 'Welcome!',
+      body: 'Thanks for joining us 🎉',
+      status: 'unread',
+      createdAt: new Date(),
+    },
+    {
+      uuid: '2',
+      title: 'Update Available',
+      body: 'A new version of the app is ready to download.',
+      status: 'read',
+      createdAt: new Date(),
+    },
+  ];
 
   const filteredNotifications =
     notifications?.filter((n: any) => {
@@ -75,32 +86,11 @@ const Notifications = () => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
-  const handleNotificationPress = async (item: any) => {
+  const handleNotificationPress = (item: any) => {
     setSelectedNotification(item);
-
-    if (item.status === 'unread') {
-      try {
-        await updateNotificationStatus({
-          uuid: item.uuid,
-          status: 'read',
-        });
-        loadNotifications();
-      } catch (error) {
-        console.error('Error updating notification status:', error);
-      }
-    }
   };
 
-  const handleDelete = async (id: string) => {
-    try {
-      await deleteNotification({ uuid: id });
-      toast.success('Success', 'Notification deleted successfully!');
-      setSelectedNotification(null);
-      loadNotifications();
-    } catch (error) {
-      toast.error('Error', 'Failed to delete notification.');
-    }
-  };
+  const handleDelete = (uuid: string) => {}
 
   return (
     <>
@@ -117,8 +107,8 @@ const Notifications = () => {
         </View>
 
         <Text style={styles.headerCount}>
-          {notifications?.length} Messages /{' '}
-          {notifications?.filter((n: any) => n.status === 'unread').length} Unread
+          {dummyNotifications?.length} Messages /{' '}
+          {dummyNotifications?.filter((n: any) => n.status === 'unread').length} Unread
         </Text>
 
         {/* Search */}
@@ -150,16 +140,11 @@ const Notifications = () => {
           ))}
         </View>
 
-        {/* Notifications List with RefreshControl */}
+        {/* Notifications List */}
         <ScrollView
           showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={[COLORS.black]}
-              tintColor={COLORS.black}
-            />
+            <RefreshControl refreshing={refreshing} onRefresh={() => setRefreshing(false)} />
           }>
           {currentNotifications?.length === 0 ? (
             <Text
@@ -167,7 +152,7 @@ const Notifications = () => {
                 textAlign: 'center',
                 color: COLORS.text_desc,
                 marginTop: 155,
-                fontWeight: 500,
+                fontWeight: '500',
                 ...FONTS.body3,
               }}>
               No notifications found
@@ -225,8 +210,7 @@ const Notifications = () => {
             </Pressable>
           </View>
         )}
-
-        {/* Modal */}
+     {/* Modal */}
         <Modal visible={!!selectedNotification} transparent animationType="slide">
           <View style={styles.modalOverlay}>
             <View style={styles.modalBox}>
@@ -264,33 +248,16 @@ export default Notifications;
 
 const styles = StyleSheet.create({
   container: { flex: 1, paddingTop: 10, paddingHorizontal: 16, backgroundColor: '#f3f4f6' },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 5,
-    gap: 3,
-  },
-  backbutton: {
-    width: 48,
-    height: 48,
-    resizeMode: 'contain',
-  },
+  header: { flexDirection: 'row', alignItems: 'center', marginBottom: 5, gap: 3 },
+  backbutton: { width: 48, height: 48, resizeMode: 'contain' },
   headerLeft: { flexDirection: 'row', alignItems: 'center' },
-  headerTitle: { fontSize: 22, fontWeight: '600', color: '#000' },
+  headerTitle: { fontSize: 22, fontWeight: '600', color: '#000', marginBottom:8 },
   headerCount: {
     fontSize: 12,
     color: '#6b7280',
     textAlign: 'right',
     marginBottom: 15,
     marginRight: 10,
-  },
-  reloadButton: {
-    padding: 8,
-    borderRadius: 20,
-    backgroundColor: '#f3f4f6',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   searchWrapper: { marginBottom: 16 },
   searchInput: {
@@ -321,7 +288,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   inactiveTabText: { color: '#374151', fontWeight: '500', textAlign: 'center' },
-  sectionTitle: { fontSize: 14, color: '#6b7280', fontWeight: '500', marginBottom: 12 },
   card: {
     flexDirection: 'row',
     backgroundColor: '#f3f4f6',
@@ -372,15 +338,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
-  modalBox: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    width: '100%',
-    padding: 20,
-  },
+  modalBox: { backgroundColor: '#fff', borderRadius: 16, width: '100%', padding: 20 },
   modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
   modalDesc: { fontSize: 14, color: '#374151', marginBottom: 20 },
-  modalActions: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 30 },
+  modalActions: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 30, gap: 10 },
   modalBtn: { paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8 },
   paginationContainer: {
     flexDirection: 'row',

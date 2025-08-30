@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   StatusBar,
   StyleSheet,
@@ -7,6 +7,7 @@ import {
   Image,
   ScrollView,
   TouchableOpacity,
+  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '~/components/shared/Header';
@@ -18,6 +19,7 @@ import { AppDispatch } from '~/store/store';
 import { getStudentcourse } from '~/features/Courses/Reducers/thunks';
 import { selectCourse } from '~/features/Courses/Reducers/selectors';
 import { getImageUrl } from '~/utils/imageUtils';
+import { Ionicons } from '@expo/vector-icons';
 
 type RootStackParamList = {
   Courses: undefined;
@@ -36,33 +38,43 @@ type Course = {
 type CoursesScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Courses'>;
 
 const Courses = () => {
-  const navigation = useNavigation<CoursesScreenNavigationProp>();
+  const navigation = useNavigation<any>();
   const dispatch = useDispatch<AppDispatch>();
   const coursedata = useSelector(selectCourse);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const params = {
-          courseId: '67f3b7fcb8d2634300cc87b6',
-        };
-        await dispatch(getStudentcourse(params));
-      } catch (error) {
-        console.error('Course fetch error:', error);
-      }
-    };
+  const [refreshing, setRefreshing] = useState(false);
 
-    fetchData();
+  const fetchData = useCallback(async () => {
+    try {
+      const params = {
+        courseId: '67f3b7fcb8d2634300cc87b6',
+      };
+      await dispatch(getStudentcourse(params));
+    } catch (error) {
+      console.error('Course fetch error:', error);
+    }
   }, [dispatch]);
 
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchData();
+    setRefreshing(false);
+  };
   const course = coursedata?.data;
+
   return (
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
       <SafeAreaView edges={['top']} style={styles.container}>
         <Header />
 
-        <ScrollView style={styles.scrollContainer}>
+        <ScrollView
+          style={styles.scrollContainer}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
           <Text style={styles.heading}>Courses</Text>
 
           {course && (
@@ -103,8 +115,6 @@ const Courses = () => {
               </View>
             </TouchableOpacity>
           )}
-
-          <View style={{ marginTop: 70 }} />
         </ScrollView>
       </SafeAreaView>
     </>

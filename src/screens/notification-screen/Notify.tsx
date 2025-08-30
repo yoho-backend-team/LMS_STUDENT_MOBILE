@@ -67,7 +67,6 @@ export default function NotificationScreen() {
     setCurrentPage(1);
   }, [activeTab, search]);
 
-  // 🔎 Filtering
   const filteredNotifications =
     notifications?.filter((n) => {
       const matchTab =
@@ -78,7 +77,6 @@ export default function NotificationScreen() {
       return matchTab && matchSearch;
     }) || [];
 
-  // 📄 Pagination
   const indexOfLast = currentPage * notificationsPerPage;
   const indexOfFirst = indexOfLast - notificationsPerPage;
   const currentNotifications = filteredNotifications.slice(
@@ -119,7 +117,6 @@ export default function NotificationScreen() {
     <>
       <StatusBar backgroundColor="#000" barStyle="light-content" />
       <SafeAreaView edges={["top"]} style={styles.container}>
-        {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Pressable onPress={() => navigation.goBack()}>
@@ -137,7 +134,6 @@ export default function NotificationScreen() {
           {notifications?.filter((n) => n.status === "unread").length} Unread
         </Text>
 
-        {/* Search */}
         <View style={styles.searchWrapper}>
           <TextInput
             placeholder="Search"
@@ -147,7 +143,6 @@ export default function NotificationScreen() {
           />
         </View>
 
-        {/* Tabs */}
         <View style={styles.tabWrapper}>
           {["All", "Read", "Unread"].map((tab) => (
             <Pressable key={tab} onPress={() => setActiveTab(tab as any)}>
@@ -173,7 +168,6 @@ export default function NotificationScreen() {
           ))}
         </View>
 
-        {/* Notifications List */}
         <ScrollView
           showsVerticalScrollIndicator={false}
           refreshControl={
@@ -239,7 +233,6 @@ export default function NotificationScreen() {
           )}
         </ScrollView>
 
-        {/* Pagination */}
         {filteredNotifications.length > notificationsPerPage && (
           <View style={styles.paginationContainer}>
             <Pressable
@@ -267,7 +260,6 @@ export default function NotificationScreen() {
           </View>
         )}
 
-        {/* Modal */}
         <Modal visible={!!selectedNotification} transparent animationType="slide">
           <View style={styles.modalOverlay}>
             <View style={styles.modalBox}>

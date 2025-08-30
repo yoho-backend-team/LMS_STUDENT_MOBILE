@@ -1,15 +1,14 @@
-import React from 'react';
-import { StatusBar, StyleSheet, Text, View } from 'react-native';
+import {  StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Header from '~/components/shared/Header';
+import { StatusBar } from 'react-native';
 import { COLORS } from '~/constants';
 import Classcards from '~/components/Classes/Onlineclasses';
-import ClassById from './ClassById';
-
-
-
+import { useNavigation } from '@react-navigation/native';
+import Header from '~/components/shared/Header';
 
 function Classes() {
+  const navigation = useNavigation<any>();
+
   return (
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
@@ -18,7 +17,7 @@ function Classes() {
 
         {/* code inside the view section*/}
         <View>
-     <Classcards />
+          <Classcards />
         </View>
       </SafeAreaView>
     </>
@@ -30,7 +29,7 @@ export default Classes;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 10,
     backgroundColor: COLORS.white,
+    padding: 10,
   },
 });

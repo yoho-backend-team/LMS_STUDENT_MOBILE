@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Alert } from 'react-native';
 
 const backendUrl = 'https://lms-node-backend-v1.onrender.com/api';
+// const backendUrl = 'https://10.29.248.157:3001/api';
 
 const Axios = axios.create({
   baseURL: backendUrl,
@@ -30,7 +31,10 @@ Axios.interceptors.response.use(
       error?.response.status == 401 &&
       error?.response?.data?.status === 'session_expired'
     ) {
-      Alert.alert('Session expired', 'Please login');
+      if (global.handleSessionExpired) {
+        global.handleSessionExpired();
+      }
+      // Alert.alert('Session expired', 'Please login');
       await AsyncStorage.removeItem('AuthStudentToken');
       await AsyncStorage.removeItem('StudentData');
     }

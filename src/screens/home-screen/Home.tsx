@@ -8,12 +8,12 @@ import {
   View,
   ScrollView,
   RefreshControl,
+  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '../../components/shared/Header';
-import { COLORS, FONTS } from '../../constants';
+import { COLORS } from '../../constants';
 import Svg, { Circle } from 'react-native-svg';
-import CoursesProgress from '~/components/home/CourseProgress';
 import CoursesProgressChart from '~/components/home/CourseProgress';
 import AttendanceChart from '~/components/home/Attendance';
 import PaymentCard from '~/components/home/Payment';
@@ -24,6 +24,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectDashboardData } from '~/features/home/reducer/selectors';
 import { getDashboardthunks } from '~/features/home/reducer/thunks';
 import { getImageUrl } from '~/utils/imageUtils';
+import { Ionicons } from '@expo/vector-icons';
 
 // Custom Progress Circle Component
 type ProgressCircleProps = {
@@ -78,7 +79,7 @@ const ProgressCircle = ({
 };
 
 const Home = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const dispatch = useDispatch();
   const dashboardData = useSelector(selectDashboardData);
   const [refreshing, setRefreshing] = useState(false);
@@ -146,12 +147,6 @@ const Home = () => {
       color: '#F59E0B',
       bgColor: COLORS.white,
     },
-  ];
-
-  const classData = [
-    { day: 'Day', topic: 'HTML', link: 'Www.Google.Com', duration: '45 Min', action: 'Join Now' },
-    { day: 'Day 1', topic: 'HTML', link: 'Www.Google.Com', duration: '45 Min', action: 'Join Now' },
-    { day: 'Day 1', topic: 'HTML', link: 'Www.Google.Com', duration: '45 Min', action: 'Join Now' },
   ];
 
   return (

@@ -210,7 +210,14 @@ const Login = () => {
                   </LinearGradient>
                 </TouchableOpacity>
 
-                <View style={{ flexDirection: 'row', gap: 3, marginTop: 18, alignItems: 'center' }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    gap: 3,
+                    marginTop: 18,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
                   <EvilIcons name="exclamation" size={20} color={COLORS.text_desc} />
                   <Text style={{ ...FONTS.body4, color: COLORS.text_desc }}>
                     Enter the mail ID & Password given by LMS
