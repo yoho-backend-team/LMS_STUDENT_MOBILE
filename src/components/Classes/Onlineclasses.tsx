@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Linking, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Linking, Alert, RefreshControl } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from '~/store/store';
 import { getClassDetails } from '~/features/classes/reducers/thunks';
@@ -8,6 +8,7 @@ import { selectClass } from '~/features/classes/reducers/selector';
 import { COLORS, FONTS } from '~/constants';
 import { formatDate, formatTime } from '~/utils/formatDate';
 import toast from '~/utils/toasts';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const Classcards = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -15,6 +16,11 @@ const Classcards = () => {
   const navigation = useNavigation<any>();
   const [activeTab, setActiveTab] = useState<'live' | 'upcoming' | 'completed'>('completed');
   const scrollRef = useRef<ScrollView>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = classData?.last_page;
+  
+    const [refreshing, setRefreshing] = useState(false);
+    
 
   const tabs = [
     { key: 'completed', label: 'Completed Class' },
@@ -22,12 +28,12 @@ const Classcards = () => {
     { key: 'live', label: 'Live Class' },
   ];
 
-  const fetchClassData = (type: 'live' | 'upcoming' | 'completed') => {
+  const fetchClassData = (type: 'live' | 'upcoming' | 'completed', page: number = 1) => {
     dispatch(
       getClassDetails({
         userType: 'online',
         classType: type,
-        page: 1,
+        page: page,
         courseId: '67f3b7fcb8d2634300cc87b6',
       })
     );
@@ -36,6 +42,13 @@ const Classcards = () => {
   useEffect(() => {
     fetchClassData(activeTab);
   }, [dispatch, activeTab]);
+
+   const onRefresh = async () => {
+    setRefreshing(true);
+    setCurrentPage(1);
+    await fetchClassData(activeTab, 1);
+    setRefreshing(false);
+  };
 
   const onTabPress = (key: 'live' | 'upcoming' | 'completed', index: number) => {
     setActiveTab(key);
@@ -165,7 +178,21 @@ const Classcards = () => {
       />
     ));
   };
+  function loadNextPage() {
+  if (currentPage < totalPages) {
+    const nextPage = currentPage + 1;
+    setCurrentPage(nextPage);
+    fetchClassData(activeTab, nextPage);
+  }
+}
 
+function loadPrevPage() {
+  if (currentPage > 1) {
+    const prevPage = currentPage - 1;
+    setCurrentPage(prevPage);
+    fetchClassData(activeTab, prevPage);
+  }
+}
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Online Classes</Text>
@@ -175,7 +202,8 @@ const Classcards = () => {
           horizontal
           ref={scrollRef}
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.tabContainer}>
+          contentContainerStyle={styles.tabContainer}
+         >
           {tabs.map((tab, index) => (
             <TouchableOpacity
               key={tab.key}
@@ -186,6 +214,7 @@ const Classcards = () => {
               </Text>
             </TouchableOpacity>
           ))}
+            
         </ScrollView>
 
         <Text style={styles.sectionTitle}>
@@ -197,8 +226,42 @@ const Classcards = () => {
         </Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.container1} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.container1} showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         {renderClasses()}
+        
+      {/* ✅ Pagination at bottom */}
+      <View style={styles.pagination}>
+        <LinearGradient
+          colors={currentPage === 1 ? ['#E0E0E0', '#E0E0E0'] : ['#7B00FF', '#B200FF']}
+          start={{ x: 0.134, y: 0.021 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.pageGradient}>
+          <TouchableOpacity
+            onPress={loadPrevPage}
+            disabled={currentPage === 1}
+            style={styles.buttonInner}>
+            <Text style={styles.buttonText}>Previous</Text>
+          </TouchableOpacity>
+        </LinearGradient>
+
+        <Text style={styles.pageInfo}>
+          Page {currentPage} of {totalPages}
+        </Text>
+
+        <LinearGradient
+          colors={currentPage === totalPages ? ['#E0E0E0', '#E0E0E0'] : ['#7B00FF', '#B200FF']}
+          start={{ x: 0.134, y: 0.021 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.pageGradient}>
+          <TouchableOpacity
+            onPress={loadNextPage}
+            disabled={currentPage === totalPages}
+            style={styles.buttonInner}>
+            <Text style={styles.buttonText}>Next</Text>
+          </TouchableOpacity>
+        </LinearGradient>
+      </View>
       </ScrollView>
     </View>
   );
@@ -246,4 +309,28 @@ const styles = StyleSheet.create({
   buttonText: { color: COLORS.white, fontWeight: '500', fontSize: 14 },
   container1: { backgroundColor: '#f1f6fc', padding: 16, borderRadius: 16, paddingBottom: 450 },
   sectionTitle: { fontSize: 18, fontWeight: '500', color: '#333' },
+  pagination: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 15,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.blue_02,
+  },
+  pageInfo: {
+    fontSize: 14,
+    color: COLORS.text_title,
+    fontWeight: '500',
+  },
+  pageGradient: {
+    borderRadius: 6,
+    overflow: 'hidden',
+    minWidth: 90,
+    marginHorizontal: 5,
+  },
+   buttonInner: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+  },
 });
