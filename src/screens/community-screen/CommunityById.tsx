@@ -79,7 +79,6 @@ const formatTime = (timestamp: any | number | Date): string => {
 const formatMessageDate = (timestamp: string | number | Date): string => {
   const messageDate = new Date(timestamp);
   const now = new Date();
-
   const isToday = messageDate.toDateString() === now.toDateString();
   const yesterday = new Date();
   yesterday.setDate(now.getDate() - 1);
@@ -111,7 +110,6 @@ const CommunityById: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute<any>();
   const { community } = route?.params;
-
   const dispatch = useDispatch();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -144,6 +142,7 @@ const CommunityById: React.FC = () => {
       return null;
     }
   };
+
   useEffect(() => {
     const initializeSocket = async () => {
       const studentData = await getStudentId();
@@ -167,6 +166,7 @@ const CommunityById: React.FC = () => {
       dispatch<any>(GetallMessageThunks({ community: community._id, page: 1, limit: 15 }));
     }
   }, [community?._id, dispatch]);
+
   useEffect(() => {
     if (messagelist) {
       const list = Array.isArray(messagelist) ? messagelist : messagelist.messages || [];
@@ -226,6 +226,7 @@ const CommunityById: React.FC = () => {
         scrollViewRef.current?.scrollToEnd({ animated: true });
       }, 100);
     };
+
     socket.on('receiveMessage', handleIncomingMessage);
     socket.on('newMessage', handleIncomingMessage);
     socket.on('messageDelivered', (messageId) => {
@@ -359,7 +360,6 @@ const CommunityById: React.FC = () => {
     const currentDate = new Date(msg.createdAt || '');
     const prevMessage = index > 0 ? messages[index - 1] : null;
     const prevDate = prevMessage ? new Date(prevMessage.createdAt || '') : null;
-
     const showDateDivider = !prevDate || !isSameDay(currentDate, prevDate);
 
     return (
@@ -439,15 +439,15 @@ const CommunityById: React.FC = () => {
                   </View>
                 )}
 
-                  {!hasMoreMessages && messages.length > 15 && (
-                    <View style={styles.noMoreMessagesContainer}>
-                      <Text style={styles.noMoreMessagesText}>No more messages</Text>
-                    </View>
-                  )}
+                {!hasMoreMessages && messages.length > 15 && (
+                  <View style={styles.noMoreMessagesContainer}>
+                    <Text style={styles.noMoreMessagesText}>No more messages</Text>
+                  </View>
+                )}
 
-                  {messages.map((msg, index) => renderMessage(msg, index))}
-                </ScrollView>
-              </ImageBackground>
+                {messages.map((msg, index) => renderMessage(msg, index))}
+              </ScrollView>
+            </ImageBackground>
 
             {showScrollToBottom && (
               <TouchableOpacity style={styles.scrollToBottomButton} onPress={scrollToBottom}>
@@ -457,8 +457,7 @@ const CommunityById: React.FC = () => {
 
             <KeyboardAvoidingView
               behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-              keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0} 
-            >
+              keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
               <View style={styles.inputContainer}>
                 <TextInput
                   style={styles.textInput}
@@ -560,7 +559,14 @@ const styles = StyleSheet.create({
   },
   loadingText: { marginLeft: 8, color: '#ccc', fontSize: 12 },
   noMoreMessagesContainer: { padding: 16, alignItems: 'center' },
-  noMoreMessagesText: { color: '#ccc', fontSize: 12 },
+  noMoreMessagesText: {
+    color: '#000',
+    fontSize: 12,
+    backgroundColor: '#ccc',
+    borderRadius: 12,
+    paddingHorizontal: 5,
+    paddingVertical: 3,
+  },
   scrollToBottomButton: {
     position: 'absolute',
     right: 20,
