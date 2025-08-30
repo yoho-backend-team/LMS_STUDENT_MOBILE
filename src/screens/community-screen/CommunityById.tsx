@@ -147,7 +147,7 @@ const CommunityById: React.FC = () => {
   useEffect(() => {
     const initializeSocket = async () => {
       const studentData = await getStudentId();
-      
+
       if (community?._id && studentData?._id) {
         socket.emit('joinGroup', { groupId: community._id, userId: studentData._id });
       }
@@ -231,9 +231,7 @@ const CommunityById: React.FC = () => {
     socket.on('messageDelivered', (messageId) => {
       setMessages((prevMessages) =>
         prevMessages.map((msg) =>
-          msg._id === messageId || msg.id === messageId 
-            ? { ...msg, delivered: true } 
-            : msg
+          msg._id === messageId || msg.id === messageId ? { ...msg, delivered: true } : msg
         )
       );
     });
@@ -241,9 +239,7 @@ const CommunityById: React.FC = () => {
     socket.on('messageRead', (messageId) => {
       setMessages((prevMessages) =>
         prevMessages.map((msg) =>
-          msg._id === messageId || msg.id === messageId 
-            ? { ...msg, read: true } 
-            : msg
+          msg._id === messageId || msg.id === messageId ? { ...msg, read: true } : msg
         )
       );
     });
@@ -266,23 +262,22 @@ const CommunityById: React.FC = () => {
     }
   }, [messages, userId, community?._id]);
 
+  const handleSend = () => {
+    if (!message.trim() || !community?._id || !userId) return;
 
-const handleSend = () => {
-  if (!message.trim() || !community?._id || !userId) return;
+    const messageToSend = message.trim();
+    setMessage('');
+    const messageData = {
+      content: messageToSend,
+      groupId: community._id,
+      senderId: userId,
+      name: student?.full_name || student?.first_name || 'You',
+      message: messageToSend,
+    };
 
-  const messageToSend = message.trim();
-  setMessage(''); 
-  const messageData = {
-    content: messageToSend,
-    groupId: community._id,
-    senderId: userId,
-    name: student?.full_name || student?.first_name || 'You',
-    message: messageToSend,
+    socket.emit('sendMessage', messageData);
+    setShouldAutoScroll(true);
   };
-
-  socket.emit('sendMessage', messageData);
-  setShouldAutoScroll(true);
-};
 
   const loadMoreMessages = useCallback(() => {
     if (loadingMore || !hasMoreMessages || isLoadingAtTop) return;
@@ -403,94 +398,93 @@ const handleSend = () => {
   };
 
   return (
-  <>
-    <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
-    <SafeAreaView edges={['top']} style={styles.container}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0} 
-      >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-          <View style={{ flex: 1 }}>
-            {/* HEADER */}
-            <View style={styles.header}>
-              <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                <Ionicons name="arrow-back" size={24} color="#333" />
-              </TouchableOpacity>
-              <View style={styles.profileContainer}>
-                <Image style={styles.avatar} source={{ uri: getImageUrl(community?.groupimage) }} />
-                <View style={styles.headerText}>
-                  <Text style={styles.headerTitle}>{community?.group}</Text>
-                  <Text style={styles.headerSubtitle}>
-                    {community?.users?.length || "0"} Members
-                  </Text>
+    <>
+      <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
+      <SafeAreaView edges={['top']} style={styles.container}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 30}>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <View style={{ flex: 1 }}>
+              {/* HEADER */}
+              <View style={styles.header}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                  <Ionicons name="arrow-back" size={24} color="#333" />
+                </TouchableOpacity>
+                <View style={styles.profileContainer}>
+                  <Image
+                    style={styles.avatar}
+                    source={{ uri: getImageUrl(community?.groupimage) }}
+                  />
+                  <View style={styles.headerText}>
+                    <Text style={styles.headerTitle}>{community?.group}</Text>
+                    <Text style={styles.headerSubtitle}>
+                      {community?.users?.length || '0'} Members
+                    </Text>
+                  </View>
                 </View>
               </View>
+
+              {/* CHAT */}
+              <ImageBackground
+                source={require('../../assets/chatbg.png')}
+                style={{ flex: 1 }}
+                resizeMode="cover">
+                <ScrollView
+                  ref={scrollViewRef}
+                  contentContainerStyle={styles.chatContent}
+                  showsVerticalScrollIndicator={false}
+                  onScroll={handleScroll}
+                  onContentSizeChange={handleContentSizeChange}
+                  scrollEventThrottle={16}
+                  keyboardShouldPersistTaps="handled">
+                  {(loadingMore || isLoadingAtTop) && (
+                    <View style={styles.loadingContainer}>
+                      <ActivityIndicator size="small" color={COLORS.blue_01} />
+                      <Text style={styles.loadingText}>Loading more messages...</Text>
+                    </View>
+                  )}
+
+                  {!hasMoreMessages && messages.length > 15 && (
+                    <View style={styles.noMoreMessagesContainer}>
+                      <Text style={styles.noMoreMessagesText}>No more messages</Text>
+                    </View>
+                  )}
+
+                  {messages.map((msg, index) => renderMessage(msg, index))}
+                </ScrollView>
+              </ImageBackground>
+
+              {/* SCROLL TO BOTTOM */}
+              {showScrollToBottom && (
+                <TouchableOpacity style={styles.scrollToBottomButton} onPress={scrollToBottom}>
+                  <Ionicons name="arrow-down" size={24} color="#fff" />
+                </TouchableOpacity>
+              )}
+
+              {/* INPUT */}
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Type a Message"
+                  placeholderTextColor="#999"
+                  value={message}
+                  onChangeText={setMessage}
+                  multiline
+                  returnKeyType="send"
+                  onSubmitEditing={handleSend}
+                />
+                <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+                  <Ionicons name="send" size={20} color="#fff" />
+                </TouchableOpacity>
+              </View>
             </View>
-
-            {/* CHAT */}
-            <ImageBackground
-              source={require("../../assets/chatbg.png")}
-              style={{ flex: 1 }}
-              resizeMode="cover"
-            >
-              <ScrollView
-                ref={scrollViewRef}
-                contentContainerStyle={styles.chatContent}
-                showsVerticalScrollIndicator={false}
-                onScroll={handleScroll}
-                onContentSizeChange={handleContentSizeChange}
-                scrollEventThrottle={16}
-                keyboardShouldPersistTaps="handled"
-              >
-                {(loadingMore || isLoadingAtTop) && (
-                  <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="small" color={COLORS.blue_01} />
-                    <Text style={styles.loadingText}>Loading more messages...</Text>
-                  </View>
-                )}
-
-                {!hasMoreMessages && messages.length > 15 && (
-                  <View style={styles.noMoreMessagesContainer}>
-                    <Text style={styles.noMoreMessagesText}>No more messages</Text>
-                  </View>
-                )}
-
-                {messages.map((msg, index) => renderMessage(msg, index))}
-              </ScrollView>
-            </ImageBackground>
-
-            {/* SCROLL TO BOTTOM */}
-            {showScrollToBottom && (
-              <TouchableOpacity style={styles.scrollToBottomButton} onPress={scrollToBottom}>
-                <Ionicons name="arrow-down" size={24} color="#fff" />
-              </TouchableOpacity>
-            )}
-
-            {/* INPUT */}
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.textInput}
-                placeholder="Type a Message"
-                placeholderTextColor="#999"
-                value={message}
-                onChangeText={setMessage}
-                multiline
-                returnKeyType="send"
-                onSubmitEditing={handleSend}
-              />
-              <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
-                <Ionicons name="send" size={20} color="#fff" />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
-  </>
-);
-
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </>
+  );
 };
 
 export default CommunityById;

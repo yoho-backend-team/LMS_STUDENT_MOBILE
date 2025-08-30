@@ -8,7 +8,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
-  RefreshControl, 
+  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -25,9 +25,8 @@ const Communities = () => {
   const navigation = useNavigation<any>();
   const communityList = useSelector(GetCommuntiySelector);
   const dispatch = useDispatch<any>();
-
   const [searchQuery, setSearchQuery] = useState('');
-  const [refreshing, setRefreshing] = useState(false); 
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchCommunities = (page = 1) => {
     return dispatch(GetallCommunityThunks({ page }));
@@ -36,9 +35,10 @@ const Communities = () => {
   useEffect(() => {
     fetchCommunities(1);
   }, []);
+
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await fetchCommunities(1); 
+    await fetchCommunities(1);
     setRefreshing(false);
   }, []);
 
@@ -76,9 +76,7 @@ const Communities = () => {
           <View style={styles.messageList}>
             <ScrollView
               showsVerticalScrollIndicator={false}
-              refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-              } // 👈 pull to refresh
+              refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} // 👈 pull to refresh
             >
               {filteredCommunities?.map((community: any, index: number) => (
                 <TouchableOpacity
