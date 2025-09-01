@@ -14,4 +14,4 @@ const ActivitySlice = createSlice({
 })
 
 export default ActivitySlice.reducer
-export const {getActivity} = ActivitySlice.actions;
+export const {getActivity} = ActivitySlice.actions;  

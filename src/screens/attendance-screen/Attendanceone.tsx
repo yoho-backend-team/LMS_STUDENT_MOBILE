@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StatusBar,
   StyleSheet,
@@ -7,9 +7,8 @@ import {
   TouchableOpacity,
   ScrollView,
   Dimensions,
-  Animated,
   FlatList,
-  Modal
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "~/components/shared/Header";
@@ -17,56 +16,64 @@ import { COLORS } from "~/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "~/store/store";
-import { getStudentattendance } from '~/features/Attendanceone/reducers/thunks';
-import { selectAttendance } from '~/features/Attendanceone/reducers/selectors';
-import Svg, { Path, Defs, LinearGradient, Stop, G } from "react-native-svg";
+import { getStudentattendance } from "~/features/Attendanceone/reducers/thunks";
+import { selectAttendance } from "~/features/Attendanceone/reducers/selectors";
+import Svg, { Path, Defs, LinearGradient, Stop } from "react-native-svg";
 
 const { width: screenWidth } = Dimensions.get("window");
 const cardWidth = screenWidth * 0.85;
 
-const MinimalWave = ({ percentage, color, cardId }: { percentage: number; color: string; cardId: number }) => {
-  const animatedValue = useRef(new Animated.Value(0)).current;
-
-  
-
+const MinimalWave = ({
+  percentage,
+  color,
+  cardId,
+}: {
+  percentage: number;
+  color: string;
+  cardId: number;
+}) => {
   const waveHeight = 45;
   const waveWidth = cardWidth - 80;
-  const amplitude = 6 + (percentage / 100) * 8;
 
-  const translateX = animatedValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, -25],
-  });
+  
+  const waterLevel = waveHeight * (1 - percentage / 100);
 
-  const path = `M0,${waveHeight / 2} ${Array.from({ length: 100 }, (_, i) => {
+  const amplitude = 4;
+  const frequency = 0.05;
+
+ 
+  const path = `M0,${waterLevel} ${Array.from({ length: 100 }, (_, i) => {
     const x = (waveWidth / 100) * i;
-    const y = waveHeight / 2 + Math.sin(x * 0.03 + percentage * 0.01) * amplitude;
+    const y = waterLevel + Math.sin(x * frequency) * amplitude;
     return `L${x},${y}`;
   }).join(" ")} L${waveWidth},${waveHeight} L0,${waveHeight} Z`;
 
-  const strokePath = `M0,${waveHeight / 2} ${Array.from({ length: 100 }, (_, i) => {
-    const x = (waveWidth / 100) * i;
-    const y = waveHeight / 2 + Math.sin(x * 0.03 + percentage * 0.01) * amplitude;
-    return `L${x},${y}`;
-  }).join(" ")}`;
-
   return (
-    <View style={{ height: waveHeight, alignItems: "center", overflow: "hidden" }}>
-      <Animated.View style={{ transform: [{ translateX }] }}>
-        <Svg height={waveHeight} width={waveWidth}>
-          <Defs>
-            <LinearGradient id={`minimal${cardId}`} x1="0%" y1="0%" x2="100%" y2="0%">
-              <Stop offset="0%" stopColor={color} stopOpacity="0.1" />
-              <Stop offset="50%" stopColor={color} stopOpacity="0.6" />
-              <Stop offset="100%" stopColor={color} stopOpacity="0.1" />
-            </LinearGradient>
-          </Defs>
-          <G>
-            <Path d={path} fill={`url(#minimal${cardId})`} />
-            <Path d={strokePath} stroke={color} strokeWidth="2" fill="none" />
-          </G>
-        </Svg>
-      </Animated.View>
+    <View
+      style={{
+        height: waveHeight,
+        alignItems: "center",
+        overflow: "hidden",
+      }}
+    >
+      <Svg height={waveHeight} width={waveWidth}>
+        <Defs>
+          <LinearGradient
+            id={`minimal${cardId}`}
+            x1="0%"
+            y1="0%"
+            x2="100%"
+            y2="0%"
+          >
+            <Stop offset="0%" stopColor={color} stopOpacity="0.1" />
+            <Stop offset="50%" stopColor={color} stopOpacity="0.6" />
+            <Stop offset="100%" stopColor={color} stopOpacity="0.1" />
+          </LinearGradient>
+        </Defs>
+
+      
+        <Path d={path} fill={`url(#minimal${cardId})`} />
+      </Svg>
     </View>
   );
 };
@@ -74,19 +81,29 @@ const MinimalWave = ({ percentage, color, cardId }: { percentage: number; color:
 const Attendanceone = () => {
   const dispatch = useDispatch<AppDispatch>();
   const attendance = useSelector(selectAttendance);
-  
+
   const [showFilter, setShowFilter] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [showMonthDropdown, setShowMonthDropdown] = useState(false);
   const [showYearDropdown, setShowYearDropdown] = useState(false);
-  
+
   const today = new Date();
   const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December",
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
-  
+
   const years = Array.from({ length: 11 }, (_, i) => today.getFullYear() - 5 + i);
   const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
   const firstDay = new Date(selectedYear, selectedMonth, 1).getDay();
@@ -105,7 +122,15 @@ const Attendanceone = () => {
     fetchAttendance();
   }, [selectedMonth, selectedYear, dispatch]);
 
+  console.log("Payload sent:", {
+  month: selectedMonth,
+  year: selectedYear
+});
 
+console.log("Payload sent (+1):", {
+  month: selectedMonth + 1,
+  year: selectedYear
+});
 useEffect(() => {
   console.log("Attendance raw from Redux:", attendance);
 
@@ -115,35 +140,29 @@ useEffect(() => {
     console.log("Attended:", attendance.data.attendedClassCount);
   }
 }, [attendance]);
-
-
-
-const cards = [
-  {
-    id: 1,
-    title: "Classes Attended",
-    attended: attendance?.data?.attendedClassCount ?? 0,
-    total: attendance?.data?.totalWorkingDays ?? 0,
-    color: "#6366F1",
-    
-  },
-  {
-    id: 2,
-    title: "Present Days",
-    attended: attendance?.data?.totalPresentDays ?? 0,
-    total: attendance?.data?.totalWorkingDays ?? 0,
-    color: "#059669",
-  
-  },
-  {
-    id: 3,
-    title: "Absent Days",
-    attended: attendance?.data?.totalAbsentDays ?? 0,
-    total: attendance?.data?.totalWorkingDays ?? 0,
-    color: "#DC2626",
-   
-  },
-];
+  const cards = [
+    {
+      id: 1,
+      title: "Classes Attended",
+      attended: attendance?.data?.attendedClassCount ?? 0,
+      total: attendance?.data?.totalWorkingDays ?? 0,
+      color: "#6366F1",
+    },
+    {
+      id: 2,
+      title: "Present Days",
+      attended: attendance?.data?.totalPresentDays ?? 0,
+      total: attendance?.data?.totalWorkingDays ?? 0,
+      color: "#059669",
+    },
+    {
+      id: 3,
+      title: "Absent Days",
+      attended: attendance?.data?.totalAbsentDays ?? 0,
+      total: attendance?.data?.totalWorkingDays ?? 0,
+      color: "#DC2626",
+    },
+  ];
 
   return (
     <>
@@ -151,16 +170,17 @@ const cards = [
       <SafeAreaView edges={["top"]} style={styles.container}>
         <Header />
 
-        
         <View style={styles.headerRow}>
           <Text style={styles.headerTitle}>Attendance</Text>
-          <TouchableOpacity style={styles.filterBtn} onPress={() => setShowFilter(!showFilter)}>
+          <TouchableOpacity
+            style={styles.filterBtn}
+            onPress={() => setShowFilter(!showFilter)}
+          >
             <Ionicons name="filter" size={20} color="#555" />
           </TouchableOpacity>
         </View>
 
-      
-        {showFilter && (
+         {showFilter && (
           <View style={styles.filterContainer}>
             <TouchableOpacity
               style={styles.dropdownBtn}
@@ -226,35 +246,42 @@ const cards = [
           </View>
         </Modal>
 
-        
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} pagingEnabled style={{ paddingHorizontal: 5 }} contentContainerStyle={{ paddingRight: 20 }}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          pagingEnabled
+          style={{ paddingHorizontal: 5 }}
+          contentContainerStyle={{ paddingRight: 20 }}
+        >
           {cards.map((card) => {
-            const percentage = card.total > 0 ? (card.attended / card.total) * 100 : 0;
+            const percentage =
+              card.total > 0 ? (card.attended / card.total) * 100 : 0;
             return (
-              <View key={card.id} style={[styles.card,]}>
+              <View key={card.id} style={[styles.card]}>
                 <View style={styles.cardHeader}>
                   <Text style={styles.cardTitle}>{card.title}</Text>
                 </View>
 
                 <View style={styles.attendedRow}>
-                  <Text style={[styles.attendedText, { color: card.color }]}>{card.attended}</Text>
+                  <Text style={[styles.attendedText, { color: card.color }]}>
+                    {card.attended}
+                  </Text>
                   <Text style={styles.totalText}>/ {card.total}</Text>
                 </View>
 
-                <MinimalWave percentage={percentage} color={card.color} cardId={card.id} />
+                <MinimalWave
+                  percentage={percentage}
+                  color={card.color}
+                  cardId={card.id}
+                />
 
                 <View style={styles.percentageContainer}>
-                  <Text style={[styles.percentageText, { color: card.color }]}>{Math.round(percentage)}%</Text>
-                </View>
-
-                <View style={styles.statusContainer}>
-                  <View style={[styles.statusIndicator, { 
-                    backgroundColor: percentage >= 75 ? '#10B981' : percentage >= 50 ? '#F59E0B' : '#EF4444' 
-                  }]} />
-                  <Text style={styles.statusText}>
-                    {percentage >= 75 ? 'Excellent' : percentage >= 50 ? 'Good' : 'Low'}
+                  <Text style={[styles.percentageText, { color: card.color }]}>
+                    {Math.round(percentage)}%
                   </Text>
                 </View>
+
+               
               </View>
             );
           })}
@@ -370,7 +397,7 @@ const cards = [
 };
 
 const styles = StyleSheet.create({
-  container: {
+ container: {
     flex: 1,
     padding: 15,
     backgroundColor: COLORS.white,
