@@ -16,7 +16,7 @@ const Payment = () => {
   const paymentData = useSelector(selectPaymentData);
   console.log('data', paymentData)
     useEffect(() => {
-      dispatch(getPaymentthunks({}) as any);
+      dispatch(getPaymentthunks({paymentId:'44122adb-3406-44a6-9dbe-72449d2e441c'}) as any);
     }, [dispatch]);
 
   const statsCards = [

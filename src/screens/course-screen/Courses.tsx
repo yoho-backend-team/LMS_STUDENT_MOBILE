@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '~/components/shared/Header';
-import { COLORS } from '~/constants';
+import { COLORS, FONTS } from '~/constants';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useDispatch, useSelector } from 'react-redux';
@@ -77,7 +77,7 @@ const Courses = () => {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
           <Text style={styles.heading}>Courses</Text>
 
-          {course && (
+          {course ? (
             <TouchableOpacity
               style={styles.card}
               onPress={() => navigation.navigate('CourseViewScreen', { course })}>
@@ -101,7 +101,7 @@ const Courses = () => {
                     style={{ width: 24, height: 24 }}
                   />
                   <Text style={styles.footerText}>
-                    {course.coursemodules.length ?? '0'} modules
+                    {course.coursemodules?.length ?? '0'} modules
                   </Text>
                 </View>
 
@@ -114,6 +114,11 @@ const Courses = () => {
                 </View>
               </View>
             </TouchableOpacity>
+          ) : (
+            <View style={styles.noDataContainer}>
+              <Ionicons name="book-outline" size={60} color="#9CA3AF"  />
+              <Text style={styles.noDataText}>No courses available</Text>
+            </View>
           )}
         </ScrollView>
       </SafeAreaView>
@@ -183,5 +188,18 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     fontSize: 12,
     color: '#716F6F',
+  },
+  noDataContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 50,
+    marginTop:150
+  },
+  noDataText: {
+    marginTop: 12,
+    fontWeight: '500',
+    color: COLORS.text_desc,
+     ...FONTS.body3
   },
 });

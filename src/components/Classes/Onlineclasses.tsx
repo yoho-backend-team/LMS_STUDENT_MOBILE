@@ -7,7 +7,6 @@ import {
   ScrollView,
   StyleSheet,
   Linking,
-  Alert,
   RefreshControl,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
@@ -26,7 +25,7 @@ const Classcards = () => {
   const [activeTab, setActiveTab] = useState<'live' | 'upcoming' | 'completed'>('completed');
   const scrollRef = useRef<ScrollView>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = classData?.last_page;
+  const totalPages = classData?.last_page || 1;
   const [refreshing, setRefreshing] = useState(false);
 
   const tabs = [
@@ -75,10 +74,6 @@ const Classcards = () => {
 
   const ClassCard = ({ item }: { item: any }) => (
     <View style={styles.card}>
-      <View style={styles.row}>
-        <Text style={styles.label}>Day</Text>
-        <Text style={styles.value}>{item.day}</Text>
-      </View>
       <View style={styles.row}>
         <Text style={styles.label}>Topic</Text>
         <Text style={styles.value}>
@@ -150,10 +145,8 @@ const Classcards = () => {
   const renderClasses = () => {
     if (!classData?.data?.length) {
       return (
-        <View>
-          <Text style={{ textAlign: 'center', color: COLORS.text_desc, ...FONTS.body3 }}>
-            No classes available
-          </Text>
+        <View style={styles.noDataContainer}>
+          <Text style={styles.noDataText}>No classes available</Text>
         </View>
       );
     }
@@ -185,6 +178,7 @@ const Classcards = () => {
       />
     ));
   };
+
   function loadNextPage() {
     if (currentPage < totalPages) {
       const nextPage = currentPage + 1;
@@ -200,8 +194,9 @@ const Classcards = () => {
       fetchClassData(activeTab, prevPage);
     }
   }
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { flex: 1 }]}>
       <Text style={styles.header}>Online Classes</Text>
 
       <View style={styles.wrapper}>
@@ -226,50 +221,51 @@ const Classcards = () => {
           {activeTab === 'live'
             ? 'Live Classes'
             : activeTab === 'upcoming'
-              ? 'Upcoming Classes'
-              : 'Completed Classes'}
+            ? 'Upcoming Classes'
+            : 'Completed Classes'}
         </Text>
       </View>
 
+      {/* ✅ Scrollable Content */}
       <ScrollView
         contentContainerStyle={styles.container1}
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         {renderClasses()}
-
-        {/* ✅ Pagination at bottom */}
-        <View style={styles.pagination}>
-          <LinearGradient
-            colors={currentPage === 1 ? ['#E0E0E0', '#E0E0E0'] : ['#7B00FF', '#B200FF']}
-            start={{ x: 0.134, y: 0.021 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.pageGradient}>
-            <TouchableOpacity
-              onPress={loadPrevPage}
-              disabled={currentPage === 1}
-              style={styles.buttonInner}>
-              <Text style={styles.buttonText}>Previous</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-
-          <Text style={styles.pageInfo}>
-            Page {currentPage} of {totalPages}
-          </Text>
-
-          <LinearGradient
-            colors={currentPage === totalPages ? ['#E0E0E0', '#E0E0E0'] : ['#7B00FF', '#B200FF']}
-            start={{ x: 0.134, y: 0.021 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.pageGradient}>
-            <TouchableOpacity
-              onPress={loadNextPage}
-              disabled={currentPage === totalPages}
-              style={styles.buttonInner}>
-              <Text style={styles.buttonText}>Next</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-        </View>
       </ScrollView>
+
+      {/* ✅ Pagination always pinned at bottom */}
+      <View style={styles.pagination}>
+        <LinearGradient
+          colors={currentPage === 1 ? ['#E0E0E0', '#E0E0E0'] : ['#7B00FF', '#B200FF']}
+          start={{ x: 0.134, y: 0.021 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.pageGradient}>
+          <TouchableOpacity
+            onPress={loadPrevPage}
+            disabled={currentPage === 1}
+            style={styles.buttonInner}>
+            <Text style={styles.buttonText}>Previous</Text>
+          </TouchableOpacity>
+        </LinearGradient>
+
+        <Text style={styles.pageInfo}>
+          Page {currentPage} of {totalPages}
+        </Text>
+
+        <LinearGradient
+          colors={currentPage === totalPages ? ['#E0E0E0', '#E0E0E0'] : ['#7B00FF', '#B200FF']}
+          start={{ x: 0.134, y: 0.021 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.pageGradient}>
+          <TouchableOpacity
+            onPress={loadNextPage}
+            disabled={currentPage === totalPages}
+            style={styles.buttonInner}>
+            <Text style={styles.buttonText}>Next</Text>
+          </TouchableOpacity>
+        </LinearGradient>
+      </View>
     </View>
   );
 };
@@ -314,7 +310,15 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   buttonText: { color: COLORS.white, fontWeight: '500', fontSize: 14 },
-  container1: { backgroundColor: '#f1f6fc', padding: 16, borderRadius: 16, paddingBottom: 450 },
+  container1: {
+    backgroundColor: '#f1f6fc',
+    padding: 16,
+    borderRadius: 16,
+    minHeight: 300,
+    flexGrow: 1,
+    justifyContent: 'center',
+    
+  },
   sectionTitle: { fontSize: 18, fontWeight: '500', color: '#333' },
   pagination: {
     flexDirection: 'row',
@@ -323,21 +327,36 @@ const styles = StyleSheet.create({
     padding: 15,
     borderTopWidth: 1,
     borderTopColor: COLORS.blue_02,
+    // marginTop:50
   },
   pageInfo: {
     fontSize: 14,
     color: COLORS.text_title,
     fontWeight: '500',
+    marginTop:30
   },
   pageGradient: {
     borderRadius: 6,
     overflow: 'hidden',
     minWidth: 75,
     marginHorizontal: 1,
+    marginTop:30
   },
   buttonInner: {
     paddingVertical: 8,
     paddingHorizontal: 16,
     alignItems: 'center',
+   
+  },
+  noDataContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 50,
+  },
+  noDataText: {
+    textAlign: 'center',
+    color: COLORS.text_desc,
+    ...FONTS.body3,
   },
 });
