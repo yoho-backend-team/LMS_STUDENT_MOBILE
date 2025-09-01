@@ -85,8 +85,7 @@ class Client {
     },
 
     placement: {
-      get: (params: any) =>
-        httpClient.get(HTTP_END_POINTS.placement.get + params?.studentId, params, 'student'),
+      get: (params: any) => httpClient.get(HTTP_END_POINTS.placement.get + params.studentId, params,'student'),
     },
   };
 
