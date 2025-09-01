@@ -18,10 +18,7 @@ const Classcards = () => {
   const scrollRef = useRef<ScrollView>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = classData?.last_page;
-  
-    const [refreshing, setRefreshing] = useState(false);
-    
-
+   const [refreshing, setRefreshing] = useState(false);
   const tabs = [
     { key: 'completed', label: 'Completed Class' },
     { key: 'upcoming', label: 'Upcoming Class' },
