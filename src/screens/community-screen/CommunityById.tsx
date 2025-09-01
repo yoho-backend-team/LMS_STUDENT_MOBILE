@@ -24,6 +24,8 @@ import { GetallMessageThunks } from '../../features/Community/reducers.ts/thunks
 import { GetCommuntiyIdSelector } from '~/features/Community/reducers.ts/selectore';
 import { COLORS } from '~/constants';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import socket from '~/utils/socket';
 
 interface Message {
   id: string;
@@ -31,6 +33,13 @@ interface Message {
   isOutgoing: boolean;
   senderName?: string;
   createdAt?: string;
+  sender?: string;
+  _id?: string;
+  uuid?: string;
+  message?: string;
+  sender_name?: string;
+  timestamp?: string;
+  read?: boolean;
 }
 
 const COLORS_LIST = [
@@ -70,7 +79,6 @@ const formatTime = (timestamp: any | number | Date): string => {
 const formatMessageDate = (timestamp: string | number | Date): string => {
   const messageDate = new Date(timestamp);
   const now = new Date();
-
   const isToday = messageDate.toDateString() === now.toDateString();
   const yesterday = new Date();
   yesterday.setDate(now.getDate() - 1);
@@ -102,7 +110,6 @@ const CommunityById: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute<any>();
   const { community } = route?.params;
-
   const dispatch = useDispatch();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -117,9 +124,47 @@ const CommunityById: React.FC = () => {
   const [isLoadingAtTop, setIsLoadingAtTop] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
   const messagelist = useSelector(GetCommuntiyIdSelector);
+  const [userId, setUserId] = useState('');
+  const [student, setStudent] = useState<any>(null);
+
+  const getStudentId = async () => {
+    try {
+      const data = await AsyncStorage.getItem('StudentData');
+      if (data) {
+        const parsed = JSON.parse(data);
+        setUserId(parsed._id);
+        setStudent(parsed);
+        return parsed;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error reading StudentData:', error);
+      return null;
+    }
+  };
 
   useEffect(() => {
-    dispatch<any>(GetallMessageThunks({ community: community?._id, page: 1, limit: 15 }));
+    const initializeSocket = async () => {
+      const studentData = await getStudentId();
+
+      if (community?._id && studentData?._id) {
+        socket.emit('joinGroup', { groupId: community._id, userId: studentData._id });
+      }
+    };
+
+    initializeSocket();
+
+    return () => {
+      if (community?._id && userId) {
+        socket.emit('leaveGroup', { groupId: community._id, userId: userId });
+      }
+    };
+  }, [community?._id]);
+
+  useEffect(() => {
+    if (community?._id) {
+      dispatch<any>(GetallMessageThunks({ community: community._id, page: 1, limit: 15 }));
+    }
   }, [community?._id, dispatch]);
 
   useEffect(() => {
@@ -128,11 +173,13 @@ const CommunityById: React.FC = () => {
 
       const formatted = list
         .map((msg: any) => ({
-          id: msg.uuid || msg._id,
-          text: msg.message,
-          isOutgoing: msg.sender === 'me',
+          id: msg.uuid || msg._id || Date.now().toString(),
+          text: msg.message || msg.content,
+          isOutgoing: msg.sender === userId,
           senderName: msg.sender_name || 'Unknown',
-          createdAt: msg.createdAt || new Date().toISOString(),
+          createdAt: msg.createdAt || msg.timestamp || new Date().toISOString(),
+          sender: msg.sender,
+          _id: msg._id,
         }))
         .sort(
           (a: Message, b: Message) =>
@@ -150,7 +197,7 @@ const CommunityById: React.FC = () => {
 
       setHasMoreMessages(Array.isArray(messagelist) ? false : (messagelist.hasMore ?? false));
     }
-  }, [messagelist, page]);
+  }, [messagelist, page, userId]);
 
   useEffect(() => {
     if (shouldAutoScroll && messages.length > 0) {
@@ -161,19 +208,76 @@ const CommunityById: React.FC = () => {
     }
   }, [messages, shouldAutoScroll, isInitialLoad]);
 
-  const handleSend = () => {
-    if (message.trim()) {
-      const newMsg: Message = {
-        id: Date.now().toString(),
-        text: message,
-        isOutgoing: true,
-        senderName: 'Me',
-        createdAt: new Date().toISOString(),
+  useEffect(() => {
+    if (!userId) return;
+    const handleIncomingMessage = (msg: any) => {
+      const incomingMsg: Message = {
+        id: msg.uuid || msg._id || Date.now().toString(),
+        text: msg.message || msg.content,
+        isOutgoing: msg.sender === userId || msg.senderId === userId,
+        senderName: msg.sender_name || msg.name || 'Unknown',
+        createdAt: msg.createdAt || msg.timestamp || new Date().toISOString(),
+        sender: msg.sender || msg.senderId,
+        _id: msg._id,
       };
-      setMessages((prev) => [...prev, newMsg]);
-      setMessage('');
-      setShouldAutoScroll(true);
+
+      setMessages((prev) => [...prev, incomingMsg]);
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+    };
+
+    socket.on('receiveMessage', handleIncomingMessage);
+    socket.on('newMessage', handleIncomingMessage);
+    socket.on('messageDelivered', (messageId) => {
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg._id === messageId || msg.id === messageId ? { ...msg, delivered: true } : msg
+        )
+      );
+    });
+
+    socket.on('messageRead', (messageId) => {
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg._id === messageId || msg.id === messageId ? { ...msg, read: true } : msg
+        )
+      );
+    });
+
+    return () => {
+      socket.off('receiveMessage', handleIncomingMessage);
+      socket.off('newMessage', handleIncomingMessage);
+      socket.off('messageDelivered');
+      socket.off('messageRead');
+    };
+  }, [userId]);
+
+  useEffect(() => {
+    if (messages?.length > 0 && userId) {
+      messages?.forEach((msg) => {
+        if (!msg.read && msg.sender !== userId) {
+          socket.emit('messageRead', { messageId: msg._id || msg.id, groupId: community?._id });
+        }
+      });
     }
+  }, [messages, userId, community?._id]);
+
+  const handleSend = () => {
+    if (!message.trim() || !community?._id || !userId) return;
+
+    const messageToSend = message.trim();
+    setMessage('');
+    const messageData = {
+      content: messageToSend,
+      groupId: community._id,
+      senderId: userId,
+      name: student?.full_name || student?.first_name || 'You',
+      message: messageToSend,
+    };
+
+    socket.emit('sendMessage', messageData);
+    setShouldAutoScroll(true);
   };
 
   const loadMoreMessages = useCallback(() => {
@@ -256,7 +360,6 @@ const CommunityById: React.FC = () => {
     const currentDate = new Date(msg.createdAt || '');
     const prevMessage = index > 0 ? messages[index - 1] : null;
     const prevDate = prevMessage ? new Date(prevMessage.createdAt || '') : null;
-
     const showDateDivider = !prevDate || !isSameDay(currentDate, prevDate);
 
     return (
@@ -299,10 +402,7 @@ const CommunityById: React.FC = () => {
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
       <SafeAreaView edges={['top']} style={styles.container}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-          <KeyboardAvoidingView
-            style={{ flex: 1 }}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
+          <View style={{ flex: 1 }}>
             {/* HEADER */}
             <View style={styles.header}>
               <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
@@ -319,7 +419,7 @@ const CommunityById: React.FC = () => {
               </View>
             </View>
 
-            {/* CHAT */}
+            {/* CHAT LIST */}
             <ImageBackground
               source={require('../../assets/chatbg.png')}
               style={{ flex: 1 }}
@@ -331,7 +431,6 @@ const CommunityById: React.FC = () => {
                 onScroll={handleScroll}
                 onContentSizeChange={handleContentSizeChange}
                 scrollEventThrottle={16}
-                removeClippedSubviews={true}
                 keyboardShouldPersistTaps="handled">
                 {(loadingMore || isLoadingAtTop) && (
                   <View style={styles.loadingContainer}>
@@ -350,28 +449,32 @@ const CommunityById: React.FC = () => {
               </ScrollView>
             </ImageBackground>
 
-            {/* SCROLL TO BOTTOM */}
             {showScrollToBottom && (
               <TouchableOpacity style={styles.scrollToBottomButton} onPress={scrollToBottom}>
                 <Ionicons name="arrow-down" size={24} color="#fff" />
               </TouchableOpacity>
             )}
 
-            {/* INPUT */}
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.textInput}
-                placeholder="Type a Message"
-                placeholderTextColor="#999"
-                value={message}
-                onChangeText={setMessage}
-                multiline
-              />
-              <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
-                <Ionicons name="send" size={20} color="#fff" />
-              </TouchableOpacity>
-            </View>
-          </KeyboardAvoidingView>
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+              keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Type a Message"
+                  placeholderTextColor="#999"
+                  value={message}
+                  onChangeText={setMessage}
+                  multiline
+                  returnKeyType="send"
+                  onSubmitEditing={handleSend}
+                />
+                <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+                  <Ionicons name="send" size={20} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            </KeyboardAvoidingView>
+          </View>
         </TouchableWithoutFeedback>
       </SafeAreaView>
     </>
@@ -456,7 +559,14 @@ const styles = StyleSheet.create({
   },
   loadingText: { marginLeft: 8, color: '#ccc', fontSize: 12 },
   noMoreMessagesContainer: { padding: 16, alignItems: 'center' },
-  noMoreMessagesText: { color: '#ccc', fontSize: 12 },
+  noMoreMessagesText: {
+    color: '#000',
+    fontSize: 12,
+    backgroundColor: '#ccc',
+    borderRadius: 12,
+    paddingHorizontal: 5,
+    paddingVertical: 3,
+  },
   scrollToBottomButton: {
     position: 'absolute',
     right: 20,

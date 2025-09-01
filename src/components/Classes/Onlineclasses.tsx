@@ -1,6 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Linking, Alert, RefreshControl } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+  Linking,
+  Alert,
+  RefreshControl,
+} from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from '~/store/store';
 import { getClassDetails } from '~/features/classes/reducers/thunks';
@@ -18,7 +27,8 @@ const Classcards = () => {
   const scrollRef = useRef<ScrollView>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = classData?.last_page;
-   const [refreshing, setRefreshing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
   const tabs = [
     { key: 'completed', label: 'Completed Class' },
     { key: 'upcoming', label: 'Upcoming Class' },
@@ -40,7 +50,7 @@ const Classcards = () => {
     fetchClassData(activeTab);
   }, [dispatch, activeTab]);
 
-   const onRefresh = async () => {
+  const onRefresh = async () => {
     setRefreshing(true);
     setCurrentPage(1);
     await fetchClassData(activeTab, 1);
@@ -176,20 +186,20 @@ const Classcards = () => {
     ));
   };
   function loadNextPage() {
-  if (currentPage < totalPages) {
-    const nextPage = currentPage + 1;
-    setCurrentPage(nextPage);
-    fetchClassData(activeTab, nextPage);
+    if (currentPage < totalPages) {
+      const nextPage = currentPage + 1;
+      setCurrentPage(nextPage);
+      fetchClassData(activeTab, nextPage);
+    }
   }
-}
 
-function loadPrevPage() {
-  if (currentPage > 1) {
-    const prevPage = currentPage - 1;
-    setCurrentPage(prevPage);
-    fetchClassData(activeTab, prevPage);
+  function loadPrevPage() {
+    if (currentPage > 1) {
+      const prevPage = currentPage - 1;
+      setCurrentPage(prevPage);
+      fetchClassData(activeTab, prevPage);
+    }
   }
-}
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Online Classes</Text>
@@ -199,8 +209,7 @@ function loadPrevPage() {
           horizontal
           ref={scrollRef}
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.tabContainer}
-         >
+          contentContainerStyle={styles.tabContainer}>
           {tabs.map((tab, index) => (
             <TouchableOpacity
               key={tab.key}
@@ -211,7 +220,6 @@ function loadPrevPage() {
               </Text>
             </TouchableOpacity>
           ))}
-            
         </ScrollView>
 
         <Text style={styles.sectionTitle}>
@@ -223,42 +231,44 @@ function loadPrevPage() {
         </Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.container1} showsVerticalScrollIndicator={false}
+      <ScrollView
+        contentContainerStyle={styles.container1}
+        showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         {renderClasses()}
-        
-      {/* ✅ Pagination at bottom */}
-      <View style={styles.pagination}>
-        <LinearGradient
-          colors={currentPage === 1 ? ['#E0E0E0', '#E0E0E0'] : ['#7B00FF', '#B200FF']}
-          start={{ x: 0.134, y: 0.021 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.pageGradient}>
-          <TouchableOpacity
-            onPress={loadPrevPage}
-            disabled={currentPage === 1}
-            style={styles.buttonInner}>
-            <Text style={styles.buttonText}>Previous</Text>
-          </TouchableOpacity>
-        </LinearGradient>
 
-        <Text style={styles.pageInfo}>
-          Page {currentPage} of {totalPages}
-        </Text>
+        {/* ✅ Pagination at bottom */}
+        <View style={styles.pagination}>
+          <LinearGradient
+            colors={currentPage === 1 ? ['#E0E0E0', '#E0E0E0'] : ['#7B00FF', '#B200FF']}
+            start={{ x: 0.134, y: 0.021 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.pageGradient}>
+            <TouchableOpacity
+              onPress={loadPrevPage}
+              disabled={currentPage === 1}
+              style={styles.buttonInner}>
+              <Text style={styles.buttonText}>Previous</Text>
+            </TouchableOpacity>
+          </LinearGradient>
 
-        <LinearGradient
-          colors={currentPage === totalPages ? ['#E0E0E0', '#E0E0E0'] : ['#7B00FF', '#B200FF']}
-          start={{ x: 0.134, y: 0.021 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.pageGradient}>
-          <TouchableOpacity
-            onPress={loadNextPage}
-            disabled={currentPage === totalPages}
-            style={styles.buttonInner}>
-            <Text style={styles.buttonText}>Next</Text>
-          </TouchableOpacity>
-        </LinearGradient>
-      </View>
+          <Text style={styles.pageInfo}>
+            Page {currentPage} of {totalPages}
+          </Text>
+
+          <LinearGradient
+            colors={currentPage === totalPages ? ['#E0E0E0', '#E0E0E0'] : ['#7B00FF', '#B200FF']}
+            start={{ x: 0.134, y: 0.021 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.pageGradient}>
+            <TouchableOpacity
+              onPress={loadNextPage}
+              disabled={currentPage === totalPages}
+              style={styles.buttonInner}>
+              <Text style={styles.buttonText}>Next</Text>
+            </TouchableOpacity>
+          </LinearGradient>
+        </View>
       </ScrollView>
     </View>
   );
@@ -322,10 +332,10 @@ const styles = StyleSheet.create({
   pageGradient: {
     borderRadius: 6,
     overflow: 'hidden',
-    minWidth: 90,
-    marginHorizontal: 5,
+    minWidth: 75,
+    marginHorizontal: 1,
   },
-   buttonInner: {
+  buttonInner: {
     paddingVertical: 8,
     paddingHorizontal: 16,
     alignItems: 'center',

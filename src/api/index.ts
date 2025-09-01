@@ -83,11 +83,16 @@ class Client {
           'student'
         ),
     },
+
+    placement: {
+      get: (params: any) => httpClient.get(HTTP_END_POINTS.placement.get, params, 'student'),
+    },
   };
 
   common = {
     file: {
-      upload: (data: any) => httpClient.uploadFile(HTTP_END_POINTS.common.file.upload, data, 'student'),
+      upload: (data: any) =>
+        httpClient.uploadFile(HTTP_END_POINTS.common.file.upload, data, 'student'),
       get: (url: any) => httpClient.fileGet(url),
     },
   };
