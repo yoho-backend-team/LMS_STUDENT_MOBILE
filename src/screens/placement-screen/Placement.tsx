@@ -9,28 +9,23 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import placementimg from '../../assets/icons/Placement/placementimg.png';
-import backIcon from '../../assets/icons/Placement/back.png';
 import { useDispatch, useSelector } from 'react-redux';
 import { getPlacementthunks } from '~/features/placements/reducer/thunks';
 import { selectPlacementData } from '~/features/placements/reducer/selectors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Placement = ({ navigation }: any) => {
-
-const fetchPlacement = async ()=>{
-        const stuId = JSON.parse(await AsyncStorage.getItem("StudentData"))
-        console.log(stuId._id, 'student')
-        dispatch(getPlacementthunks({studentId: stuId._id}) as any);
-}
-
-
   const dispatch = useDispatch();
   const placementData = useSelector(selectPlacementData);
-  console.log('data', placementData)
-    useEffect(() => {
-      fetchPlacement()
-    }, [dispatch]);
+
+  const fetchPlacement = async () => {
+    const stuId: any = JSON.parse(await AsyncStorage.getItem('StudentData'));
+    dispatch(getPlacementthunks({ studentId: stuId?._id }) as any);
+  };
+
+  useEffect(() => {
+    fetchPlacement();
+  }, [dispatch]);
   return (
     <>
       <StatusBar backgroundColor="#000" barStyle="light-content" />
@@ -38,14 +33,21 @@ const fetchPlacement = async ()=>{
         {/* Header with Back Button */}
         <View style={styles.headerRow}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Image source={backIcon} style={styles.backIcon} resizeMode="contain" />
+            <Image
+              source={require('../../assets/icons/Placement/back.png')}
+              style={styles.backIcon}
+              resizeMode="contain"
+            />
           </TouchableOpacity>
           <Text style={styles.header}>Placement</Text>
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* Image */}
-          <Image source={placementimg} style={styles.image} />
+          <Image
+            source={require('../../assets/icons/Placement/placementimg.png')}
+            style={styles.image}
+          />
 
           {/* Company Details */}
           <View style={styles.card}>
@@ -88,7 +90,13 @@ const fetchPlacement = async ()=>{
             <View style={styles.row}>
               <Text style={styles.label}>Skills</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>{placementData?.job?.skills?.map((data:any)=>{data}).join(",")}</Text>
+              <Text style={styles.value}>
+                {placementData?.job?.skills
+                  ?.map((data: any) => {
+                    data;
+                  })
+                  .join(',')}
+              </Text>
             </View>
           </View>
 
