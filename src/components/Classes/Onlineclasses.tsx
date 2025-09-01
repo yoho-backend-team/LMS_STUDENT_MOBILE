@@ -326,7 +326,6 @@ const styles = StyleSheet.create({
     padding: 15,
     borderTopWidth: 1,
     borderTopColor: COLORS.blue_02,
-    // marginTop:50
   },
   pageInfo: {
     fontSize: 14,
