@@ -13,7 +13,6 @@ interface ClassPayload {
 export const getClassDetails = (params: ClassPayload) => async (dispatch: any) => {
   try {
     const response = await getLiveClassDetails(params);
-    // console.log("thunk....",response);
     dispatch(getclassdetails(response));
   } catch (error) {
     console.error('Error fetching class details:', error);

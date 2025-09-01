@@ -77,14 +77,14 @@ const Classcards = () => {
       <View style={styles.row}>
         <Text style={styles.label}>Topic</Text>
         <Text style={styles.value}>
-          {item.topic.length > 20 ? item.topic.substring(0, 20) + '...' : item.topic}
+          {item?.topic?.length > 20 ? item.topic.substring(0, 20) + '...' : item.topic}
         </Text>
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>Join Link</Text>
         <TouchableOpacity onPress={() => handleOpenLink(item.link)}>
           <Text style={styles.value1}>
-            {item.link.length > 20 ? item.link.substring(0, 20) + '...' : item.link}
+            {item?.link?.length > 20 ? item.link.substring(0, 20) + '...' : item.link}
           </Text>
         </TouchableOpacity>
       </View>
@@ -205,7 +205,7 @@ const Classcards = () => {
           ref={scrollRef}
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.tabContainer}>
-          {tabs.map((tab, index) => (
+          {tabs?.map((tab, index) => (
             <TouchableOpacity
               key={tab.key}
               onPress={() => onTabPress(tab.key as any, index)}
@@ -221,8 +221,8 @@ const Classcards = () => {
           {activeTab === 'live'
             ? 'Live Classes'
             : activeTab === 'upcoming'
-            ? 'Upcoming Classes'
-            : 'Completed Classes'}
+              ? 'Upcoming Classes'
+              : 'Completed Classes'}
         </Text>
       </View>
 
@@ -317,7 +317,6 @@ const styles = StyleSheet.create({
     minHeight: 300,
     flexGrow: 1,
     justifyContent: 'center',
-    
   },
   sectionTitle: { fontSize: 18, fontWeight: '500', color: '#333' },
   pagination: {
@@ -333,20 +332,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.text_title,
     fontWeight: '500',
-    marginTop:30
+    marginTop: 30,
   },
   pageGradient: {
     borderRadius: 6,
     overflow: 'hidden',
     minWidth: 75,
     marginHorizontal: 1,
-    marginTop:30
+    marginTop: 30,
   },
   buttonInner: {
     paddingVertical: 8,
     paddingHorizontal: 16,
     alignItems: 'center',
-   
   },
   noDataContainer: {
     flex: 1,
