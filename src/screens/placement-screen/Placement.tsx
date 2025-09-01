@@ -15,18 +15,19 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getPlacementthunks } from '~/features/placements/reducer/thunks';
 import { selectPlacementData } from '~/features/placements/reducer/selectors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import dayjs from 'dayjs'
 
 const Placement = ({ navigation }: any) => {
 
 const fetchPlacement = async ()=>{
-        const stuId = JSON.parse(await AsyncStorage.getItem("StudentData"))
+        const stuId = JSON.parse(await AsyncStorage.getItem("StudentData") as any)
         console.log(stuId._id, 'student')
-        dispatch(getPlacementthunks({studentId: stuId._id}) as any);
+        dispatch(getPlacementthunks({studentId:stuId._id}) as any);
 }
 
 
   const dispatch = useDispatch();
-  const placementData = useSelector(selectPlacementData);
+  const placementData:any = useSelector<any>(selectPlacementData);
   console.log('data', placementData)
     useEffect(() => {
       fetchPlacement()
@@ -53,22 +54,22 @@ const fetchPlacement = async ()=>{
             <View style={styles.row}>
               <Text style={styles.label}>Company Name</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>{placementData?.Company?.name}</Text>
+              <Text style={styles.value}>{placementData[0]?.company?.name}</Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Company Address</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>{placementData?.Company?.address}</Text>
+              <Text style={styles.value}>{placementData[0]?.company?.address}</Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Contact Email</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>{placementData?.Company?.email}</Text>
+              <Text style={styles.value}>{placementData[0]?.company?.email}</Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Contact Number</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>{placementData?.Company?.phone}</Text>
+              <Text style={styles.value}>{placementData[0]?.company?.phone}</Text>
             </View>
           </View>
 
@@ -78,17 +79,17 @@ const fetchPlacement = async ()=>{
             <View style={styles.row}>
               <Text style={styles.label}>Job Name</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>{placementData?.job?.name}</Text>
+              <Text style={styles.value}>{placementData[0]?.job?.name}</Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Job Description</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>{placementData?.job?.description}</Text>
+              <Text style={styles.value}>{placementData[0]?.job?.description}</Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Skills</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>{placementData?.job?.skills?.map((data:any)=>{data}).join(",")}</Text>
+              <Text style={styles.value}>{placementData[0]?.job?.skils?.join(",")}</Text>
             </View>
           </View>
 
@@ -98,17 +99,17 @@ const fetchPlacement = async ()=>{
             <View style={styles.row}>
               <Text style={styles.label}>Interview Date</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>{placementData?.schedule?.interviewDate}</Text>
+              <Text style={styles.value}>{}{dayjs(placementData[0]?.schedule?.interviewDate).format("DD-MMM-YYYY")}</Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Venue</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>{placementData?.schedule?.venue}</Text>
+              <Text style={styles.value}>{placementData[0]?.schedule?.venue}</Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Address</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>{placementData?.schedule?.address}</Text>
+              <Text style={styles.value}>{placementData[0]?.schedule?.address}</Text>
             </View>
           </View>
         </ScrollView>
