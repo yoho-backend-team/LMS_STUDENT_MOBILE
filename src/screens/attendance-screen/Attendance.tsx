@@ -26,7 +26,6 @@ const Attendance = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-
   const [showMonthDropdown, setShowMonthDropdown] = useState(false);
   const [showYearDropdown, setShowYearDropdown] = useState(false);
   const dispatch = useDispatch<any>();
@@ -49,7 +48,6 @@ const Attendance = () => {
   ];
 
   const years = Array.from({ length: 11 }, (_, i) => today.getFullYear() - 5 + i);
-
   const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
   const firstDay = new Date(selectedYear, selectedMonth, 1).getDay();
   const attendance = useSelector(selectAttendance);
@@ -501,8 +499,8 @@ const styles = StyleSheet.create({
     top: 1,
     left: 4,
     borderRadius: 6,
-    paddingHorizontal: 4,
-    paddingVertical: 2,
+    paddingHorizontal: 2,
+    paddingVertical: 1,
   },
   presentBadge: {
     backgroundColor: 'green',
@@ -512,7 +510,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     color: '#fff',
-    fontSize: 10,
+    fontSize: 6,
     fontWeight: '700',
   },
 });
