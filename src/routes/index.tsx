@@ -61,7 +61,6 @@ const Routes = () => {
   const Stack: any = createNativeStackNavigator<RootStackParamList>();
   const navigation =
     useNavigation<import('@react-navigation/native').NavigationProp<RootStackParamList>>();
-
   const [showSessionModal, setShowSessionModal] = useState(false);
 
   const handleSessionExpired = async () => {
