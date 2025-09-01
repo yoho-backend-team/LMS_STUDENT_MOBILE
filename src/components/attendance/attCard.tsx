@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { View, Text, ScrollView, Animated, Dimensions } from 'react-native';
 import Svg, { Path, Defs, LinearGradient, Stop, G } from 'react-native-svg';
 
@@ -20,7 +20,7 @@ const MinimalWave = ({ percentage, color, cardId }: WaveProps) => {
         toValue: 1,
         duration: 5000,
         useNativeDriver: false,
-      }),
+      })
     ).start();
   }, []);
 
@@ -40,17 +40,10 @@ const MinimalWave = ({ percentage, color, cardId }: WaveProps) => {
               }),
             },
           ],
-        }}
-      >
+        }}>
         <Svg height={waveHeight} width={waveWidth}>
           <Defs>
-            <LinearGradient
-              id={`minimal${cardId}`}
-              x1="0%"
-              y1="0%"
-              x2="100%"
-              y2="0%"
-            >
+            <LinearGradient id={`minimal${cardId}`} x1="0%" y1="0%" x2="100%" y2="0%">
               <Stop offset="0%" stopColor={color} stopOpacity="0.1" />
               <Stop offset="50%" stopColor={color} stopOpacity="0.6" />
               <Stop offset="100%" stopColor={color} stopOpacity="0.1" />
@@ -61,9 +54,7 @@ const MinimalWave = ({ percentage, color, cardId }: WaveProps) => {
             <Path
               d={`M0,${waveHeight / 2} ${Array.from({ length: 100 }, (_, i) => {
                 const x = (waveWidth / 100) * i;
-                const y =
-                  waveHeight / 2 +
-                  Math.sin(x * 0.03 + percentage * 0.01) * amplitude;
+                const y = waveHeight / 2 + Math.sin(x * 0.03 + percentage * 0.01) * amplitude;
                 return `L${x},${y}`;
               }).join(' ')} L${waveWidth},${waveHeight} L0,${waveHeight} Z`}
               fill={`url(#minimal${cardId})`}
@@ -72,9 +63,7 @@ const MinimalWave = ({ percentage, color, cardId }: WaveProps) => {
             <Path
               d={`M0,${waveHeight / 2} ${Array.from({ length: 100 }, (_, i) => {
                 const x = (waveWidth / 100) * i;
-                const y =
-                  waveHeight / 2 +
-                  Math.sin(x * 0.03 + percentage * 0.01) * amplitude;
+                const y = waveHeight / 2 + Math.sin(x * 0.03 + percentage * 0.01) * amplitude;
                 return `L${x},${y}`;
               }).join(' ')}`}
               stroke={color}
@@ -103,13 +92,10 @@ type AttendanceProps = {
 
 type AttendanceCardsProps = {
   attendance?: AttendanceProps['attendance'];
-  onScrollIndexChange?: (index: number) => void; 
+  onScrollIndexChange?: (index: number) => void;
 };
 
-const AttendanceCards = ({
-  attendance,
-  onScrollIndexChange,
-}: AttendanceCardsProps) => {
+const AttendanceCards = ({ attendance, onScrollIndexChange }: AttendanceCardsProps) => {
   const scrollRef = useRef<ScrollView>(null);
 
   const cards = [
@@ -117,9 +103,7 @@ const AttendanceCards = ({
       id: 1,
       title: 'Total Classes',
       attended: attendance?.data?.attendedClassCount,
-      total:
-        (attendance?.data?.onlineClassCount || 0) +
-        (attendance?.data?.offlineClassCount || 0),
+      total: (attendance?.data?.onlineClassCount || 0) + (attendance?.data?.offlineClassCount || 0),
       color: '#6366F1',
       bgColor: '#EEF2FF',
     },
@@ -166,7 +150,7 @@ const AttendanceCards = ({
   };
 
   return (
-    <View style={{ height: 230 }}> 
+    <View style={{ height: 230 }}>
       <ScrollView
         ref={scrollRef}
         horizontal
@@ -175,19 +159,12 @@ const AttendanceCards = ({
         onScroll={handleScroll}
         scrollEventThrottle={16}
         style={{ paddingHorizontal: 5 }}
-        contentContainerStyle={{ paddingRight: 20 }}
-      >
-        {cards.map((card?:any) => {
-          const percentage =
-            card.total && card.total > 0
-              ? (card.attended / card.total) * 100
-              : 0;
+        contentContainerStyle={{ paddingRight: 20 }}>
+        {cards.map((card?: any) => {
+          const percentage = card.total && card.total > 0 ? (card.attended / card.total) * 100 : 0;
 
           return (
-            <View
-              key={card.id}
-              style={[cardStyle, { backgroundColor: card.bgColor }]}
-            >
+            <View key={card.id} style={[cardStyle, { backgroundColor: card.bgColor }]}>
               {/* header */}
               <View style={{ marginBottom: 12 }}>
                 <Text
@@ -196,8 +173,7 @@ const AttendanceCards = ({
                     fontWeight: '500',
                     color: '#475569',
                     marginBottom: 8,
-                  }}
-                >
+                  }}>
                   {card.title}
                 </Text>
               </View>
@@ -208,15 +184,13 @@ const AttendanceCards = ({
                   flexDirection: 'row',
                   justifyContent: 'flex-end',
                   marginBottom: 12,
-                }}
-              >
+                }}>
                 <Text
                   style={{
                     fontSize: 20,
                     fontWeight: '700',
                     color: card.color,
-                  }}
-                >
+                  }}>
                   {card.attended}
                 </Text>
                 <Text
@@ -224,19 +198,14 @@ const AttendanceCards = ({
                     fontSize: 14,
                     color: '#94A3B8',
                     alignSelf: 'flex-end',
-                  }}
-                >
+                  }}>
                   / {card.total}
                 </Text>
               </View>
 
               {/* wave */}
               <View style={{ alignItems: 'center', marginTop: 5 }}>
-                <MinimalWave
-                  percentage={percentage}
-                  color={card.color}
-                  cardId={card.id}
-                />
+                <MinimalWave percentage={percentage} color={card.color} cardId={card.id} />
               </View>
 
               {/* percentage */}
@@ -245,15 +214,13 @@ const AttendanceCards = ({
                   alignItems: 'center',
                   marginTop: 8,
                   marginBottom: 5,
-                }}
-              >
+                }}>
                 <Text
                   style={{
                     fontSize: 22,
                     fontWeight: '800',
                     color: card.color,
-                  }}
-                >
+                  }}>
                   {Math.round(percentage)}%
                 </Text>
               </View>
@@ -268,19 +235,14 @@ const AttendanceCards = ({
                   paddingTop: 8,
                   borderTopWidth: 0.5,
                   borderTopColor: '#E2E8F0',
-                }}
-              >
+                }}>
                 <View
                   style={{
                     width: 6,
                     height: 6,
                     borderRadius: 3,
                     backgroundColor:
-                      percentage >= 75
-                        ? '#10B981'
-                        : percentage >= 50
-                        ? '#F59E0B'
-                        : '#EF4444',
+                      percentage >= 75 ? '#10B981' : percentage >= 50 ? '#F59E0B' : '#EF4444',
                     marginRight: 6,
                   }}
                 />
@@ -289,13 +251,8 @@ const AttendanceCards = ({
                     fontSize: 11,
                     fontWeight: '600',
                     color: '#64748B',
-                  }}
-                >
-                  {percentage >= 75
-                    ? 'Excellent'
-                    : percentage >= 50
-                    ? 'Good'
-                    : 'Low'}
+                  }}>
+                  {percentage >= 75 ? 'Excellent' : percentage >= 50 ? 'Good' : 'Low'}
                 </Text>
               </View>
             </View>

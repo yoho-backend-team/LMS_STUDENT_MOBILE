@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   StatusBar,
   StyleSheet,
@@ -14,7 +14,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '~/components/shared/Header';
 import { COLORS } from '~/constants';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectAttendance } from '~/features/Attendance/reducers/selectors';
 import { getattendanceByDate, getStudentattendance } from '~/features/Attendance/reducers/thunks';
@@ -23,7 +22,6 @@ import AttendanceCards from '~/components/attendance/attCard';
 const { width } = Dimensions.get('window');
 
 const Attendance = () => {
-  const Navigation = useNavigation<any>();
   const [showFilter, setShowFilter] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
@@ -57,7 +55,7 @@ const Attendance = () => {
   const attendance = useSelector(selectAttendance);
   const attendanceByDate: Record<string, string> = {};
   attendance?.data?.formattedAttendance?.attendance?.forEach((item: any) => {
-    attendanceByDate[item.date] = item.status; 
+    attendanceByDate[item.date] = item.status;
   });
 
   useEffect(() => {
@@ -151,11 +149,10 @@ const Attendance = () => {
         </Modal>
 
         <View>
-          
           <AttendanceCards
-              attendance={attendance}
-              onScrollIndexChange={(index) => setActiveIndex(index)}
-            />
+            attendance={attendance}
+            onScrollIndexChange={(index) => setActiveIndex(index)}
+          />
           <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 10 }}>
             {[0, 1, 2].map((_, index) => (
               <View
@@ -250,10 +247,7 @@ const Attendance = () => {
                       currentWeek.push(
                         <TouchableOpacity
                           key={date}
-                          style={[
-                            styles.dateCell,
-                            isToday && styles.selectedDate, 
-                          ]}>
+                          style={[styles.dateCell, isToday && styles.selectedDate]}>
                           {status && (
                             <View
                               style={[
@@ -266,11 +260,7 @@ const Attendance = () => {
                             </View>
                           )}
 
-                          <Text
-                            style={[
-                              styles.dateText,
-                              isToday && styles.selectedDateText, 
-                            ]}>
+                          <Text style={[styles.dateText, isToday && styles.selectedDateText]}>
                             {date}
                           </Text>
                         </TouchableOpacity>
@@ -362,8 +352,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
   },
-
-  // Cards
   card: {
     backgroundColor: '#ffffff',
     padding: 20,
@@ -403,8 +391,6 @@ const styles = StyleSheet.create({
     height: 75,
     marginTop: 30,
   },
-
-  // Calendar
   calendarTitle: {
     fontSize: 18,
     fontWeight: '600',
