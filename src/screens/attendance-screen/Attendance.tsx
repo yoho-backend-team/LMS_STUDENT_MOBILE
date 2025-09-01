@@ -55,36 +55,10 @@ const Attendance = () => {
   const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
   const firstDay = new Date(selectedYear, selectedMonth, 1).getDay();
   const attendance = useSelector(selectAttendance);
-
-  // convert attendance list to map for quick lookup
   const attendanceByDate: Record<string, string> = {};
   attendance?.data?.formattedAttendance?.attendance?.forEach((item: any) => {
-    attendanceByDate[item.date] = item.status; // e.g. { "2025-08-25": "present" }
+    attendanceByDate[item.date] = item.status; 
   });
-
-  const cards = [
-    {
-      id: 1,
-      title: 'Classes Atten',
-      attended: attendance?.data?.attendedClassCount,
-      total: attendance?.data?.totalWorkingDays,
-      img: require('../../assets/attendace/attengraph1.png'),
-    },
-    {
-      id: 2,
-      title: 'Present Days',
-      attended: attendance?.data?.totalPresentDays,
-      total: attendance?.data?.totalWorkingDays,
-      img: require('../../assets/attendace/attengraph2.png'),
-    },
-    {
-      id: 3,
-      title: 'Absent Days',
-      attended: attendance?.data?.totalAbsentDays,
-      total: attendance?.data?.totalWorkingDays,
-      img: require('../../assets/attendace/attengraph3.png'),
-    },
-  ];
 
   useEffect(() => {
     if (selectedDate) {
