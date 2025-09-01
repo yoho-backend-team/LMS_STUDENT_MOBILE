@@ -5,7 +5,6 @@ import {
   Text,
   View,
   TouchableOpacity,
-  Image,
   ScrollView,
   Modal,
   FlatList,
@@ -17,9 +16,8 @@ import { COLORS } from '~/constants';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectAttendance, selectAttendanceByDate } from '~/features/Attendance/reducers/selectors';
+import { selectAttendance } from '~/features/Attendance/reducers/selectors';
 import { getattendanceByDate, getStudentattendance } from '~/features/Attendance/reducers/thunks';
-import { getattendancedata } from '~/features/Attendance/Services';
 import AttendanceCards from '~/components/attendance/attCard';
 
 const { width } = Dimensions.get('window');
@@ -34,7 +32,7 @@ const Attendance = () => {
   const [showMonthDropdown, setShowMonthDropdown] = useState(false);
   const [showYearDropdown, setShowYearDropdown] = useState(false);
   const dispatch = useDispatch<any>();
-
+  const [activeIndex, setActiveIndex] = useState(0);
   const today = new Date();
 
   const monthNames = [
@@ -57,6 +55,12 @@ const Attendance = () => {
   const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
   const firstDay = new Date(selectedYear, selectedMonth, 1).getDay();
   const attendance = useSelector(selectAttendance);
+
+  // convert attendance list to map for quick lookup
+  const attendanceByDate: Record<string, string> = {};
+  attendance?.data?.formattedAttendance?.attendance?.forEach((item: any) => {
+    attendanceByDate[item.date] = item.status; // e.g. { "2025-08-25": "present" }
+  });
 
   const cards = [
     {
@@ -173,20 +177,25 @@ const Attendance = () => {
         </Modal>
 
         <View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} pagingEnabled>
-            {/* {cards.map((card) => (
-              <View key={card.id} style={styles.card}>
-                <View style={styles.row}>
-                  <Text style={styles.title}>{card.title}</Text>
-                  <Text style={styles.attendanceText}>
-                    <Text style={styles.attended}>{card.attended}</Text>/{card.total}
-                  </Text>
-                </View>
-                <Image source={card.img} style={styles.curveImage} resizeMode="contain" />
-              </View>
-            ))} */}
-            <AttendanceCards attendance={attendance} />
-          </ScrollView>
+          
+          <AttendanceCards
+              attendance={attendance}
+              onScrollIndexChange={(index) => setActiveIndex(index)}
+            />
+          <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 10 }}>
+            {[0, 1, 2].map((_, index) => (
+              <View
+                key={index}
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: 4,
+                  marginHorizontal: 4,
+                  backgroundColor: activeIndex === index ? '#6366F1' : '#E2E8F0',
+                }}
+              />
+            ))}
+          </View>
         </View>
 
         {/* Calendar */}
@@ -236,11 +245,10 @@ const Attendance = () => {
             </View>
 
             {/* Dates */}
-            {/* Dates */}
             <View style={styles.datesGrid}>
               {(() => {
                 const totalSlots = firstDay + daysInMonth;
-                const totalWeeks = Math.ceil(totalSlots / 7); // always full rows
+                const totalWeeks = Math.ceil(totalSlots / 7);
                 const weeks = [];
 
                 for (let w = 0; w < totalWeeks; w++) {
@@ -254,6 +262,12 @@ const Attendance = () => {
                       currentWeek.push(<View key={`empty-${cellIndex}`} style={styles.dateCell} />);
                     } else {
                       const date = cellIndex - firstDay + 1;
+                      const currentDateStr = `${selectedYear}-${String(selectedMonth + 1).padStart(
+                        2,
+                        '0'
+                      )}-${String(date).padStart(2, '0')}`;
+
+                      const status = attendanceByDate[currentDateStr];
                       const isToday =
                         date === today.getDate() &&
                         selectedMonth === today.getMonth() &&
@@ -262,8 +276,27 @@ const Attendance = () => {
                       currentWeek.push(
                         <TouchableOpacity
                           key={date}
-                          style={[styles.dateCell, isToday && styles.selectedDate]}>
-                          <Text style={[styles.dateText, isToday && styles.selectedDateText]}>
+                          style={[
+                            styles.dateCell,
+                            isToday && styles.selectedDate, 
+                          ]}>
+                          {status && (
+                            <View
+                              style={[
+                                styles.statusBadge,
+                                status === 'present' ? styles.presentBadge : styles.absentBadge,
+                              ]}>
+                              <Text style={styles.badgeText}>
+                                {status === 'present' ? 'P' : 'A'}
+                              </Text>
+                            </View>
+                          )}
+
+                          <Text
+                            style={[
+                              styles.dateText,
+                              isToday && styles.selectedDateText, 
+                            ]}>
                             {date}
                           </Text>
                         </TouchableOpacity>
@@ -363,7 +396,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginRight: 15,
     height: 175,
-    width: width * 0.85, // responsive
+    width: width * 0.85,
     borderWidth: 1,
     borderColor: '#E0E0E0',
     shadowColor: '#000',
@@ -409,7 +442,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 16,
     marginTop: 10,
-    width: '100%', // responsive
+    width: '100%',
     borderWidth: 1,
     borderColor: '#E0E0E0',
     shadowColor: '#000',
@@ -501,5 +534,25 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 3,
+    position: 'relative',
+  },
+  statusBadge: {
+    position: 'absolute',
+    top: 1,
+    left: 4,
+    borderRadius: 6,
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+  },
+  presentBadge: {
+    backgroundColor: 'green',
+  },
+  absentBadge: {
+    backgroundColor: 'red',
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '700',
   },
 });
