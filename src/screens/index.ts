@@ -1,4 +1,4 @@
-import ActivityLogsScreen from './activityLogs-screen/ActivityLogs';
+// import ActivityLogsScreen from './activityLogs-screen/ActivityLogs';
 import AttendanceScreen from './attendance-screen/Attendance';
 import EmailVerificationScreen from './auth-screens/EmailVerification';
 import LoginScreen from './auth-screens/Login';
@@ -21,9 +21,10 @@ import CreateTicketScreen from './ticket-screen/CreateTicket';
 import TicketByIdScreen from './ticket-screen/TicketById';
 import TicketsScreen from './ticket-screen/Tickets';
 import SpokenEnglishScreen from './spoken-english-screen/SpokenEnglish';
-
+import Activity from './activityLogs-screen/ActivityLogs';
 export {
-  ActivityLogsScreen,
+  Activity,
+  // ActivityLogsScreen,
   AttendanceScreen,
   ClassByIdScreen,
   ClassesScreen,

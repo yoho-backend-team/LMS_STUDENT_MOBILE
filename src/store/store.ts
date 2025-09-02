@@ -7,7 +7,7 @@ import ProfileSlice from '../features/Profile/reducer/profileSlice';
 import DashboardSlice from '../features/home/reducer/DashboardSlice';
 import helpReducer from '../features/HelpCenter/Reducer/HelpSlice';
 import NotificationSlice from '../features/notification/reducers/notificationSlice';
-import ActivitySlice from '../features/reducer/activitylog/reducers/ActivitySlice';
+// import ActivitySlice from '../features/reducer/activitylog/reducers/ActivitySlice';
 import PaymentSlice from '../features/payments/reducer/paymentSlice';
 import PlacementSlice from '../features/placements/reducer/placementSlice';
 import ClassSlice from '../features/classes/reducers/classslice';
@@ -15,6 +15,7 @@ import ClassIdSlice from '../features/classid/reducers/classidslice';
 import FaqSlice from '../features/faq/reducers/faqSlice';
 import Community from '../features/Community/reducers.ts/ModuleSlice';
 import AttendanceSlice from '../features/Attendance/reducers/attendanceSlice';
+import ActivitySlice from '../features/Activity/reudcers/ActivitySlice';
 
 const store = configureStore({
   reducer: {
