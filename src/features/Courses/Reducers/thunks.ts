@@ -1,5 +1,5 @@
-import { getcoursedata } from "../Services";
-import { getcoursedetails } from "./courseSlice";
+import { getcoursedata, taskdataget } from "../Services";
+import { getcoursedetails, getcousetask } from "./courseSlice";
 
 
 
@@ -13,3 +13,13 @@ export const getStudentcourse = (params: any = {}) => async (dispatch: any) => {
     throw error;
   }
 };
+
+export const getStudentTask =(params:any)=>async (dispatch:any)=>{
+  try{
+    const response = await taskdataget(params)
+    dispatch(getcousetask(response?.data))
+  }
+  catch(error){
+    console.log('error fetching course data task',error)
+  }
+}

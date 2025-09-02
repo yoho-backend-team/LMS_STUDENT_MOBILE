@@ -2,8 +2,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { Alert } from 'react-native';
 
-const backendUrl = 'https://lms-node-backend-v1.onrender.com/api';
+// const backendUrl = 'https://lms-node-backend-v1.onrender.com/api';
 // const backendUrl = 'https://192.168.1.21:3001/api';
+const backendUrl = 'http://10.51.121.152:3001/api';
 
 const Axios = axios.create({
   baseURL: backendUrl,
@@ -48,7 +49,9 @@ class HttpClient {
       headers: {
         'User-Type': userType,
       },
+      
     });
+    console.log('getresponsesssssss',response)
     return response;
   }
 
@@ -59,6 +62,7 @@ class HttpClient {
         'User-Type': userType,
       },
     });
+
     return response;
   }
 
