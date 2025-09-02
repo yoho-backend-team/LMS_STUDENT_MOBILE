@@ -8,11 +8,15 @@ import {
   TouchableOpacity,
   View,
   RefreshControl,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllActivityData } from '~/features/Activity/reducer/ActivityThunk';
 import { ActivitySelector } from '~/features/Activity/reducer/ActivitySelector';
+import { useNavigation } from '@react-navigation/native';
+import DateTimePicker from '@react-native-community/datetimepicker';
+
 const COLORS = {
   bg_Colour: '#f2f6fa',
   white: '#ffffff',
@@ -34,24 +38,35 @@ const formatDateandTime = (ts: string) => {
   });
 };
 
+const formatDate = (date: Date) => {
+  return date.toLocaleDateString('en-GB');
+};
+
 const Activity = () => {
   const dispatch = useDispatch<any>();
-  const logs = useSelector(ActivitySelector); 
+  const navigation = useNavigation<any>();
+  const { logs = [] } = useSelector(ActivitySelector); // ✅ safe destructure
 
   const [currentPage, setCurrentPage] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
 
+  // 🔹 States for date filter
+  const [filterVisible, setFilterVisible] = useState(false);
+  const [fromDate, setFromDate] = useState<Date | null>(null);
+  const [toDate, setToDate] = useState<Date | null>(null);
+  const [showPicker, setShowPicker] = useState(false);
+  const [pickerMode, setPickerMode] = useState<'from' | 'to'>('from');
+
   const pageSize = 3;
   const totalPages = Math.ceil(logs.length / pageSize);
 
- 
   useEffect(() => {
-    dispatch(getAllActivityData({})); 
+    dispatch(getAllActivityData({}));
   }, [dispatch]);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await dispatch(getAllActivityData({})); 
+    await dispatch(getAllActivityData({}));
     setRefreshing(false);
   };
 
@@ -63,7 +78,20 @@ const Activity = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
   };
 
-  const paginatedLogs = logs.slice(
+  const resetFilter = () => {
+    setFromDate(null);
+    setToDate(null);
+  };
+
+  // 🔹 Apply filter if dates are selected
+  const filteredLogs = logs.filter((item: any) => {
+    const itemDate = new Date(item.timestamp);
+    if (fromDate && itemDate < fromDate) return false;
+    if (toDate && itemDate > toDate) return false;
+    return true;
+  });
+
+  const paginatedLogs = filteredLogs.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize
   );
@@ -89,10 +117,71 @@ const Activity = () => {
       <StatusBar backgroundColor={COLORS.bg_Colour} barStyle="dark-content" />
       <SafeAreaView edges={['top']} style={styles.container}>
         <View style={styles.headerRow}>
-          <Ionicons name="arrow-back-outline" size={22} color="black" />
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Image
+              source={require('../../assets/profile/back.png')}
+              style={styles.backbutton}
+            />
+          </TouchableOpacity>
           <Text style={styles.header}>Activity Log</Text>
-          <Ionicons name="menu" size={22} color="black" />
+
+          {/* Filter toggle */}
+          <TouchableOpacity
+            style={styles.filterBtn}
+            onPress={() => setFilterVisible(!filterVisible)}>
+            <Ionicons name="filter" size={24} color={COLORS.text_title} />
+          </TouchableOpacity>
         </View>
+
+        {/* Date filter section */}
+        {filterVisible && (
+          <View style={styles.dateFilter}>
+            <TouchableOpacity
+              style={styles.dateInput}
+              onPress={() => {
+                setPickerMode('from');
+                setShowPicker(true);
+              }}>
+              <Text style={styles.dateText}>
+                {fromDate ? formatDate(fromDate) : 'From : DD-MM-YYYY'}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.dateInput}
+              onPress={() => {
+                setPickerMode('to');
+                setShowPicker(true);
+              }}>
+              <Text style={styles.dateText}>
+                {toDate ? formatDate(toDate) : 'To : DD-MM-YYYY'}
+              </Text>
+            </TouchableOpacity>
+
+            {(fromDate || toDate) && (
+              <TouchableOpacity onPress={resetFilter} style={styles.resetBtn}>
+                <Ionicons name="refresh" size={18} color={COLORS.white} />
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
+
+        {/* Date Picker */}
+        {showPicker && (
+          <DateTimePicker
+            value={new Date()}
+            mode="date"
+            display="default"
+            onChange={(event, selectedDate) => {
+              setShowPicker(false);
+              if (selectedDate) {
+                if (pickerMode === 'from') setFromDate(selectedDate);
+                else setToDate(selectedDate);
+              }
+            }}
+          />
+        )}
+
         <FlatList
           data={paginatedLogs}
           keyExtractor={(item) => item.id.toString()}
@@ -107,6 +196,7 @@ const Activity = () => {
             </View>
           }
         />
+
         <View style={styles.pagination}>
           <TouchableOpacity
             onPress={loadPrevPage}
@@ -142,10 +232,37 @@ const styles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     marginVertical: 12,
+    justifyContent: 'space-between',
   },
-  header: { fontSize: 18, fontWeight: '600', color: COLORS.text_title },
+  header: { fontSize: 22, fontWeight: '600', color: COLORS.text_title },
+  filterBtn: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: COLORS.white,
+    elevation: 3,
+  },
+  dateFilter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    gap: 8,
+  },
+  dateInput: {
+    flex: 1,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: COLORS.white,
+    borderRadius: 20,
+    backgroundColor: COLORS.white,
+  },
+  dateText: { fontSize: 14, color: COLORS.text_title, textAlign: 'center' },
+  resetBtn: {
+    padding: 10,
+    backgroundColor: COLORS.blue_01,
+    borderRadius: 8,
+    marginLeft: 8,
+  },
   row: { flexDirection: 'row', marginBottom: 24 },
   timeline: { width: 30, alignItems: 'center' },
   dot: {
