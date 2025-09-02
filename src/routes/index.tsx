@@ -2,7 +2,7 @@ import { useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
 import {
-  Activity,
+   Activity,
   // ActivityLogsScreen,
   ClassByIdScreen,
   ClassesScreen,
@@ -57,7 +57,7 @@ const Routes = () => {
     Profile: undefined;
     CommunitiesScreen: undefined;
     CommunityViewScreen: undefined;
-    Activity: undefined;
+     Activity: undefined;
   };
 
   const Stack: any = createNativeStackNavigator<RootStackParamList>();
@@ -129,7 +129,7 @@ const Routes = () => {
         <Stack.Screen name="StudentDrawer" component={StudentDrawer} />
         <Stack.Screen name="Payment" component={PaymentScreen} />
         <Stack.Screen name="Helpcenter" component={HelpCenterScreen} />
-        {/* <Stack.Screen name="ActivityLog" component={ActivityLogsScreen} /> */}
+        {/* { <Stack.Screen name="ActivityLog" component={ActivityLogsScreen} /> } */}
         <Stack.Screen name="ActivityLog" component={Activity} />
         <Stack.Screen name="TicketsScreen" component={TicketsScreen} />
         <Stack.Screen name="TicketViewScreen" component={TicketByIdScreen} />

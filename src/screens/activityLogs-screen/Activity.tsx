@@ -1,115 +1,72 @@
-import React, { useEffect, useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
   FlatList,
-  TouchableOpacity,
-  TextInput,
-  RefreshControl,
   StatusBar,
   StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import { createSlice, configureStore } from '@reduxjs/toolkit';
-import { Provider, useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { getAllActivityData } from '~/features/Activity/reducer/ActivityThunk';
+import { ActivitySelector } from '~/features/Activity/reducer/ActivitySelector';
+const COLORS = {
+  bg_Colour: '#f2f6fa',
+  white: '#ffffff',
+  green_text: '#16a34a',
+  text_title: '#111827',
+  text_desc: '#6b7280',
+  blue_01: '#2563eb',
+  blue_02: '#cbd5e1',
+};
 
-// --- Slice + Reducer ---
-const ActivitySlice = createSlice({
-  name: 'ActivitySlice',
-  initialState: { data: [] },
-  reducers: {
-    setActivity: (state, action) => {
-      state.data = action.payload;
-    },
-  },
-});
-const { setActivity } = ActivitySlice.actions;
-
-// --- Store ---
-const store = configureStore({
-  reducer: { ActivitySlice: ActivitySlice.reducer },
-});
-
-// --- Mock API function (replace with your Client.student.activity.get) ---
-const getActivityData = async () => {
-  return Promise.resolve({
-    data: [
-      { id: '1', title: 'Login', email: 'john@example.com', timestamp: '2025-09-01T09:00:00' },
-      { id: '2', title: 'Logout', email: 'john@example.com', timestamp: '2025-09-01T10:00:00' },
-      { id: '3', title: 'Update Profile', email: 'john@example.com', timestamp: '2025-09-01T11:30:00' },
-    ],
+const formatDateandTime = (ts: string) => {
+  const d = new Date(ts);
+  return d.toLocaleString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   });
 };
 
-// --- Component ---
-const ActivityComponent = () => {
-  const navigation = useNavigation();
-  const dispatch = useDispatch();
-  const logs = useSelector((state: any) => state.ActivitySlice.data);
+const Activity = () => {
+  const dispatch = useDispatch<any>();
+  const logs = useSelector(ActivitySelector); 
 
-  const [filteredLogs, setFilteredLogs] = useState<any[]>([]);
-  const [fromDate, setFromDate] = useState('');
-  const [toDate, setToDate] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
-  const [showFilterForm, setShowFilterForm] = useState(false);
 
-  const pageSize = 5;
-  const totalPages = Math.ceil(filteredLogs.length / pageSize);
+  const pageSize = 3;
+  const totalPages = Math.ceil(logs.length / pageSize);
 
+ 
   useEffect(() => {
-    loadData();
-  }, []);
-
-  useEffect(() => {
-    setFilteredLogs(logs);
-  }, [logs]);
-
-  const loadData = async () => {
-    const response = await getActivityData();
-    dispatch(setActivity(response.data));
-  };
+    dispatch(getAllActivityData({})); 
+  }, [dispatch]);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadData();
+    await dispatch(getAllActivityData({})); 
     setRefreshing(false);
   };
 
-  const applyFilter = () => {
-    if (!fromDate || !toDate) {
-      setFilteredLogs(logs);
-      setShowFilterForm(false);
-      return;
-    }
-    const from = new Date(fromDate.split('-').reverse().join('-'));
-    const to = new Date(toDate.split('-').reverse().join('-'));
-    const result = logs.filter((log: any) => {
-      const logDate = new Date(log.timestamp);
-      return logDate >= from && logDate <= to;
-    });
-    setFilteredLogs(result);
-    setCurrentPage(1);
-    setShowFilterForm(false);
+  const loadNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
 
-  const paginatedLogs = filteredLogs.slice(
+  const loadPrevPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const paginatedLogs = logs.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize
   );
-
-  const formatDateandTime = (ts: string) => {
-    const d = new Date(ts);
-    return d.toLocaleString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
 
   const renderItem = ({ item }: { item: any }) => (
     <View style={styles.row}>
@@ -129,120 +86,86 @@ const ActivityComponent = () => {
 
   return (
     <>
-      <StatusBar backgroundColor="#f2f6fa" barStyle="dark-content" />
-      <SafeAreaView style={styles.container}>
+      <StatusBar backgroundColor={COLORS.bg_Colour} barStyle="dark-content" />
+      <SafeAreaView edges={['top']} style={styles.container}>
         <View style={styles.headerRow}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back-outline" size={22} color="black" />
-          </TouchableOpacity>
+          <Ionicons name="arrow-back-outline" size={22} color="black" />
           <Text style={styles.header}>Activity Log</Text>
-          <TouchableOpacity onPress={() => setShowFilterForm(!showFilterForm)}>
-            <Ionicons name="menu-outline" size={26} color="black" />
-          </TouchableOpacity>
+          <Ionicons name="menu" size={22} color="black" />
         </View>
-
-        {showFilterForm && (
-          <View style={styles.filterBox}>
-            <TextInput
-              style={styles.input}
-              placeholder="From Date (DD-MM-YYYY)"
-              value={fromDate}
-              onChangeText={setFromDate}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="To Date (DD-MM-YYYY)"
-              value={toDate}
-              onChangeText={setToDate}
-            />
-            <TouchableOpacity style={styles.applyBtn} onPress={applyFilter}>
-              <Text style={styles.applyText}>Apply</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
         <FlatList
           data={paginatedLogs}
-          keyExtractor={(item) => String(item.id)}
+          keyExtractor={(item) => item.id.toString()}
           renderItem={renderItem}
+          contentContainerStyle={{ paddingBottom: 20 }}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
-          ListEmptyComponent={<Text style={styles.emptyText}>No logs found</Text>}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>No activity logs found</Text>
+            </View>
+          }
         />
+        <View style={styles.pagination}>
+          <TouchableOpacity
+            onPress={loadPrevPage}
+            disabled={currentPage === 1}
+            style={[styles.pageBtn, currentPage === 1 && styles.disabledBtn]}>
+            <Text style={styles.pageText}>Previous</Text>
+          </TouchableOpacity>
 
-        {filteredLogs.length > 0 && (
-          <View style={styles.pagination}>
-            <TouchableOpacity
-              style={[styles.pageBtn, currentPage === 1 && styles.disabledBtn]}
-              onPress={() => setCurrentPage(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              <Text style={styles.pageText}>Prev</Text>
-            </TouchableOpacity>
+          <Text style={styles.pageInfo}>
+            Page {currentPage} of {totalPages || 1}
+          </Text>
 
-            <Text style={styles.pageInfo}>
-              Page {currentPage} of {totalPages}
-            </Text>
-
-            <TouchableOpacity
-              style={[styles.pageBtn, currentPage === totalPages && styles.disabledBtn]}
-              onPress={() => setCurrentPage(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              <Text style={styles.pageText}>Next</Text>
-            </TouchableOpacity>
-          </View>
-        )}
+          <TouchableOpacity
+            onPress={loadNextPage}
+            disabled={currentPage === totalPages || logs.length === 0}
+            style={[
+              styles.pageBtn,
+              (currentPage === totalPages || logs.length === 0) &&
+                styles.disabledBtn,
+            ]}>
+            <Text style={styles.pageText}>Next</Text>
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
     </>
   );
 };
 
-// --- Wrap with Provider ---
-export default function AppWrapper() {
-  return (
-    <Provider store={store}>
-      <ActivityComponent />
-    </Provider>
-  );
-}
+export default Activity;
 
-// --- Styles ---
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f2f6fa', paddingHorizontal: 16 },
+  container: { flex: 1, backgroundColor: COLORS.bg_Colour, paddingHorizontal: 16 },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginVertical: 12,
   },
-  header: { fontSize: 18, fontWeight: '600', color: '#111827' },
-  filterBox: { backgroundColor: '#fff', padding: 12, borderRadius: 12, marginBottom: 12 },
-  input: {
-    borderWidth: 1,
-    borderColor: '#cbd5e1',
-    borderRadius: 8,
-    padding: 8,
-    fontSize: 13,
-    marginVertical: 5,
-    backgroundColor: '#fff',
-  },
-  applyBtn: {
-    backgroundColor: '#16a34a',
-    paddingVertical: 10,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  applyText: { color: '#fff', fontWeight: '600' },
+  header: { fontSize: 18, fontWeight: '600', color: COLORS.text_title },
   row: { flexDirection: 'row', marginBottom: 24 },
   timeline: { width: 30, alignItems: 'center' },
-  dot: { width: 14, height: 14, borderRadius: 7, backgroundColor: '#16a34a', zIndex: 1 },
-  line: { position: 'absolute', top: 14, bottom: 0, width: 2, backgroundColor: '#16a34a' },
+  dot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: COLORS.green_text,
+    zIndex: 1,
+  },
+  line: {
+    position: 'absolute',
+    top: 14,
+    bottom: 0,
+    width: 2,
+    backgroundColor: COLORS.green_text,
+  },
   content: { flex: 1 },
-  title: { fontSize: 13, fontWeight: '500', marginBottom: 6, color: '#111827' },
+  title: { fontSize: 13, fontWeight: '500', marginBottom: 6, color: COLORS.text_title },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.white,
     borderRadius: 14,
     padding: 12,
     shadowColor: '#000',
@@ -251,24 +174,25 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 3,
   },
-  email: { fontSize: 12, color: '#16a34a', marginBottom: 6 },
-  date: { fontSize: 11, color: '#6b7280', textAlign: 'right' },
+  email: { fontSize: 12, color: COLORS.green_text, marginBottom: 6 },
+  date: { fontSize: 11, color: COLORS.text_desc, textAlign: 'right' },
   pagination: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 10,
     borderTopWidth: 1,
-    borderTopColor: '#cbd5e1',
+    borderTopColor: COLORS.blue_02,
   },
   pageBtn: {
     padding: 10,
-    backgroundColor: '#2563eb',
+    backgroundColor: COLORS.blue_01,
     borderRadius: 5,
     width: '25%',
   },
-  disabledBtn: { backgroundColor: '#6b7280' },
-  pageText: { color: '#fff', textAlign: 'center', fontWeight: '500' },
-  pageInfo: { fontSize: 14, color: '#111827' },
-  emptyText: { fontSize: 16, color: '#6b7280', textAlign: 'center', marginTop: 50 },
+  disabledBtn: { backgroundColor: COLORS.text_desc },
+  pageText: { color: COLORS.white, textAlign: 'center', fontWeight: '500' },
+  pageInfo: { fontSize: 14, color: COLORS.text_title },
+  emptyContainer: { alignItems: 'center', justifyContent: 'center', marginTop: 185 },
+  emptyText: { fontSize: 16, color: COLORS.text_desc, textAlign: 'center' },
 });

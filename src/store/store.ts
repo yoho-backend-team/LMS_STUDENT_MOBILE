@@ -15,7 +15,7 @@ import ClassIdSlice from '../features/classid/reducers/classidslice';
 import FaqSlice from '../features/faq/reducers/faqSlice';
 import Community from '../features/Community/reducers.ts/ModuleSlice';
 import AttendanceSlice from '../features/Attendance/reducers/attendanceSlice';
-import ActivitySlice from '../features/Activity/reudcers/ActivitySlice';
+import ActivitySlice from '../features/Activity/reducer/ActivitySlice';
 
 const store = configureStore({
   reducer: {
@@ -27,7 +27,7 @@ const store = configureStore({
     DashboardSlice: DashboardSlice,
     helpSlice: helpReducer,
     NotificationSlice: NotificationSlice,
-    ActivitySlice: ActivitySlice,
+     ActivitySlice: ActivitySlice,
     PaymentSlice: PaymentSlice,
     PlacementSlice:PlacementSlice,
     ClassSlice: ClassSlice,
