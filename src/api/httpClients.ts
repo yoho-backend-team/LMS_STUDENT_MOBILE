@@ -45,7 +45,9 @@ class HttpClient {
       headers: {
         'User-Type': userType,
       },
+      
     });
+    console.log('getresponsesssssss',response)
     return response;
   }
 
@@ -56,6 +58,7 @@ class HttpClient {
         'User-Type': userType,
       },
     });
+
     return response;
   }
 

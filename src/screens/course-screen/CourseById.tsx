@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
@@ -9,6 +9,9 @@ import { getFileUrl, getImageUrl } from '~/utils/imageUtils';
 import { formatDateMonthandYear } from '~/utils/formatDate';
 import { Linking, Alert } from 'react-native';
 import TaskCard from '../../components/courses/TaskCard';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectcoursetask } from '~/features/Courses/Reducers/selectors';
+import { getStudentTask } from '~/features/Courses/Reducers/thunks';
 
 type RootStackParamList = {
   Courses: undefined;
@@ -41,6 +44,16 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
   const [showVideo, setShowVideo] = useState(false);
   const { course } = route?.params;
   const [activeTab, setActiveTab] = useState<'about' | 'notes' | 'tasks' | 'track'>('about');
+  const [selectedTask, setSelectedTask] = useState<any | null>(null);
+
+ const dispatch :any= useDispatch();
+  const taskData = useSelector(selectcoursetask);
+  console.log(taskData,'courseTask');
+
+   useEffect(() => {
+        dispatch(getStudentTask({ course: '67d7ff20adc836d7f85fb99e'}) );
+      }, [dispatch]);
+
 
   const downloadPdf = async (fileUrl: string) => {
     const PDF_URL = getFileUrl(fileUrl);
@@ -55,13 +68,14 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
       console.error('Linking error:', error);
     }
   };
+  
 
   const tasksData = [
     {
       id: 1,
       instructorname: 'Kamal',
       task: 'for dashboard we need schema',
-      taskname: 'Creat schema',
+      task_name: 'Creat schema',
       deadline: '26-06-2025',
       status: 'Completed',
       question: 'why we use mongo db insted of sql',
@@ -290,38 +304,47 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
         {activeTab === 'tasks' && (
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>Tasks & Projects</Text>
-            {tasksData?.map((task: any) => (
-              <TouchableOpacity
-                key={task.id}
-                style={styles.taskCard}
-                onPress={() => navigation.navigate('TaskCard', { task })}>
-                <View style={styles.textRow}>
-                  <Text style={styles.taskText}>Name</Text>
-                  <Text style={styles.taskValue}>{task.instructorname}</Text>
-                </View>
+           {taskData?.length ? (
+      taskData?.map((task: any) => (
+        <TouchableOpacity
+          key={task._id}
+          style={styles.taskCard}
+          onPress={() => navigation.navigate('TaskCard', { task })}
+        >
+          <View style={styles.textRow}>
+            <Text style={styles.taskText}>Task Name</Text>
+            <Text style={styles.taskValue}>{task.task_name}</Text>
+          </View>
 
-                <View style={styles.textRow}>
-                  <Text style={styles.taskText}>Task Name</Text>
-                  <Text style={styles.taskValue}>{task.taskname}</Text>
-                </View>
+          <View style={styles.textRow}>
+            <Text style={styles.taskText}>Deadline</Text>
+            <Text style={styles.taskValue}>
+              {formatDateMonthandYear(task?.deadline)}
+            </Text>
+          </View>
 
-                <View style={styles.textRow}>
-                  <Text style={styles.taskText}>Deadline</Text>
-                  <Text style={styles.taskValue}>{task.deadline}</Text>
-                </View>
-
-                <View style={styles.textRow}>
-                  <Text style={styles.taskText}>Action</Text>
-                  <View
-                    style={[
-                      styles.statusButton,
-                      task.status === 'Completed' ? styles.completed : styles.pending,
-                    ]}>
-                    <Text style={styles.statusText}>{task.status}</Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            ))}
+          <View style={styles.textRow}>
+            <Text style={styles.taskText}>Action</Text>
+            <View
+              style={[
+                styles.statusButton,
+                task.status === 'completed'
+                  ? styles.completed
+                  : styles.pending,
+              ]}
+            >
+              <Text style={styles.statusText}>
+                {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
+              </Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+      ))
+    ) : (
+      <Text style={{ textAlign: 'center', marginTop: 100 }}>
+        "No tasks available"
+      </Text>
+    )}
           </View>
         )}
 
