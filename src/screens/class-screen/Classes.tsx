@@ -3,12 +3,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'react-native';
 import { COLORS } from '~/constants';
 import Classcards from '~/components/Classes/Onlineclasses';
-import { useNavigation } from '@react-navigation/native';
 import Header from '~/components/shared/Header';
 
 function Classes() {
-  const navigation = useNavigation<any>();
-
   return (
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
@@ -16,7 +13,7 @@ function Classes() {
         <Header />
 
         {/* code inside the view section*/}
-        <View>
+        <View style={{ flex: 1 }}>
           <Classcards />
         </View>
       </SafeAreaView>

@@ -23,6 +23,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { getStudentLogoutClient } from '~/features/Authentication/services';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Platform } from 'react-native';
+import { clearStudentData, getStudentData } from '~/utils/storage';
 
 type CustomDrawerItemProps = {
   label: string;
@@ -106,20 +107,21 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
   const dispatch = useDispatch<any>();
   const selectedTab = useSelector((state: RootState) => state.tabReducer.selectedTab);
   const [error, setError] = useState(false);
-  const profileDetails = useSelector(selectProfile);
-  const userDetail = profileDetails?.data;
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
+  const [student, setStudent] = useState<any>(null);
 
   useEffect(() => {
-    dispatch(getStudentProfileThunk({}));
-  }, [dispatch]);
+    (async () => {
+      const data = await getStudentData();
+      setStudent(data);
+    })();
+  }, []);
 
   const confirmLogout = async () => {
     try {
       const response = await getStudentLogoutClient({});
       if (response) {
-        await AsyncStorage.removeItem('AuthStudentToken');
-        await AsyncStorage.removeItem('StudentData');
+        await clearStudentData();
         toast.success('Success', 'Logout Successfully.');
         setLogoutModalVisible(false);
         navigation.reset({ index: 0, routes: [{ name: 'AuthStackstudent' }] });
@@ -172,8 +174,8 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
           onPress={() => navigation.navigate('Profile')}>
           <Image
             source={
-              userDetail?.image
-                ? { uri: getImageUrl(userDetail?.image) }
+              student?.image
+                ? { uri: getImageUrl(student?.image) }
                 : require('../assets/home/profile.png')
             }
             onError={() => setError(true)}
@@ -181,10 +183,10 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
           />
           <View style={{ marginLeft: 12, flex: 1 }}>
             <Text style={{ color: '#333', ...FONTS.h2_01, fontWeight: '600' }}>
-              {userDetail?.full_name}
+              {student?.full_name}
             </Text>
             <Text style={{ color: '#777', ...FONTS.h5 }}>
-              ID : {userDetail?.userDetail?.studentId}
+              ID : {student?.userDetail?.studentId}
             </Text>
           </View>
         </TouchableOpacity>

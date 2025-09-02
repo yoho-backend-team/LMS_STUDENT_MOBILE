@@ -1,32 +1,45 @@
-import React, { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectPaymentData } from '~/features/payments/reducer/selectors';
 import { getPaymentthunks } from '~/features/payments/reducer/thunks';
+import { getStudentData } from '~/utils/storage';
 
 const PaymentCard = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const paymentData = useSelector(selectPaymentData);
+  const [student, setStudent] = useState<any>(null);
+  const currentPendingLength = paymentData?.payment_history?.length;
+  const currentPending = paymentData?.payment_history?.[currentPendingLength - 1];
 
   useEffect(() => {
-    dispatch(getPaymentthunks({}) as any);
-  }, [dispatch]);
+    (async () => {
+      const data = await getStudentData();
+      setStudent(data);
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (student) {
+      dispatch(getPaymentthunks({ paymentId: student?.uuid }) as any);
+    }
+  }, [dispatch, student]);
   return (
     <View style={styles.card}>
       {/* Title */}
       <Text style={styles.title}>Payment</Text>
 
       {/* Subtitle */}
-      <Text style={styles.subtitle}>Payment Pending for April</Text>
+      <Text style={styles.subtitle}>Due date: {currentPending?.duepaymentdate}</Text>
 
       {/* Amount Label */}
       <Text style={styles.amountLabel}>Amount to pay :</Text>
 
       {/* Amount */}
-      <Text style={styles.amount}>{paymentData?.balance || '₹0'}</Text>
+      <Text style={styles.amount}>{`₹${currentPending?.balance}` || '₹0'}</Text>
 
       {/* Gradient Button */}
       <TouchableOpacity

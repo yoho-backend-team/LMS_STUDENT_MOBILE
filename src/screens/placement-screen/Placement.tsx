@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   StatusBar,
   StyleSheet,
@@ -12,24 +12,33 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 import { getPlacementthunks } from '~/features/placements/reducer/thunks';
 import { selectPlacementData } from '~/features/placements/reducer/selectors';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import dayjs from 'dayjs'
+import dayjs from 'dayjs';
+import { getStudentData } from '~/utils/storage';
 
 const Placement = ({ navigation }: any) => {
-
-const fetchPlacement = async ()=>{
-        const stuId = JSON.parse(await AsyncStorage.getItem("StudentData") as any)
-        console.log(stuId._id, 'student')
-        dispatch(getPlacementthunks({studentId:stuId._id}) as any);
-}
-
-
+  const [student, setStudent] = useState<any>(null);
   const dispatch = useDispatch();
-  const placementData:any = useSelector<any>(selectPlacementData);
-  console.log('data', placementData)
-    useEffect(() => {
-      fetchPlacement()
-    }, [dispatch]);
+  const placementData: any = useSelector<any>(selectPlacementData);
+
+  useEffect(() => {
+    (async () => {
+      const data = await getStudentData();
+      setStudent(data);
+    })();
+  }, []);
+
+  const fetchPlacement = async () => {
+    if (student) {
+      dispatch(getPlacementthunks({ studentId: student?._id }) as any);
+    }
+  };
+
+  useEffect(() => {
+    if (student) {
+      fetchPlacement();
+    }
+  }, [dispatch, student]);
+
   return (
     <>
       <StatusBar backgroundColor="#000" barStyle="light-content" />
@@ -94,7 +103,7 @@ const fetchPlacement = async ()=>{
             <View style={styles.row}>
               <Text style={styles.label}>Skills</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>{placementData[0]?.job?.skils?.join(",")}</Text>
+              <Text style={styles.value}>{placementData[0]?.job?.skils?.join(',')}</Text>
             </View>
           </View>
 
@@ -104,7 +113,10 @@ const fetchPlacement = async ()=>{
             <View style={styles.row}>
               <Text style={styles.label}>Interview Date</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>{}{dayjs(placementData[0]?.schedule?.interviewDate).format("DD-MMM-YYYY")}</Text>
+              <Text style={styles.value}>
+                {}
+                {dayjs(placementData[0]?.schedule?.interviewDate).format('DD-MMM-YYYY')}
+              </Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Venue</Text>

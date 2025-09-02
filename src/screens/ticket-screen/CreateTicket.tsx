@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StatusBar,
   StyleSheet,
@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS, FONTS, icons } from '~/constants';
-import Header from '~/components/shared/Header';
 import { useNavigation } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 import { Picker } from '@react-native-picker/picker';
@@ -19,7 +18,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import { createticketdata, uploadticketfile } from '~/features/Ticket/Services/index';
 import toast from '~/utils/toasts';
 import { LinearGradient } from 'expo-linear-gradient';
-
+import { getStudentData } from '~/utils/storage';
 
 const CreateTicket = () => {
   const navigation = useNavigation();
@@ -29,6 +28,14 @@ const CreateTicket = () => {
   const [attachment, setAttachment] = useState<any>(null);
   const [priority, setPriority] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [student, setStudent] = useState<any>(null);
+
+  useEffect(() => {
+    (async () => {
+      const data = await getStudentData();
+      setStudent(data);
+    })();
+  }, []);
 
   const problemCategories = [
     { label: 'Select your problem', value: '' },
@@ -85,14 +92,14 @@ const CreateTicket = () => {
       }
 
       const ticketData = {
-        branch: '67f3a26ef4b2c530acd16425',
+        branch: student?.branch_id?._id,
         category: category,
         description: description,
         file: fileUrl,
-        institute: '67f3a26df4b2c530acd16419',
+        institute: student?.institute_id?._id,
         priority: priority,
         query: subject,
-        user: '67f3b8feb8d2634300cc8819',
+        user: student?._id,
       };
 
       await createticketdata(ticketData, {});
@@ -197,8 +204,6 @@ const CreateTicket = () => {
               <Text style={styles.submitText}>{isLoading ? 'Creating...' : 'Create Ticket'}</Text>
             </TouchableOpacity>
           </LinearGradient>
-
-
         </ScrollView>
       </SafeAreaView>
     </>
@@ -216,7 +221,7 @@ const styles = StyleSheet.create({
     gap: 5,
     marginVertical: 10,
   },
-  title: { fontSize: 20, fontWeight: 'bold', },
+  title: { fontSize: 20, fontWeight: 'bold' },
   backButton: { paddingHorizontal: 10, marginTop: 10 },
   formContainer: { paddingHorizontal: 15, paddingBottom: 30 },
   label: { fontSize: 16, fontWeight: '600', marginBottom: 8, marginTop: 15 },

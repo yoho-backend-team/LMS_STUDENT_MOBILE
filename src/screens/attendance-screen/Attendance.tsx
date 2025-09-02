@@ -18,6 +18,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectAttendance } from '~/features/Attendance/reducers/selectors';
 import { getattendanceByDate, getStudentattendance } from '~/features/Attendance/reducers/thunks';
 import AttendanceCards from '~/components/attendance/attCard';
+import { getStudentData } from '~/utils/storage';
 
 const { width } = Dimensions.get('window');
 
@@ -55,6 +56,7 @@ const Attendance = () => {
   attendance?.data?.formattedAttendance?.attendance?.forEach((item: any) => {
     attendanceByDate[item.date] = item.status;
   });
+  const [student, setStudent] = useState<any>(null);
 
   useEffect(() => {
     if (selectedDate) {
@@ -64,14 +66,23 @@ const Attendance = () => {
   }, [selectedDate, dispatch]);
 
   useEffect(() => {
-    const payload = {
-      userId: '60d59242-f922-4c34-8974-ea207acadeec',
-      month: selectedMonth,
-      year: selectedYear,
-      instituteId: '973195c0-66ed-47c2-b098-d8989d3e4529',
-    };
-    dispatch(getStudentattendance(payload));
-  }, [selectedMonth, selectedYear]);
+    (async () => {
+      const data = await getStudentData();
+      setStudent(data);
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (student) {
+      const payload = {
+        userId: student?.uuid,
+        month: selectedMonth,
+        year: selectedYear,
+        instituteId: student?.institute_id?.uuid,
+      };
+      dispatch(getStudentattendance(payload));
+    }
+  }, [selectedMonth, selectedYear, student]);
 
   return (
     <>

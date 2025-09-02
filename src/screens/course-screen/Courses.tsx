@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   StatusBar,
   StyleSheet,
@@ -13,58 +13,53 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '~/components/shared/Header';
 import { COLORS, FONTS } from '~/constants';
 import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from '~/store/store';
 import { getStudentcourse } from '~/features/Courses/Reducers/thunks';
 import { selectCourse } from '~/features/Courses/Reducers/selectors';
 import { getImageUrl } from '~/utils/imageUtils';
 import { Ionicons } from '@expo/vector-icons';
-
-type RootStackParamList = {
-  Courses: undefined;
-  CourseViewScreen: { course: Course };
-};
-
-type Course = {
-  id: number;
-  title: string;
-  description: string;
-  modules: string;
-  duration: string;
-  image: any;
-};
-
-type CoursesScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Courses'>;
+import { getStudentData } from '~/utils/storage';
 
 const Courses = () => {
   const navigation = useNavigation<any>();
   const dispatch = useDispatch<AppDispatch>();
   const coursedata = useSelector(selectCourse);
-
+  const course = coursedata?.data;
   const [refreshing, setRefreshing] = useState(false);
-
-  const fetchData = useCallback(async () => {
-    try {
-      const params = {
-        courseId: '67f3b7fcb8d2634300cc87b6',
-      };
-      await dispatch(getStudentcourse(params));
-    } catch (error) {
-      console.error('Course fetch error:', error);
-    }
-  }, [dispatch]);
+  const [student, setStudent] = useState<any>(null);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    (async () => {
+      const data = await getStudentData();
+      setStudent(data);
+    })();
+  }, []);
+
+  const fetchData = useCallback(async () => {
+    if (student) {
+      try {
+        const params = {
+          courseId: student?.userDetail?.course,
+        };
+        await dispatch(getStudentcourse(params));
+      } catch (error) {
+        console.error('Course fetch error:', error);
+      }
+    }
+  }, [dispatch, student]);
+
+  useEffect(() => {
+    if (student) {
+      fetchData();
+    }
+  }, [fetchData, student]);
 
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchData();
     setRefreshing(false);
   };
-  const course = coursedata?.data;
 
   return (
     <>
@@ -116,7 +111,7 @@ const Courses = () => {
             </TouchableOpacity>
           ) : (
             <View style={styles.noDataContainer}>
-              <Ionicons name="book-outline" size={60} color="#9CA3AF"  />
+              <Ionicons name="book-outline" size={60} color="#9CA3AF" />
               <Text style={styles.noDataText}>No courses available</Text>
             </View>
           )}
@@ -194,12 +189,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 50,
-    marginTop:150
+    marginTop: 150,
   },
   noDataText: {
     marginTop: 12,
     fontWeight: '500',
     color: COLORS.text_desc,
-     ...FONTS.body3
+    ...FONTS.body3,
   },
 });

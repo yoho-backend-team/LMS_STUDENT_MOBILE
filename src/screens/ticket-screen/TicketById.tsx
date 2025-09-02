@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import { COLORS, FONTS, icons } from '~/constants';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import Header from '~/components/shared/Header';
 import { getFileUrl } from '~/utils/imageUtils';
 import toast from '~/utils/toasts';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -35,8 +34,6 @@ const TicketById = () => {
     }
   };
 
-  console.log(ticket, 'ticket data');
-
   return (
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
@@ -47,24 +44,24 @@ const TicketById = () => {
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <Image source={icons.back_arrow} style={{ width: 25, height: 25 }} />
             </TouchableOpacity>
-            <Text style={styles.backText}>Ticket- #{ticket.ticket_id}</Text>
+            <Text style={styles.backText}>Ticket- #{ticket?.ticket_id}</Text>
           </View>
 
           <View style={styles.viewCard}>
             <Text style={styles.viewLabel}>Ticket ID</Text>
-            <Text style={styles.viewValue}>{ticket.ticket_id}</Text>
+            <Text style={styles.viewValue}>{ticket?.ticket_id}</Text>
 
             <Text style={styles.viewLabel}>Query</Text>
-            <Text style={styles.viewValue}>{ticket.query}</Text>
+            <Text style={styles.viewValue}>{ticket?.query}</Text>
 
             <Text style={styles.viewLabel}>Description</Text>
-            <Text style={[styles.viewValue, styles.textArea]}>{ticket.description}</Text>
+            <Text style={[styles.viewValue, styles.textArea]}>{ticket?.description}</Text>
 
             <Text style={styles.viewLabel}>Priority</Text>
-            <Text style={styles.viewValue}>{ticket.priority}</Text>
+            <Text style={styles.viewValue}>{ticket?.priority}</Text>
 
             <Text style={styles.viewLabel}>Status</Text>
-            <Text style={styles.viewValue}>{ticket.status}</Text>
+            <Text style={styles.viewValue}>{ticket?.status}</Text>
 
             <Text style={styles.viewLabel}>Attachment</Text>
             {ticket?.file ? (
@@ -80,7 +77,7 @@ const TicketById = () => {
               <Text style={styles.viewValue}>No attachment</Text>
             )}
             <Text style={styles.viewLabel}>Count</Text>
-            <Text style={styles.viewValue}>{ticket.id}</Text>
+            <Text style={styles.viewValue}>{ticket?.id}</Text>
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -119,7 +116,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     color: COLORS.text_desc,
     fontWeight: 500,
-
   },
   textArea: { minHeight: 70, textAlignVertical: 'top' },
   attachmentRow: {

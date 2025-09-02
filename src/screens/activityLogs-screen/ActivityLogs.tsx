@@ -11,7 +11,6 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Header from '~/components/shared/Header';
 import { COLORS, FONTS, icons } from '~/constants';
 import { formatDateandTime, formatDate } from '~/utils/formatDate';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';

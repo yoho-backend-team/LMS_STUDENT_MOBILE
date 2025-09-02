@@ -19,6 +19,8 @@ import { formatDateandTime, formatMessageDate } from '../../utils/formatDate';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllNotificationsThunk } from '~/features/notification/reducers/thunks';
 import { selectNotifications } from '~/features/notification/reducers/selectors';
+import { deleteNotification, updateNotificationStatus } from '~/features/notification/services';
+import toast from '~/utils/toasts';
 
 const Notifications = () => {
   const navigation = useNavigation();
@@ -28,14 +30,14 @@ const Notifications = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const notificationsPerPage = 5;
-  const dispatch = useDispatch();
- const notifications = useSelector(selectNotifications);
+  const dispatch = useDispatch<any>();
+  const notifications = useSelector(selectNotifications);
 
- useEffect(() => {
+  useEffect(() => {
     loadNotifications();
   }, [dispatch]);
 
-    const onRefresh = React.useCallback(() => {
+  const onRefresh = React.useCallback(() => {
     setRefreshing(true);
     (dispatch(getAllNotificationsThunk({}) as any) as Promise<void>)
       .then(() => {
@@ -49,24 +51,6 @@ const Notifications = () => {
   const loadNotifications = () => {
     dispatch(getAllNotificationsThunk({}) as any);
   };
-
-  
-  const dummyNotifications = [
-    {
-      uuid: '1',
-      title: 'Welcome!',
-      body: 'Thanks for joining us 🎉',
-      status: 'unread',
-      createdAt: new Date(),
-    },
-    {
-      uuid: '2',
-      title: 'Update Available',
-      body: 'A new version of the app is ready to download.',
-      status: 'read',
-      createdAt: new Date(),
-    },
-  ];
 
   const filteredNotifications =
     notifications?.filter((n: any) => {
@@ -86,11 +70,24 @@ const Notifications = () => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
-  const handleNotificationPress = (item: any) => {
+  const handleNotificationPress = async (item: any) => {
     setSelectedNotification(item);
+    await updateNotificationStatus({ uuid: item?.uuid, status: 'read' });
+    dispatch(getAllNotificationsThunk({}));
+    loadNotifications();
   };
 
-  const handleDelete = (uuid: string) => {}
+  const handleDelete = async (uuid: string) => {
+    try {
+      await deleteNotification({ uuid });
+      toast.success('Success', 'Notification deleted successfully!');
+      setSelectedNotification(null);
+      dispatch(getAllNotificationsThunk({}));
+      loadNotifications();
+    } catch (error) {
+      toast.error('Error', 'Failed to delete notification.');
+    }
+  };
 
   return (
     <>
@@ -107,8 +104,8 @@ const Notifications = () => {
         </View>
 
         <Text style={styles.headerCount}>
-          {dummyNotifications?.length} Messages /{' '}
-          {dummyNotifications?.filter((n: any) => n.status === 'unread').length} Unread
+          {notifications?.length} Messages /{' '}
+          {notifications?.filter((n: any) => n.status === 'unread').length} Unread
         </Text>
 
         {/* Search */}
@@ -210,7 +207,7 @@ const Notifications = () => {
             </Pressable>
           </View>
         )}
-     {/* Modal */}
+        {/* Modal */}
         <Modal visible={!!selectedNotification} transparent animationType="slide">
           <View style={styles.modalOverlay}>
             <View style={styles.modalBox}>
@@ -251,7 +248,7 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: 5, gap: 3 },
   backbutton: { width: 48, height: 48, resizeMode: 'contain' },
   headerLeft: { flexDirection: 'row', alignItems: 'center' },
-  headerTitle: { fontSize: 22, fontWeight: '600', color: '#000', marginBottom:8 },
+  headerTitle: { fontSize: 22, fontWeight: '600', color: '#000', marginBottom: 8 },
   headerCount: {
     fontSize: 12,
     color: '#6b7280',

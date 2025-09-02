@@ -1,9 +1,8 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { Alert } from 'react-native';
+import { clearStudentData, getStudentToken } from '~/utils/storage';
 
 const backendUrl = 'https://lms-node-backend-v1.onrender.com/api';
-// const backendUrl = 'https://192.168.1.21:3001/api';
+// const backendUrl = 'http://10.51.121.152:3001/api';
 
 const Axios = axios.create({
   baseURL: backendUrl,
@@ -14,8 +13,7 @@ const Axios = axios.create({
 });
 
 Axios.interceptors.request.use(async (config) => {
-  const token = await AsyncStorage.getItem('AuthStudentToken');
-
+  const token = await getStudentToken();
   if (token) {
     config.headers['Authorization'] = `Token ${token}`;
   }
@@ -25,7 +23,7 @@ Axios.interceptors.request.use(async (config) => {
 Axios.interceptors.response.use(
   (response) => response,
   async (error) => {
-    console.log('HTTP Error:', error.response);
+    console.log('HTTP Error:', error?.response);
     if (
       error?.response &&
       error?.response.status == 401 &&
@@ -35,8 +33,7 @@ Axios.interceptors.response.use(
         global.handleSessionExpired();
       }
       // Alert.alert('Session expired', 'Please login');
-      await AsyncStorage.removeItem('AuthStudentToken');
-      await AsyncStorage.removeItem('StudentData');
+      await clearStudentData();
     }
   }
 );

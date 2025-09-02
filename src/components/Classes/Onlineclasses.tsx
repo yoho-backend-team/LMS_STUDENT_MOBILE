@@ -17,6 +17,7 @@ import { COLORS, FONTS } from '~/constants';
 import { formatDate, formatTime } from '~/utils/formatDate';
 import toast from '~/utils/toasts';
 import { LinearGradient } from 'expo-linear-gradient';
+import { getStudentData } from '~/utils/storage';
 
 const Classcards = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -27,6 +28,7 @@ const Classcards = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = classData?.last_page || 1;
   const [refreshing, setRefreshing] = useState(false);
+  const [student, setStudent] = useState<any>(null);
 
   const tabs = [
     { key: 'completed', label: 'Completed Class' },
@@ -34,20 +36,29 @@ const Classcards = () => {
     { key: 'live', label: 'Live Class' },
   ];
 
+  useEffect(() => {
+    (async () => {
+      const data = await getStudentData();
+      setStudent(data);
+    })();
+  }, []);
+
   const fetchClassData = (type: 'live' | 'upcoming' | 'completed', page: number = 1) => {
     dispatch(
       getClassDetails({
         userType: 'online',
         classType: type,
         page: page,
-        courseId: '67f3b7fcb8d2634300cc87b6',
+        courseId: student?.userDetail?.course,
       })
     );
   };
 
   useEffect(() => {
-    fetchClassData(activeTab);
-  }, [dispatch, activeTab]);
+    if (student) {
+      fetchClassData(activeTab);
+    }
+  }, [dispatch, activeTab, student]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -323,9 +334,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 15,
+    paddingHorizontal: 15,
     borderTopWidth: 1,
     borderTopColor: COLORS.blue_02,
+    marginBottom: 60,
   },
   pageInfo: {
     fontSize: 14,

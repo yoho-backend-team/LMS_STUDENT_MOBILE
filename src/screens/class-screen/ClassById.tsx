@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { StatusBar, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Header from '~/components/shared/Header';
 import { COLORS } from '~/constants';
 import CompleteClassDetails from '~/components/Classes/Completedclass';
 import { useDispatch, useSelector } from 'react-redux';

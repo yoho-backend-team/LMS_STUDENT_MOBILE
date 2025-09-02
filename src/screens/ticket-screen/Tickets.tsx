@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect } from 'react';
 import {
   StatusBar,
@@ -72,10 +70,7 @@ const Tickets = () => {
 
         <View style={[styles.ticketRow, { justifyContent: 'flex-start' }]}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Image
-              source={icons.back_arrow}
-              style={{ width: 25, height: 25, marginLeft: 15 }}
-            />
+            <Image source={icons.back_arrow} style={{ width: 25, height: 25, marginLeft: 15 }} />
           </TouchableOpacity>
           <Text style={styles.headerText}>Tickets</Text>
           <View style={{ flex: 1 }} />
@@ -92,27 +87,16 @@ const Tickets = () => {
           </LinearGradient>
         </View>
 
-
         <View style={styles.filterContainer}>
           {['All', 'Opened', 'Closed'].map((option) => (
             <LinearGradient
               key={option}
-              colors={
-                filter === option
-                  ? ['#7B00FF', '#B200FF']
-                  : ['#E0E0E0', '#E0E0E0']
-              }
+              colors={filter === option ? ['#7B00FF', '#B200FF'] : ['#E0E0E0', '#E0E0E0']}
               start={{ x: 0.134, y: 0.021 }}
               end={{ x: 1, y: 1 }}
               style={styles.filterGradient}>
-              <TouchableOpacity
-                style={styles.buttonInner}
-                onPress={() => setFilter(option)}>
-                <Text
-                  style={[
-                    styles.filterText,
-                    filter === option && { color: '#fff' },
-                  ]}>
+              <TouchableOpacity style={styles.buttonInner} onPress={() => setFilter(option)}>
+                <Text style={[styles.filterText, filter === option && { color: '#fff' }]}>
                   {option}
                 </Text>
               </TouchableOpacity>
@@ -174,11 +158,7 @@ const Tickets = () => {
         {/* Pagination controls */}
         <View style={styles.pagination}>
           <LinearGradient
-            colors={
-              currentPage === 1
-                ? ['#E0E0E0', '#E0E0E0']
-                : ['#7B00FF', '#B200FF']
-            }
+            colors={currentPage === 1 ? ['#E0E0E0', '#E0E0E0'] : ['#7B00FF', '#B200FF']}
             start={{ x: 0.134, y: 0.021 }}
             end={{ x: 1, y: 1 }}
             style={styles.pageGradient}>
@@ -195,11 +175,7 @@ const Tickets = () => {
           </Text>
 
           <LinearGradient
-            colors={
-              currentPage === totalPages
-                ? ['#E0E0E0', '#E0E0E0']
-                : ['#7B00FF', '#B200FF']
-            }
+            colors={currentPage === totalPages ? ['#E0E0E0', '#E0E0E0'] : ['#7B00FF', '#B200FF']}
             start={{ x: 0.134, y: 0.021 }}
             end={{ x: 1, y: 1 }}
             style={styles.pageGradient}>
@@ -219,18 +195,17 @@ const Tickets = () => {
 export default Tickets;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 10, backgroundColor: COLORS.white, },
+  container: { flex: 1, paddingTop: 10, backgroundColor: COLORS.white },
   headerText: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginLeft: 10
+    marginLeft: 10,
   },
   filterContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: 10,
     gap: 4,
-
   },
   filterText: { ...FONTS.body4, color: COLORS.text_title, fontWeight: '500' },
   cards: { padding: 10, flex: 1 },
@@ -313,7 +288,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    width: 110
+    width: 110,
   },
   buttonText: {
     color: '#fff',
