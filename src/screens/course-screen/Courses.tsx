@@ -40,7 +40,9 @@ const Courses = () => {
     if (student) {
       try {
         const params = {
+          instituteId: student?.institute_id?._id,
           courseId: student?.userDetail?.course,
+          branchId: student?.branch_id?._id,
         };
         await dispatch(getStudentcourse(params));
       } catch (error) {

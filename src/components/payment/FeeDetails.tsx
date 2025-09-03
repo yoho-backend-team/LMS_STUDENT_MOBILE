@@ -24,6 +24,8 @@ const FeesDetails: React.FC<PaymentDataProps> = ({ paymentData }) => {
     return <PaymentSlip paymentData={paymentData} onClose={handleCloseModal} visible={true} />;
   }
 
+  console.log(paymentData, 'payment data');
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -90,6 +92,7 @@ const FeesDetails: React.FC<PaymentDataProps> = ({ paymentData }) => {
       <View style={styles.historyCard}>
         <View style={styles.historyRow}>
           <Text style={styles.historyDate}>{currentPending?.duepaymentdate}</Text>
+          <Text style={styles.historyDate}>paid</Text>
           <TouchableOpacity style={styles.pdfBtn} onPress={() => handleViewPDF()}>
             <Text style={styles.pdfText}>View PDF</Text>
           </TouchableOpacity>
@@ -99,8 +102,9 @@ const FeesDetails: React.FC<PaymentDataProps> = ({ paymentData }) => {
       {/* Pay Due */}
       <View style={styles.historyCard}>
         <View style={styles.historyRow}>
-          <Text style={styles.dueText}>Pay Due</Text>
-          <Text style={styles.noDue}>No Pending Payments</Text>
+          <Text style={styles.historyDate}>{currentPending?.duepaymentdate}</Text>
+          <Text style={styles.dueText}>pay due</Text>
+          <Text style={styles.noDue}>{`₹${currentPending?.balance}` || '₹0'}</Text>
         </View>
       </View>
     </View>
@@ -218,6 +222,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
     color: '#555',
+    width: '30%',
   },
   pdfBtn: {
     backgroundColor: '#F1F3F6',
@@ -225,6 +230,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 10,
     elevation: 2,
+    width: '30%',
   },
   pdfText: {
     fontSize: 15,
@@ -234,7 +240,7 @@ const styles = StyleSheet.create({
   dueText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#2A2A2A',
+    color: '#716F6F',
   },
   noDue: {
     fontSize: 14,

@@ -1,14 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  Linking,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { COLORS, icons } from '~/constants';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { WebView } from 'react-native-webview';
 import { getFileUrl, getImageUrl } from '~/utils/imageUtils';
 import { formatDateMonthandYear } from '~/utils/formatDate';
-import { Linking, Alert } from 'react-native';
-import TaskCard from '../../components/courses/TaskCard';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectcoursetask } from '~/features/Courses/Reducers/selectors';
 import { getStudentTask } from '~/features/Courses/Reducers/thunks';
@@ -40,20 +47,53 @@ const SHADOW = {
   elevation: 3,
 };
 
+// helper: get first pending module
+const getCurrentModule = (modules: any[]) => {
+  return modules?.find((m) => m.status === 'pending') || modules?.[0];
+};
+
+// helper: map steps
+const getSteps = (modules: any[]) => {
+  return modules?.map((m, index) => ({
+    id: index + 1,
+    title: m.title,
+    description: m.description,
+    status: m.status,
+    video: m.video,
+    icon: require('../../assets/courses/modules.png'), // default icon
+  }));
+};
+
+// helper: extract YouTube ID
+const extractVideoId = (url: string) => {
+  if (!url) return '';
+  const regex = /(?:embed\/|v=)([^&?]+)/;
+  const match = url.match(regex);
+  return match ? match[1] : '';
+};
+
 const CourseById: React.FC<Props> = ({ route, navigation }) => {
   const [showVideo, setShowVideo] = useState(false);
   const { course } = route?.params;
   const [activeTab, setActiveTab] = useState<'about' | 'notes' | 'tasks' | 'track'>('about');
-  const [selectedTask, setSelectedTask] = useState<any | null>(null);
-
- const dispatch :any= useDispatch();
+  const dispatch: any = useDispatch();
   const taskData = useSelector(selectcoursetask);
-  console.log(taskData,'courseTask');
+  const [steps, setSteps] = useState<any[]>([]);
+  const [currentModule, setCurrentModule] = useState<any>(null);
 
-   useEffect(() => {
-        dispatch(getStudentTask({ course: '67d7ff20adc836d7f85fb99e'}) );
-      }, [dispatch]);
+  useEffect(() => {
+    dispatch(getStudentTask({ course: course?._id }));
+  }, [dispatch]);
 
+  useEffect(() => {
+    if (course?.coursemodules?.length) {
+      const stepData = getSteps(course.coursemodules);
+      setSteps(stepData);
+
+      const firstPending = getCurrentModule(course.coursemodules);
+      setCurrentModule(firstPending);
+    }
+  }, [course]);
 
   const downloadPdf = async (fileUrl: string) => {
     const PDF_URL = getFileUrl(fileUrl);
@@ -68,90 +108,6 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
       console.error('Linking error:', error);
     }
   };
-  
-
-  const tasksData = [
-    {
-      id: 1,
-      instructorname: 'Kamal',
-      task: 'for dashboard we need schema',
-      task_name: 'Creat schema',
-      deadline: '26-06-2025',
-      status: 'Completed',
-      question: 'why we use mongo db insted of sql',
-      score: '8',
-      localFilePath: 'IMG-202033885599',
-    },
-    {
-      id: 2,
-      instructorname: 'Abishek',
-      task: 'Creat Api for integration',
-      taskname: 'API',
-      deadline: '26-06-2025',
-      status: 'Pending',
-      question: 'why we use reacenative  insted of java',
-      score: '',
-    },
-    {
-      id: 3,
-      instructorname: 'Prakash',
-      task: 'Need auth for login,logout ',
-      taskname: 'Auth',
-      deadline: '26-06-2025',
-      status: 'Completed',
-      question: 'what is the future scope of mongo db',
-      score: '8',
-    },
-    {
-      id: 4,
-      instructorname: 'Ram',
-      task: 'Creat scocket for conversation',
-      taskname: 'Creat scocket',
-      deadline: '26-06-2025',
-      status: 'Completed',
-      question: 'what is the future scope of react native',
-      score: '8',
-    },
-  ];
-
-  const steps = [
-    {
-      id: 1,
-      left: { kind: 'icon', src: require('../../assets/courses/css.png') },
-      right: { kind: 'text', text: 'HTML, CSS, Javascript' },
-      dot: 'purple',
-    },
-    {
-      id: 2,
-      left: { kind: 'text', text: 'MongoDB, Express, Node.js' },
-      right: { kind: 'icon', src: require('../../assets/courses/react (2).png') },
-      dot: 'gray',
-    },
-    {
-      id: 3,
-      left: { kind: 'icon', src: require('../../assets/courses/angular (2).png') },
-      right: { kind: 'text', text: 'React' },
-      dot: 'purple',
-    },
-    {
-      id: 4,
-      left: { kind: 'text', text: 'Angular' },
-      right: { kind: 'icon', src: require('../../assets/courses/google.png') },
-      dot: 'gray',
-    },
-    {
-      id: 5,
-      left: { kind: 'icon', src: require('../../assets/courses/css.png') },
-      right: { kind: 'text', text: 'Google Developer' },
-      dot: 'purple',
-    },
-    {
-      id: 6,
-      left: { kind: 'text', text: 'Javascript' },
-      right: { kind: 'icon', src: require('../../assets/courses/python.png') },
-      dot: 'gray',
-    },
-  ];
 
   const handleBackPress = () => {
     if (showVideo) {
@@ -171,6 +127,7 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
           />
         </TouchableOpacity>
 
+        {/* Tabs */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -198,6 +155,7 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
             </TouchableOpacity>
           ))}
         </ScrollView>
+
         {/* ABOUT TAB */}
         {activeTab === 'about' && (
           <>
@@ -220,7 +178,6 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
                     style={{ width: 24, height: 24 }}
                   />
                   <Text style={styles.footerText}>
-                    {' '}
                     {course.coursemodules?.length ?? '0'} modules
                   </Text>
                 </View>
@@ -257,31 +214,28 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
           </>
         )}
 
+        {/* NOTES TAB */}
         {activeTab === 'notes' && (
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>Notes & Materials</Text>
             {course?.notes?.length ? (
               course?.notes?.map((note: any) => (
                 <View key={note.id} style={styles.noteCard}>
-                  {/* Name Row */}
                   <View style={styles.textRow}>
                     <Text style={styles.labelText}>File</Text>
                     <Image source={icons.pdf} />
                   </View>
 
-                  {/* Date Row */}
                   <View style={styles.textRow}>
                     <Text style={styles.labelText}>Date</Text>
                     <Text style={styles.valueText}>{formatDateMonthandYear(note?.createdAt)}</Text>
                   </View>
 
-                  {/* Chapter Row */}
                   <View style={styles.textRow}>
                     <Text style={styles.labelText}>Chapter</Text>
                     <Text style={styles.valueText}>{note?.title}</Text>
                   </View>
 
-                  {/* Download Row */}
                   <TouchableOpacity
                     style={styles.downloadRow}
                     onPress={() => downloadPdf(note?.file)}>
@@ -304,55 +258,48 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
         {activeTab === 'tasks' && (
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>Tasks & Projects</Text>
-           {taskData?.length ? (
-      taskData?.map((task: any) => (
-        <TouchableOpacity
-          key={task._id}
-          style={styles.taskCard}
-          onPress={() => navigation.navigate('TaskCard', { task })}
-        >
-          <View style={styles.textRow}>
-            <Text style={styles.taskText}>Task Name</Text>
-            <Text style={styles.taskValue}>{task.task_name}</Text>
-          </View>
+            {taskData?.length ? (
+              taskData?.map((task: any) => (
+                <TouchableOpacity
+                  key={task._id}
+                  style={styles.taskCard}
+                  onPress={() => navigation.navigate('TaskCard', { task })}>
+                  <View style={styles.textRow}>
+                    <Text style={styles.taskText}>Task Name</Text>
+                    <Text style={styles.taskValue}>{task.task_name.substring(0, 15)}</Text>
+                  </View>
 
-          <View style={styles.textRow}>
-            <Text style={styles.taskText}>Deadline</Text>
-            <Text style={styles.taskValue}>
-              {formatDateMonthandYear(task?.deadline)}
-            </Text>
-          </View>
+                  <View style={styles.textRow}>
+                    <Text style={styles.taskText}>Deadline</Text>
+                    <Text style={styles.taskValue}>{formatDateMonthandYear(task?.deadline)}</Text>
+                  </View>
 
-          <View style={styles.textRow}>
-            <Text style={styles.taskText}>Action</Text>
-            <View
-              style={[
-                styles.statusButton,
-                task.status === 'completed'
-                  ? styles.completed
-                  : styles.pending,
-              ]}
-            >
-              <Text style={styles.statusText}>
-                {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
-              </Text>
-            </View>
-          </View>
-        </TouchableOpacity>
-      ))
-    ) : (
-      <Text style={{ textAlign: 'center', marginTop: 100 }}>
-        "No tasks available"
-      </Text>
-    )}
+                  <View style={styles.textRow}>
+                    <Text style={styles.taskText}>Action</Text>
+                    <View
+                      style={[
+                        styles.statusButton,
+                        task.status === 'completed' ? styles.completed : styles.pending,
+                      ]}>
+                      <Text style={styles.statusText}>
+                        {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))
+            ) : (
+              <Text style={{ textAlign: 'center', marginTop: 100 }}>"No tasks available"</Text>
+            )}
           </View>
         )}
 
+        {/* TRACK TAB */}
         {activeTab === 'track' && (
           <View>
             <Text style={styles.sectionTitle}>Course Tracks</Text>
             <View style={styles.videoCard}>
-              {showVideo ? (
+              {showVideo && currentModule?.video ? (
                 <WebView
                   style={styles.webview}
                   javaScriptEnabled={true}
@@ -361,150 +308,19 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
                   allowsInlineMediaPlayback={true}
                   mediaPlaybackRequiresUserAction={false}
                   source={{
-                    html: `
-                     <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Video Player</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
-            color: #fff;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1000px;
-            width: 100%;
-            padding: 20px;
-        }
-
-        .video-container {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-            margin-bottom: 30px;
-        }
-        
-        .video-wrapper {
-            position: relative;
-            width: 100%;
-        }
-        
-        #youtube-iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="video-container">
-                <iframe id="youtube-iframe" 
-                    src="https://www.youtube.com/embed/FYErehuSuuw?si=m7kiymCdWWUcCxYA" 
-                    title="YouTube video player" 
-                    frameborder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                    referrerpolicy="strict-origin-when-cross-origin" 
-                    allowfullscreen>
-                </iframe>
-        </div>
-
-    <script>
-        const iframe = document.getElementById('youtube-iframe');
-        let player;
-        
-        // Inject YouTube API script
-        const tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        const firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-        
-        // Initialize YouTube player
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('youtube-iframe', {
-                events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
-                }
-            });
-        }
-        
-        function onPlayerReady(event) {
-            console.log('Player is ready');
-        }
-        
-        function onPlayerStateChange(event) {
-            // Handle player state changes if needed
-        }
-        
-        function playVideo() {
-            if (player && player.playVideo) {
-                player.playVideo();
-            }
-        }
-        
-        function pauseVideo() {
-            if (player && player.pauseVideo) {
-                player.pauseVideo();
-            }
-        }
-        
-        function stopVideo() {
-            if (player && player.stopVideo) {
-                player.stopVideo();
-            }
-        }
-        
-        function toggleFullscreen() {
-            const container = document.querySelector('.video-container');
-            
-            if (!document.fullscreenElement) {
-                if (container.requestFullscreen) {
-                    container.requestFullscreen();
-                } else if (container.webkitRequestFullscreen) {
-                    container.webkitRequestFullscreen();
-                } else if (container.msRequestFullscreen) {
-                    container.msRequestFullscreen();
-                }
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                }
-            }
-        }
-    </script>
-</body>
-</html>
-                    `,
+                    uri: currentModule.video,
                   }}
                 />
               ) : (
                 <>
                   <Image
-                    source={{ uri: 'https://i.ytimg.com/vi_webp/FYErehuSuuw/hqdefault.webp' }}
+                    source={{
+                      uri: currentModule?.video
+                        ? `https://i.ytimg.com/vi/${extractVideoId(
+                            currentModule.video
+                          )}/hqdefault.jpg`
+                        : 'https://via.placeholder.com/300x200?text=No+Video',
+                    }}
                     style={styles.videoImage}
                   />
                   <TouchableOpacity style={styles.playBtn} onPress={() => setShowVideo(true)}>
@@ -513,53 +329,40 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
                 </>
               )}
             </View>
+
             {/* Timeline */}
             <View style={styles.trackCard}>
               <View style={styles.verticalLine} />
 
               {steps.map((step) => (
                 <View key={step.id} style={styles.stepRow}>
-                  {/* Left column */}
                   <View style={[styles.sideCol, { alignItems: 'flex-start' }]}>
-                    {step.left.kind === 'icon' && (
-                      <View style={styles.bubble}>
-                        <Image source={step.left.src} style={styles.bubbleIcon} />
-                      </View>
-                    )}
-                    {step.left.kind === 'text' && (
-                      <Text style={[styles.sideText, { textAlign: 'left' }]}>{step.left.text}</Text>
-                    )}
+                    <View style={styles.bubble}>
+                      <Image
+                        source={{ uri: getImageUrl(course?.image) }}
+                        style={styles.bubbleIcon}
+                      />
+                    </View>
                   </View>
 
-                  {/* Center */}
                   <View style={styles.centerCol}>
                     <View
                       style={[
                         styles.dot,
-                        step.dot === 'purple' ? styles.dotPurple : styles.dotGray,
+                        step.status === 'pending' ? styles.dotGray : styles.dotPurple,
                       ]}
                     />
                   </View>
 
-                  {/* Right column */}
                   <View style={[styles.sideCol, { alignItems: 'flex-end' }]}>
-                    {step.right.kind === 'icon' && (
-                      <View style={styles.bubble}>
-                        <Image source={step.right.src} style={styles.bubbleIcon} />
-                      </View>
-                    )}
-                    {step.right.kind === 'text' && (
-                      <Text style={[styles.sideText, { textAlign: 'right' }]}>
-                        {step.right.text}
-                      </Text>
-                    )}
+                    <Text style={[styles.sideText, { textAlign: 'right' }]}>{step.title}</Text>
                   </View>
                 </View>
               ))}
             </View>
           </View>
         )}
-        <View style={{ marginTop: 40 }}></View>
+        <View style={{ marginTop: 40 }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -626,14 +429,26 @@ const styles = StyleSheet.create({
     ...SHADOW,
     marginBottom: 12,
   },
-  noteTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 6 },
-  noteText: { fontSize: 14, color: '#4B5563' },
-  downloadButton: {
+  textRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 8,
+    width: '100%',
+  },
+  labelText: {
+    fontSize: 16,
+    color: '#716F6F',
+    width: '50%',
+  },
+  valueText: {
+    fontSize: 16,
+    color: '#716F6F',
+  },
+
+  downloadRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 10,
-    alignSelf: 'flex-start',
-    backgroundColor: '#F3F4F6',
-    padding: 8,
-    borderRadius: 8,
   },
 
   taskCard: {
@@ -644,7 +459,7 @@ const styles = StyleSheet.create({
     ...SHADOW,
   },
   taskText: { fontSize: 18, color: '#716F6F', marginBottom: 6, width: '50%' },
-  actionRow: { flexDirection: 'row', alignItems: 'center' },
+  taskValue: { fontSize: 16, color: '#716F6F' },
   statusButton: {
     marginLeft: 8,
     paddingVertical: 4,
@@ -666,17 +481,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#ebeff3',
     ...SHADOW,
   },
-
-  webview: {
-    flex: 1,
-  },
-
-  videoImage: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 12,
-  },
-
+  webview: { flex: 1 },
+  videoImage: { width: '100%', height: '100%', borderRadius: 12 },
   playBtn: {
     position: 'absolute',
     top: '50%',
@@ -685,19 +491,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.6)',
     padding: 15,
     borderRadius: 40,
-  },
-
-  downloadRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-
-  downloadText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: 'green',
-    marginRight: 8,
   },
 
   trackCard: {
@@ -739,26 +532,8 @@ const styles = StyleSheet.create({
   bubble: {
     backgroundColor: '#F9FAFB',
     borderRadius: 40,
-    padding: 12,
+    padding: 5,
     ...SHADOW,
   },
-  bubbleIcon: { width: 40, height: 40, resizeMode: 'contain' },
-  textRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 8,
-  },
-  taskValue: {
-    fontSize: 18,
-    color: '#716F6F',
-  },
-  labelText: {
-    fontSize: 18,
-    color: '#716F6F',
-    width: '50%',
-  },
-  valueText: {
-    fontSize: 18,
-    color: '#716F6F',
-  },
+  bubbleIcon: { width: 35, height: 35, borderRadius: 50 },
 });

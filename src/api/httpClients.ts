@@ -45,9 +45,7 @@ class HttpClient {
       headers: {
         'User-Type': userType,
       },
-      
     });
-    console.log('getresponsesssssss',response)
     return response;
   }
 
@@ -63,17 +61,12 @@ class HttpClient {
   }
 
   async update(url: string, data?: any, userType?: string) {
-    try {
-      const response = await Axios.put(url, data, {
-        headers: {
-          'User-Type': userType,
-        },
-      });
-      return response;
-    } catch (error) {
-      console.error('API update error:', error);
-      throw error;
-    }
+    const response = await Axios.put(url, data, {
+      headers: {
+        'User-Type': userType,
+      },
+    });
+    return response;
   }
 
   async delete(url: string, data?: { uuid: string }, userType?: string) {
