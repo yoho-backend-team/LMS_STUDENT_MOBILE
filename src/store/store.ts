@@ -13,9 +13,9 @@ import ClassSlice from '../features/classes/reducers/classslice';
 import ClassIdSlice from '../features/classid/reducers/classidslice';
 import FaqSlice from '../features/faq/reducers/faqSlice';
 import Community from '../features/Community/reducers.ts/ModuleSlice';
-import AttendanceSlice from '../features/Attendance/reducers/attendanceSlice';
+// import AttendanceSlice from '../features/Attendance/reducers/attendanceSlice';
 import AttendanceoneSlice from '../features/Attendanceone/reducers/attenSlice'
-
+import CommunitySlice from '../features/Communityone/reducer/communitySlice';
 const store = configureStore({
   reducer: {
     tabReducer: tabReducer,
@@ -33,7 +33,8 @@ const store = configureStore({
     faqSlice: FaqSlice,
     Community: Community,
     // AttendanceSlice: AttendanceSlice,
-    AttendanceoneSlice: AttendanceoneSlice
+    AttendanceoneSlice: AttendanceoneSlice,
+    CommunitySlice: CommunitySlice,
 
   },
 });

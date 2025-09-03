@@ -3,10 +3,11 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
 import {
   ActivityLogsScreen,
+  ChatScreen,
   ClassByIdScreen,
   ClassesScreen,
-  CommunitiesScreen,
-  CommunityByIdScreen,
+  // CommunitiesScreen,
+  // CommunityByIdScreen,
   CouresScreen,
   CourseByIdScreen,
   CreateTicketScreen,
@@ -30,6 +31,7 @@ import ChatbotScreen from '~/screens/ChatbotScreen/chatbot';
 import TaskCard from '~/components/courses/TaskCard';
 import SessionExpiredModal from '~/components/Sessionexpired/sessionexpire';
 import Attendanceone from '~/screens/attendance-screen/Attendanceone';
+import CommunityList from '~/screens/community-screen/CommunityList';
 
 const Routes = () => {
   type RootStackParamList = {
@@ -141,8 +143,10 @@ const Routes = () => {
         <Stack.Screen name="Placement" component={PlacementScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="FAQ" component={FAQScreen} />
-        <Stack.Screen name="CommunitiesScreen" component={CommunitiesScreen} />
-        <Stack.Screen name="CommunityViewScreen" component={CommunityByIdScreen} />
+        {/* <Stack.Screen name="CommunitiesScreen" component={CommunitiesScreen} /> */}
+        <Stack.Screen name="CommunitiesScreen" component={CommunityList} />
+        {/* <Stack.Screen name="CommunityViewScreen" component={CommunityByIdScreen} /> */}
+           <Stack.Screen name="ChatScreen" component={ChatScreen} />
         <Stack.Screen name="SpokenEnglish" component={SpokenEnglishScreen} />
         <Stack.Screen name="ChatbotScreen" component={ChatbotScreen} />
         <Stack.Screen name="TaskCard" component={TaskCard} />

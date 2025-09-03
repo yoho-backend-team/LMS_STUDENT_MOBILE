@@ -18,11 +18,12 @@ import {
   AttendanceoneScreen,
   // AttendanceScreen,
   ClassesScreen,
-  CommunitiesScreen,
+  // CommunitiesScreen,
   CouresScreen,
   HomeScreen,
 } from '../screens';
 import { setSelectedTab } from '../store/tab/tabSlice';
+import CommunityList from '~/screens/community-screen/CommunityList';
 
 type TabButtonProps = {
   label: string;
@@ -206,7 +207,9 @@ const MainLayout: React.FC = () => {
                 {item.label === screens.classes && <ClassesScreen />}
                 {/* {item.label === screens.attendance && <AttendanceScreen />} */}
                 {item.label === screens.attendance && <AttendanceoneScreen />}
-                {item.label === screens.community && <CommunitiesScreen />}
+                {/* {item.label === screens.community && <CommunitiesScreen />} */}
+                {item.label === screens.community && <CommunityList />}
+
               </View>
             ))}
           </PagerView>

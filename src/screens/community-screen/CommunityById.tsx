@@ -15,11 +15,12 @@ import {
   TouchableWithoutFeedback,
   Image,
   ActivityIndicator,
+  StyleSheet
+
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { getImageUrl } from '~/utils/imageUtils';
-import { StyleSheet } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { GetallMessageThunks } from '../../features/Community/reducers.ts/thunks';
 import { GetCommuntiyIdSelector } from '~/features/Community/reducers.ts/selectore';
