@@ -14,7 +14,8 @@ import FAQScreen from './faq-screen/FAQ';
 import HelpCenterScreen from './helpCenter-screen/HelpCenter';
 import HomeScreen from './home-screen/Home';
 import NotificationsScreen from './notification-screen/Notifications';
-import PaymentScreen from './payment-screen/Payment';
+// import PaymentScreen from './payment-screen/Payment';
+import PaymentScreens from './payment-screen/Payments';
 import PlacementScreen from './placement-screen/Placement';
 import ProfileScreen from './profile-screen/Profile';
 import CreateTicketScreen from './ticket-screen/CreateTicket';
@@ -40,7 +41,8 @@ export {
   LoginScreen,
   NotificationsScreen,
   OtpVerificationScreen,
-  PaymentScreen,
+  // PaymentScreen,
+  PaymentScreens,
   PlacementScreen,
   ProfileScreen,
   ResetPasswordScreen,

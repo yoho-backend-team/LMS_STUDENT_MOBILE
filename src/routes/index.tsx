@@ -17,7 +17,8 @@ import {
   LoginScreen,
   NotificationsScreen,
   OtpVerificationScreen,
-  PaymentScreen,
+  // PaymentScreen,
+  PaymentScreens,
   PlacementScreen,
   ProfileScreen,
   ResetPasswordScreen,
@@ -41,7 +42,8 @@ const Routes = () => {
     ForgetPassword: undefined;
     OtpVerification: undefined;
     ResetPassword: undefined;
-    Payment: undefined;
+    // Payment: undefined;
+    Payments: undefined;
     Helpcenter: undefined;
     // ActivityLog: undefined;
     TicketsScreen: undefined;
@@ -127,7 +129,8 @@ const Routes = () => {
     return (
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="StudentDrawer" component={StudentDrawer} />
-        <Stack.Screen name="Payment" component={PaymentScreen} />
+        {/* <Stack.Screen name="Payment" component={PaymentScreen} /> */}
+        <Stack.Screen name="Payment" component={PaymentScreens} />
         <Stack.Screen name="Helpcenter" component={HelpCenterScreen} />
         {/* { <Stack.Screen name="ActivityLog" component={ActivityLogsScreen} /> } */}
         <Stack.Screen name="ActivityLog" component={Activity} />
