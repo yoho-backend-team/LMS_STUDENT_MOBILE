@@ -5,7 +5,6 @@ import { Ionicons } from "@expo/vector-icons";
 const PaymentScreens = () => {
   return (
     <ScrollView style={styles.container}>
-      {/* ---------------- Payment Section ---------------- */}
       <Text style={styles.sectionTitle}>Payment</Text>
       <View style={styles.cardWrapper}>
         <View style={styles.card}>
@@ -38,8 +37,6 @@ const PaymentScreens = () => {
           <Text style={styles.valueOrange}>Offline</Text>
         </View>
       </View>
-
-      {/* ---------------- Course Details Section ---------------- */}
       <Text style={styles.sectionTitle}>Courses Details</Text>
       <View style={styles.courseCard}>
         <View style={styles.imageBox}>
@@ -55,8 +52,6 @@ const PaymentScreens = () => {
           <Text style={styles.price}>₹500,000</Text>
         </View>
       </View>
-
-      {/* ---------------- Fees Details Section ---------------- */}
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Fees Details</Text>
         <TouchableOpacity style={styles.downloadBtn}>
@@ -77,8 +72,6 @@ const PaymentScreens = () => {
           <Text style={styles.boldText}>Enrolled Date :</Text>
           <Text>12 June 2025</Text>
         </View>
-
-        {/* Fees Table */}
         <View style={styles.tableHeader}>
           <Text style={styles.tableHeaderText}>Description</Text>
           <Text style={styles.tableHeaderText}>Amount (INR)</Text>
@@ -105,8 +98,6 @@ const PaymentScreens = () => {
           <Text style={{ color: "#e74c3c", fontWeight: "bold" }}>₹90000 INR</Text>
         </View>
       </View>
-
-      {/* ---------------- Payment History Section ---------------- */}
       <Text style={styles.sectionTitle}>Payment History</Text>
       <View style={styles.historyBox}>
         <View style={styles.rowBetween}>
