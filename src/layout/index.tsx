@@ -19,6 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { bottom_tabs, COLORS, FONTS, screens, SIZES } from '../constants';
 import {
   AttendanceScreen,
+  Class,
   ClassesScreen,
   CommunitiesScreen,
   CouresScreen,
@@ -213,7 +214,8 @@ const MainLayout: React.FC = () => {
               <View key={`${item.id}-${index}`} style={{ width: SIZES.width, height: '100%' }}>
                 {item.label === screens.home && <HomeScreen />}
                 {item.label === screens.course && <CouresScreen />}
-                {item.label === screens.classes && <ClassesScreen />}
+                {/* {item.label === screens.classes && <ClassesScreen />} */}
+                {item.label === screens.classes && <Class />}
                 {item.label === screens.attendance && <AttendanceScreen />}
                 {item.label === screens.community && <CommunitiesScreen />}
               </View>

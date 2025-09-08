@@ -22,7 +22,7 @@ import TicketByIdScreen from './ticket-screen/TicketById';
 import TicketsScreen from './ticket-screen/Tickets';
 import SpokenEnglishScreen from './spoken-english-screen/SpokenEnglish';
 import Notify from './notification-screen/Notify';
-
+import Class from './class-screen/Class';
 export {
   ActivityLogsScreen,
   AttendanceScreen,
@@ -48,4 +48,5 @@ export {
   TicketsScreen,
   SpokenEnglishScreen,
   Notify,
+  Class,
 };
