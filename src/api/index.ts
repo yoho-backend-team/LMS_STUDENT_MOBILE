@@ -15,28 +15,40 @@ class Client {
     change_password: (data: any, params: any) =>
       httpClient.post(HTTP_END_POINTS.auth.change_password, data, params, 'student'),
     logouts: (data: any) => httpClient.post(HTTP_END_POINTS.auth.log_out, {}, data, 'student'),
+
     course: {
       get: (params: any) =>
         httpClient.get(
-          HTTP_END_POINTS.course.get.replace(':courseId', params.courseId),
+          HTTP_END_POINTS.course.get
+            .replace(':instituteId', params?.instituteId)
+            .replace(':branchId', params?.branchId)
+            .replace(':courseId', params.courseId),
           {},
           'student'
         ),
+
+      getTask: (params: any) => httpClient.get(HTTP_END_POINTS.course.get_task, params, 'student'),
+      taskUpdate: (data: any) =>
+        httpClient.update(HTTP_END_POINTS.course.updatetask, data, 'student'),
     },
+
     profile: {
       get: (params: any) => httpClient.get(HTTP_END_POINTS.profile.get, params, 'student'),
       update: (data: any) => httpClient.update(HTTP_END_POINTS.profile.update, data, 'student'),
     },
+
     class: {
       get: (params: any) =>
         httpClient.get(HTTP_END_POINTS.class.get + params.courseId, params, 'student'),
       getWithId: (params: { id: string }) =>
         httpClient.get(HTTP_END_POINTS.class.getwithId + params.id, params, 'student'),
     },
+
     payment: {
       get: (params: any) =>
         httpClient.get(HTTP_END_POINTS.payments.getFees + params.paymentId, {}, 'student'),
     },
+<<<<<<< HEAD
    attendance: {
   get: (params: any) => httpClient.get(`${HTTP_END_POINTS.attendance.get}`, params, 'student'),
   getByDate: (params: any) =>
@@ -46,6 +58,19 @@ class Client {
       params: data,
     }, 'student'),
 },
+=======
+
+    attendance: {
+      get: (params: any) => httpClient.get(`${HTTP_END_POINTS.attendance.get}`, params, 'student'),
+      getByDate: (params: any) =>
+        httpClient.get(`${HTTP_END_POINTS.attendance.getDate}`, params, 'student'),
+      get_class_attendance: (data: { classId: any }) =>
+        httpClient.get(`${HTTP_END_POINTS.attendance.class_attendance}/${data.classId}`, {
+          params: data,
+        }),
+    },
+
+>>>>>>> 29f4b2fc452804e8e72f8ae20933f1418b423841
     notification: {
       get: (params: any) => httpClient.get(HTTP_END_POINTS.notification.get, params, 'student'),
       update: (data: any) =>
@@ -53,6 +78,7 @@ class Client {
       delete: (data: any) =>
         httpClient.delete(HTTP_END_POINTS.notification.delete + data.uuid, data, 'student'),
     },
+
     ticket: {
       create: (data: any, params: any) =>
         httpClient.post(HTTP_END_POINTS.ticket.create, data, params, 'student'),
@@ -83,11 +109,17 @@ class Client {
           'student'
         ),
     },
+
+    placement: {
+      get: (params: any) =>
+        httpClient.get(HTTP_END_POINTS.placement.get + params.studentId, params, 'student'),
+    },
   };
 
   common = {
     file: {
-      upload: (data: any) => httpClient.uploadFile(HTTP_END_POINTS.common.file.upload, data, 'student'),
+      upload: (data: any) =>
+        httpClient.uploadFile(HTTP_END_POINTS.common.file.upload, data, 'student'),
       get: (url: any) => httpClient.fileGet(url),
     },
   };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,20 +7,39 @@ import * as DocumentPicker from 'expo-document-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import toast from '~/utils/toasts';
 import { LinearGradient } from 'expo-linear-gradient';
+import { formatDateMonthandYear } from '~/utils/formatDate';
 
 type RootStackParamList = {
   TaskCard: { task: any };
 };
 
 type Task = {
-  id: number;
-  instructorname: string;
-  task: string;
-  taskname: string;
+  _id: string;
+  task_name: string;
   deadline: string;
-  status: 'Completed' | 'Pending';
+  status: 'pending' | 'completed';
+  instructor: {
+    _id: string;
+    first_name: string;
+    last_name: string;
+    full_name: string;
+    email: string;
+    qualification: string;
+    contact_info: {
+      phone_number: string;
+      alternate_phone_number: string;
+      address1: string;
+      address2: string;
+      pincode: number;
+    };
+    // Add other instructor properties as needed
+  };
   question: string;
-  score?: number | string;
+  answer_file: string | null;
+  mark: number | null;
+  remark: string | null;
+  createdAt: string;
+  updatedAt: string;
 };
 
 type Props = NativeStackScreenProps<RootStackParamList, 'TaskCard'>;
@@ -45,7 +64,10 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
     }
   };
 
-  const isCompleted = task.status === 'Completed';
+  const isCompleted = task.status === 'completed';
+  const instructorName = task.instructor?.full_name || 
+                         `${task.instructor?.first_name || ''} ${task.instructor?.last_name || ''}`.trim() || 
+                         'Instructor';
 
   return (
     <>
@@ -61,17 +83,17 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
           <View style={styles.taskCard}>
             <View style={styles.textColumn}>
               <Text style={styles.taskText}>Instructor Name</Text>
-              <Text style={styles.taskValue}>{task.instructorname}</Text>
+              <Text style={styles.taskValue}>{instructorName}</Text>
             </View>
 
             <View style={styles.textColumn}>
               <Text style={styles.taskText}>Task Name</Text>
-              <Text style={styles.taskValue}>{task.taskname}</Text>
+              <Text style={styles.taskValue}>{task.task_name}</Text>
             </View>
 
             <View style={styles.textColumn}>
               <Text style={styles.taskText}>Deadline</Text>
-              <Text style={styles.taskValue}>{task.deadline}</Text>
+              <Text style={styles.taskValue}>{formatDateMonthandYear(task.deadline)}</Text>
             </View>
 
             <View style={styles.textColumn}>
@@ -93,9 +115,8 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
                     </LinearGradient>
                   </TouchableOpacity>
 
-
                   <Text style={[styles.fileName, !selectedFile && { color: '#9CA3AF', fontStyle: 'italic' }]}>
-                    {selectedFile ? selectedFile : 'Upload Notes'}
+                    {selectedFile ? selectedFile : 'No file selected'}
                   </Text>
                 </>
               )}
@@ -107,10 +128,12 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
                 <View
                   style={[
                     styles.statusButtonInsideBox,
-                    task.status === 'Completed' ? styles.completedStatus : styles.pendingStatus,
+                    isCompleted ? styles.completedStatus : styles.pendingStatus,
                   ]}
                 >
-                  <Text style={styles.statusTextInside}>{task.status}</Text>
+                  <Text style={styles.statusTextInside}>
+                    {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
+                  </Text>
                 </View>
               </View>
             </View>
@@ -118,25 +141,31 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
             <View style={styles.textColumn}>
               <Text style={styles.taskText}>Score</Text>
               <Text style={styles.taskValue}>
-                <Text style={styles.taskValue}>
-                  {task.score || task.score === 0
-                    ? `${task.score} / 10`
-                    : 'Yet To Complete'}
-                </Text>
-
+                {task.mark !== null && task.mark !== undefined
+                  ? `${task.mark} / 10`
+                  : 'Not graded yet'}
               </Text>
-
             </View>
 
-            {isCompleted && (
+            {task.remark && (
               <View style={styles.textColumn}>
-                <Text style={styles.taskText}>Notes</Text>
+                <Text style={styles.taskText}>Instructor Remark</Text>
+                <View style={styles.questionBox}>
+                  <Text style={styles.questionText}>{task.remark}</Text>
+                </View>
+              </View>
+            )}
+
+            {isCompleted && task.answer_file && (
+              <View style={styles.textColumn}>
+                <Text style={styles.taskText}>Submitted File</Text>
                 <View style={styles.viewNotesBox}>
-                  <Text style={styles.notesText}>{task.localFilePath}</Text>
+                  <Text style={styles.notesText}>{task.answer_file}</Text>
                   <TouchableOpacity
                     style={{ borderRadius: 8, marginLeft: 10 }}
                     onPress={() => {
-                      Alert.alert('View Notes', 'Opening notes...');
+                      Alert.alert('View File', 'Opening submitted file...');
+                      // Here you would typically open the file
                     }}
                   >
                     <LinearGradient
@@ -148,11 +177,9 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
                       <Text style={styles.uploadText}>View</Text>
                     </LinearGradient>
                   </TouchableOpacity>
-
                 </View>
               </View>
             )}
-
 
             {!isCompleted && (
               <View style={styles.submitContainers}>
@@ -169,6 +196,7 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
                       toast.error('Missing File', 'Please upload a file before submitting.');
                       return;
                     } else {
+                      // Here you would typically submit the file to your API
                       toast.success('Success', 'File uploaded successfully!');
                       navigation.goBack();
                     }
@@ -184,10 +212,8 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
                     <Text style={styles.submitText}>Submit</Text>
                   </LinearGradient>
                 </TouchableOpacity>
-
               </View>
             )}
-
           </View>
         </View>
       </SafeAreaView>
@@ -254,47 +280,8 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 1,
   },
-
-
-  doubtText: {
-    fontSize: 16,
-    color: '#6B7280',
-    marginBottom: 6,
-  },
-  uploadButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#3B82F6',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    marginTop: 6,
-    alignSelf: 'flex-start',
-  },
   uploadText: { color: '#fff', marginLeft: 6, fontSize: 14 },
   fileName: { marginTop: 6, fontSize: 14, color: '#374151', marginLeft: 4 },
-  statusButton: {
-    marginLeft: 8,
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-  },
-  completed: { backgroundColor: '#4ADE80' },
-  pending: { backgroundColor: '#9CA3AF' },
-  statusText: { color: '#fff', fontWeight: 'bold' },
-  submitButtonDisabled: { backgroundColor: '#9CA3AF' },
-  submitContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginTop: 16,
-  },
-  submitButton: {
-    backgroundColor: '#3B82F6',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    alignSelf: 'flex-end',
-  },
   taskValueBox: {
     backgroundColor: '#F3F4F6',
     paddingVertical: 8,
@@ -330,8 +317,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-
-
   cancelText: {
     color: '#374151',
     fontSize: 16,
@@ -344,16 +329,12 @@ const styles = StyleSheet.create({
     width: '35%',
     alignItems: 'center',
   },
-
-
   completedStatus: {
     backgroundColor: '#4ADE80',
   },
-
   pendingStatus: {
     backgroundColor: '#9CA3AF',
   },
-
   statusTextInside: {
     color: '#fff',
     fontWeight: 'bold',
@@ -387,7 +368,6 @@ const styles = StyleSheet.create({
     elevation: 1,
     width: '100%',
   },
-
   questionText: {
     fontSize: 16,
     color: '#6B7280',
@@ -409,29 +389,9 @@ const styles = StyleSheet.create({
     elevation: 1,
     width: '100%',
   },
-
   notesText: {
     fontSize: 16,
     color: '#6B7280',
     flex: 1,
   },
-
-  viewButton: {
-    backgroundColor: '#3B82F6',
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    borderRadius: 6,
-    marginLeft: 10,
-  },
-
-  viewButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-
-
-
-
 });
-

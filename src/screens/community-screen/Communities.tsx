@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   StatusBar,
   StyleSheet,
@@ -8,6 +8,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -24,15 +25,21 @@ const Communities = () => {
   const navigation = useNavigation<any>();
   const communityList = useSelector(GetCommuntiySelector);
   const dispatch = useDispatch<any>();
-
   const [searchQuery, setSearchQuery] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchCommunities = (page = 1) => {
-    dispatch(GetallCommunityThunks({ page }));
+    return dispatch(GetallCommunityThunks({ page }));
   };
 
   useEffect(() => {
     fetchCommunities(1);
+  }, []);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchCommunities(1);
+    setRefreshing(false);
   }, []);
 
   const filteredCommunities = communityList?.filter((community: any) =>
@@ -59,7 +66,6 @@ const Communities = () => {
               onChangeText={setSearchQuery}
             />
 
-            {/* ✅ Clear Button */}
             {searchQuery.length > 0 && (
               <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearIcon}>
                 <Ionicons name="close-circle" size={18} color={COLORS.text_desc} />
@@ -68,7 +74,10 @@ const Communities = () => {
           </View>
 
           <View style={styles.messageList}>
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} // 👈 pull to refresh
+            >
               {filteredCommunities?.map((community: any, index: number) => (
                 <TouchableOpacity
                   key={index}
@@ -96,7 +105,6 @@ const Communities = () => {
                 </TouchableOpacity>
               ))}
 
-              {/* If no results */}
               {filteredCommunities?.length === 0 && (
                 <Text
                   style={{
@@ -111,13 +119,6 @@ const Communities = () => {
             </ScrollView>
           </View>
         </View>
-
-        {/* Chatbot button */}
-        <TouchableOpacity
-          style={styles.chatbotBtn}
-          onPress={() => navigation.navigate('ChatbotScreen')}>
-          <Ionicons name="chatbubble-ellipses" size={28} color="#fff" />
-        </TouchableOpacity>
       </SafeAreaView>
     </>
   );
@@ -223,19 +224,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  chatbotBtn: {
-    position: 'absolute',
-    bottom: 80,
-    right: 20,
-    backgroundColor: '#7B00FF',
-    padding: 16,
-    borderRadius: 50,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 5,
-  },
+
   clearIcon: {
     position: 'absolute',
     right: 12,

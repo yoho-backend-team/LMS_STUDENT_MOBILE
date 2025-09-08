@@ -9,6 +9,8 @@ export type Endpoints = {
   };
   course: {
     get: string;
+    get_task:string;
+    updatetask:string;
   };
   class: {
     get: string;
@@ -60,5 +62,9 @@ export type Endpoints = {
 
   notificationSubscription: {
     post: string;
+  };
+
+  placement: {
+    get: string;
   };
 };

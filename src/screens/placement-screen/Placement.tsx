@@ -1,4 +1,4 @@
-import React from 'react';
+import { useEffect, useState } from 'react';
 import {
   StatusBar,
   StyleSheet,
@@ -9,10 +9,36 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import placementimg from '../../assets/icons/Placement/placementimg.png';
-import backIcon from '../../assets/icons/Placement/back.png';
+import { useDispatch, useSelector } from 'react-redux';
+import { getPlacementthunks } from '~/features/placements/reducer/thunks';
+import { selectPlacementData } from '~/features/placements/reducer/selectors';
+import dayjs from 'dayjs';
+import { getStudentData } from '~/utils/storage';
 
 const Placement = ({ navigation }: any) => {
+  const [student, setStudent] = useState<any>(null);
+  const dispatch = useDispatch();
+  const placementData: any = useSelector<any>(selectPlacementData);
+
+  useEffect(() => {
+    (async () => {
+      const data = await getStudentData();
+      setStudent(data);
+    })();
+  }, []);
+
+  const fetchPlacement = async () => {
+    if (student) {
+      dispatch(getPlacementthunks({ studentId: student?._id }) as any);
+    }
+  };
+
+  useEffect(() => {
+    if (student) {
+      fetchPlacement();
+    }
+  }, [dispatch, student]);
+
   return (
     <>
       <StatusBar backgroundColor="#000" barStyle="light-content" />
@@ -20,14 +46,21 @@ const Placement = ({ navigation }: any) => {
         {/* Header with Back Button */}
         <View style={styles.headerRow}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Image source={backIcon} style={styles.backIcon} resizeMode="contain" />
+            <Image
+              source={require('../../assets/icons/Placement/back.png')}
+              style={styles.backIcon}
+              resizeMode="contain"
+            />
           </TouchableOpacity>
           <Text style={styles.header}>Placement</Text>
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* Image */}
-          <Image source={placementimg} style={styles.image} />
+          <Image
+            source={require('../../assets/icons/Placement/placementimg.png')}
+            style={styles.image}
+          />
 
           {/* Company Details */}
           <View style={styles.card}>
@@ -35,22 +68,22 @@ const Placement = ({ navigation }: any) => {
             <View style={styles.row}>
               <Text style={styles.label}>Company Name</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>Yoho Tech</Text>
+              <Text style={styles.value}>{placementData[0]?.company?.name}</Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Company Address</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>2, Main Road Chennai</Text>
+              <Text style={styles.value}>{placementData[0]?.company?.address}</Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Contact Email</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>yohotech@gmail.com</Text>
+              <Text style={styles.value}>{placementData[0]?.company?.email}</Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Contact Number</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>8975894567</Text>
+              <Text style={styles.value}>{placementData[0]?.company?.phone}</Text>
             </View>
           </View>
 
@@ -60,17 +93,17 @@ const Placement = ({ navigation }: any) => {
             <View style={styles.row}>
               <Text style={styles.label}>Job Name</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>UI Developer</Text>
+              <Text style={styles.value}>{placementData[0]?.job?.name}</Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Job Description</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>Front - End Developer</Text>
+              <Text style={styles.value}>{placementData[0]?.job?.description}</Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Skills</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>Figma</Text>
+              <Text style={styles.value}>{placementData[0]?.job?.skils?.join(',')}</Text>
             </View>
           </View>
 
@@ -80,17 +113,20 @@ const Placement = ({ navigation }: any) => {
             <View style={styles.row}>
               <Text style={styles.label}>Interview Date</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>28-08-2025</Text>
+              <Text style={styles.value}>
+                {}
+                {dayjs(placementData[0]?.schedule?.interviewDate).format('DD-MMM-YYYY')}
+              </Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Venue</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>wewjuioc/.mnb</Text>
+              <Text style={styles.value}>{placementData[0]?.schedule?.venue}</Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Address</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>OMR, Chennai</Text>
+              <Text style={styles.value}>{placementData[0]?.schedule?.address}</Text>
             </View>
           </View>
         </ScrollView>

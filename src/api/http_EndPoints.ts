@@ -1,9 +1,6 @@
 import { Endpoints } from './httpTypes';
 
 const getEndpoints = (): Endpoints => {
-  const instituteId = '67f3a26df4b2c530acd16419';
-  const branchId = '67f3a26ef4b2c530acd16425';
-
   return {
     auth: {
       login: '/institutes/auth/student/login',
@@ -14,7 +11,9 @@ const getEndpoints = (): Endpoints => {
       log_out: '/institutes/auth/student/logout',
     },
     course: {
-      get: `/institutes/${instituteId}/branches/${branchId}/course/:courseId`,
+      get: `/institutes/:instituteId/branches/:branchId/course/:courseId`,
+      get_task: '/task-project/get',
+      updatetask: '/task-project/update',
       // getwithclass: `/institutes/${institute}/branches/${branch}/course/${course}/classes`
     },
     class: {
@@ -67,6 +66,9 @@ const getEndpoints = (): Endpoints => {
     },
     notificationSubscription: {
       post: '/notification/subscribe',
+    },
+    placement: {
+      get: `/placements/fetch/`,
     },
   };
 };

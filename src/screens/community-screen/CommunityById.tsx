@@ -1,5 +1,3 @@
-'use client';
-
 import type React from 'react';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import {
@@ -15,8 +13,8 @@ import {
   TouchableWithoutFeedback,
   Image,
   ActivityIndicator,
-  StyleSheet
-
+  ImageBackground,
+  StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -26,6 +24,9 @@ import { GetallMessageThunks } from '../../features/Community/reducers.ts/thunks
 import { GetCommuntiyIdSelector } from '~/features/Community/reducers.ts/selectore';
 import { COLORS } from '~/constants';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import socket from '~/utils/socket';
+import { getStudentData } from '~/utils/storage';
 
 interface Message {
   id: string;
@@ -33,6 +34,13 @@ interface Message {
   isOutgoing: boolean;
   senderName?: string;
   createdAt?: string;
+  sender?: string;
+  _id?: string;
+  uuid?: string;
+  message?: string;
+  sender_name?: string;
+  timestamp?: string;
+  read?: boolean;
 }
 
 const COLORS_LIST = [
@@ -61,7 +69,6 @@ const getColorForSender = (senderName: string) => {
 // Date formatting functions
 const formatTime = (timestamp: any | number | Date): string => {
   if (!timestamp) return '';
-
   const messageDate = new Date(timestamp);
   return messageDate.toLocaleTimeString('en-US', {
     hour: '2-digit',
@@ -73,7 +80,6 @@ const formatTime = (timestamp: any | number | Date): string => {
 const formatMessageDate = (timestamp: string | number | Date): string => {
   const messageDate = new Date(timestamp);
   const now = new Date();
-
   const isToday = messageDate.toDateString() === now.toDateString();
   const yesterday = new Date();
   yesterday.setDate(now.getDate() - 1);
@@ -82,19 +88,15 @@ const formatMessageDate = (timestamp: string | number | Date): string => {
     (now.getTime() - messageDate.getTime()) / (1000 * 60 * 60 * 24)
   );
 
-  if (isToday) {
-    return 'Today';
-  } else if (isYesterday) {
-    return 'Yesterday';
-  } else if (daysDifference < 7) {
-    return messageDate.toLocaleDateString('en-US', { weekday: 'long' });
-  } else {
+  if (isToday) return 'Today';
+  else if (isYesterday) return 'Yesterday';
+  else if (daysDifference < 7) return messageDate.toLocaleDateString('en-US', { weekday: 'long' });
+  else
     return messageDate.toLocaleDateString('en-GB', {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
     });
-  }
 };
 
 const isSameDay = (date1: Date, date2: Date): boolean => {
@@ -109,7 +111,6 @@ const CommunityById: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute<any>();
   const { community } = route?.params;
-
   const dispatch = useDispatch();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -124,9 +125,46 @@ const CommunityById: React.FC = () => {
   const [isLoadingAtTop, setIsLoadingAtTop] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
   const messagelist = useSelector(GetCommuntiyIdSelector);
+  const [userId, setUserId] = useState('');
+  const [student, setStudent] = useState<any>(null);
+
+  const getStudentId = async () => {
+    try {
+      const data = await getStudentData();
+      if (data) {
+        setUserId(data?._id);
+        setStudent(data);
+        return data;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error reading StudentData:', error);
+      return null;
+    }
+  };
 
   useEffect(() => {
-    dispatch<any>(GetallMessageThunks({ community: community?._id, page: 1, limit: 15 }));
+    const initializeSocket = async () => {
+      const studentData = await getStudentId();
+
+      if (community?._id && studentData?._id) {
+        socket.emit('joinGroup', { groupId: community?._id, userId: studentData?._id });
+      }
+    };
+
+    initializeSocket();
+
+    return () => {
+      if (community?._id && userId) {
+        socket.emit('leaveGroup', { groupId: community._id, userId: userId });
+      }
+    };
+  }, [community?._id]);
+
+  useEffect(() => {
+    if (community?._id) {
+      dispatch<any>(GetallMessageThunks({ community: community._id, page: 1, limit: 15 }));
+    }
   }, [community?._id, dispatch]);
 
   useEffect(() => {
@@ -135,11 +173,13 @@ const CommunityById: React.FC = () => {
 
       const formatted = list
         .map((msg: any) => ({
-          id: msg.uuid || msg._id,
-          text: msg.message,
-          isOutgoing: msg.sender === 'me',
+          id: msg.uuid || msg._id || Date.now().toString(),
+          text: msg.message || msg.content,
+          isOutgoing: msg.sender === userId,
           senderName: msg.sender_name || 'Unknown',
-          createdAt: msg.createdAt || new Date().toISOString(),
+          createdAt: msg.createdAt || msg.timestamp || new Date().toISOString(),
+          sender: msg.sender,
+          _id: msg._id,
         }))
         .sort(
           (a: Message, b: Message) =>
@@ -157,7 +197,7 @@ const CommunityById: React.FC = () => {
 
       setHasMoreMessages(Array.isArray(messagelist) ? false : (messagelist.hasMore ?? false));
     }
-  }, [messagelist, page]);
+  }, [messagelist, page, userId]);
 
   useEffect(() => {
     if (shouldAutoScroll && messages.length > 0) {
@@ -168,19 +208,76 @@ const CommunityById: React.FC = () => {
     }
   }, [messages, shouldAutoScroll, isInitialLoad]);
 
-  const handleSend = () => {
-    if (message.trim()) {
-      const newMsg: Message = {
-        id: Date.now().toString(),
-        text: message,
-        isOutgoing: true,
-        senderName: 'Me',
-        createdAt: new Date().toISOString(),
+  useEffect(() => {
+    if (!userId) return;
+    const handleIncomingMessage = (msg: any) => {
+      const incomingMsg: Message = {
+        id: msg.uuid || msg._id || Date.now().toString(),
+        text: msg.message || msg.content,
+        isOutgoing: msg.sender === userId || msg.senderId === userId,
+        senderName: msg.sender_name || msg.name || 'Unknown',
+        createdAt: msg.createdAt || msg.timestamp || new Date().toISOString(),
+        sender: msg.sender || msg.senderId,
+        _id: msg._id,
       };
-      setMessages((prev) => [...prev, newMsg]);
-      setMessage('');
-      setShouldAutoScroll(true);
+
+      setMessages((prev) => [...prev, incomingMsg]);
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+    };
+
+    socket.on('receiveMessage', handleIncomingMessage);
+    socket.on('newMessage', handleIncomingMessage);
+    socket.on('messageDelivered', (messageId) => {
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg._id === messageId || msg.id === messageId ? { ...msg, delivered: true } : msg
+        )
+      );
+    });
+
+    socket.on('messageRead', (messageId) => {
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg._id === messageId || msg.id === messageId ? { ...msg, read: true } : msg
+        )
+      );
+    });
+
+    return () => {
+      socket.off('receiveMessage', handleIncomingMessage);
+      socket.off('newMessage', handleIncomingMessage);
+      socket.off('messageDelivered');
+      socket.off('messageRead');
+    };
+  }, [userId]);
+
+  useEffect(() => {
+    if (messages?.length > 0 && userId) {
+      messages?.forEach((msg) => {
+        if (!msg.read && msg.sender !== userId) {
+          socket.emit('messageRead', { messageId: msg._id || msg.id, groupId: community?._id });
+        }
+      });
     }
+  }, [messages, userId, community?._id]);
+
+  const handleSend = () => {
+    if (!message.trim() || !community?._id || !userId) return;
+
+    const messageToSend = message.trim();
+    setMessage('');
+    const messageData = {
+      content: messageToSend,
+      groupId: community._id,
+      senderId: userId,
+      name: student?.full_name || student?.first_name || 'You',
+      message: messageToSend,
+    };
+
+    socket.emit('sendMessage', messageData);
+    setShouldAutoScroll(true);
   };
 
   const loadMoreMessages = useCallback(() => {
@@ -248,7 +345,7 @@ const CommunityById: React.FC = () => {
         const heightDifference = contentHeight - previousContentHeight;
         requestAnimationFrame(() => {
           scrollViewRef.current?.scrollTo({
-            y: heightDifference + 50, 
+            y: heightDifference + 50,
             animated: false,
           });
         });
@@ -263,7 +360,6 @@ const CommunityById: React.FC = () => {
     const currentDate = new Date(msg.createdAt || '');
     const prevMessage = index > 0 ? messages[index - 1] : null;
     const prevDate = prevMessage ? new Date(prevMessage.createdAt || '') : null;
-
     const showDateDivider = !prevDate || !isSameDay(currentDate, prevDate);
 
     return (
@@ -306,10 +402,8 @@ const CommunityById: React.FC = () => {
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
       <SafeAreaView edges={['top']} style={styles.container}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-          <KeyboardAvoidingView
-            style={{ flex: 1 }}
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
+          <View style={{ flex: 1 }}>
+            {/* HEADER */}
             <View style={styles.header}>
               <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                 <Ionicons name="arrow-back" size={24} color="#333" />
@@ -325,31 +419,35 @@ const CommunityById: React.FC = () => {
               </View>
             </View>
 
-            <ScrollView
-              ref={scrollViewRef}
-              style={styles.chatContainer}
-              contentContainerStyle={styles.chatContent}
-              showsVerticalScrollIndicator={false}
-              onScroll={handleScroll}
-              onContentSizeChange={handleContentSizeChange}
-              scrollEventThrottle={16}
-              removeClippedSubviews={true}
-              keyboardShouldPersistTaps="handled">
-              {(loadingMore || isLoadingAtTop) && (
-                <View style={styles.loadingContainer}>
-                  <ActivityIndicator size="small" color={COLORS.blue_01} />
-                  <Text style={styles.loadingText}>Loading more messages...</Text>
-                </View>
-              )}
+            {/* CHAT LIST */}
+            <ImageBackground
+              source={require('../../assets/chatbg.png')}
+              style={{ flex: 1 }}
+              resizeMode="cover">
+              <ScrollView
+                ref={scrollViewRef}
+                contentContainerStyle={styles.chatContent}
+                showsVerticalScrollIndicator={false}
+                onScroll={handleScroll}
+                onContentSizeChange={handleContentSizeChange}
+                scrollEventThrottle={16}
+                keyboardShouldPersistTaps="handled">
+                {(loadingMore || isLoadingAtTop) && (
+                  <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="small" color={COLORS.blue_01} />
+                    <Text style={styles.loadingText}>Loading more messages...</Text>
+                  </View>
+                )}
 
-              {!hasMoreMessages && messages.length > 15 && (
-                <View style={styles.noMoreMessagesContainer}>
-                  <Text style={styles.noMoreMessagesText}>No more messages</Text>
-                </View>
-              )}
+                {!hasMoreMessages && messages.length > 15 && (
+                  <View style={styles.noMoreMessagesContainer}>
+                    <Text style={styles.noMoreMessagesText}>No more messages</Text>
+                  </View>
+                )}
 
-              {messages.map((msg, index) => renderMessage(msg, index))}
-            </ScrollView>
+                {messages.map((msg, index) => renderMessage(msg, index))}
+              </ScrollView>
+            </ImageBackground>
 
             {showScrollToBottom && (
               <TouchableOpacity style={styles.scrollToBottomButton} onPress={scrollToBottom}>
@@ -357,20 +455,26 @@ const CommunityById: React.FC = () => {
               </TouchableOpacity>
             )}
 
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.textInput}
-                placeholder="Type a Message"
-                placeholderTextColor="#999"
-                value={message}
-                onChangeText={setMessage}
-                multiline
-              />
-              <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
-                <Ionicons name="send" size={20} color="#fff" />
-              </TouchableOpacity>
-            </View>
-          </KeyboardAvoidingView>
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+              keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Type a Message"
+                  placeholderTextColor="#999"
+                  value={message}
+                  onChangeText={setMessage}
+                  multiline
+                  returnKeyType="send"
+                  onSubmitEditing={handleSend}
+                />
+                <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+                  <Ionicons name="send" size={20} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            </KeyboardAvoidingView>
+          </View>
         </TouchableWithoutFeedback>
       </SafeAreaView>
     </>
@@ -380,17 +484,8 @@ const CommunityById: React.FC = () => {
 export default CommunityById;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  avatar: {
-    width: 40,
-    height: 40,
-    backgroundColor: '#000',
-    borderRadius: 20,
-    marginRight: 12,
-  },
+  container: { flex: 1, backgroundColor: '#f5f5f5' },
+  avatar: { width: 40, height: 40, backgroundColor: '#000', borderRadius: 20, marginRight: 12 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -400,87 +495,23 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
-  backButton: {
-    marginRight: 12,
-  },
-  profileContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  profileIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#333',
-    marginRight: 12,
-  },
-  headerText: {
-    flex: 1,
-  },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
-  headerSubtitle: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 2,
-  },
-  chatContainer: {
-    flex: 1,
-    backgroundColor: '#1a4a47',
-  },
-  chatContent: {
-    padding: 16,
-    paddingBottom: 20,
-  },
-  messageContainer: {
-    marginVertical: 4,
-  },
-  outgoingMessage: {
-    alignItems: 'flex-end',
-  },
-  incomingMessage: {
-    alignItems: 'flex-start',
-  },
-  messageBubble: {
-    maxWidth: '80%',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 16,
-  },
-  outgoingBubble: {
-    backgroundColor: '#7ed321',
-    borderBottomRightRadius: 4,
-  },
-  incomingBubble: {
-    backgroundColor: '#ffffff',
-    borderBottomLeftRadius: 4,
-  },
-  messageText: {
-    fontSize: 14,
-    lineHeight: 18,
-  },
-  outgoingText: {
-    color: '#000',
-  },
-  incomingText: {
-    color: '#333',
-  },
-  senderName: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#444',
-    marginBottom: 2,
-  },
-  timeText: {
-    fontSize: 10,
-    color: '#666',
-    marginTop: 4,
-    textAlign: 'right',
-  },
+  backButton: { marginRight: 12 },
+  profileContainer: { flexDirection: 'row', alignItems: 'center', flex: 1 },
+  headerText: { flex: 1 },
+  headerTitle: { fontSize: 16, fontWeight: '600', color: '#333' },
+  headerSubtitle: { fontSize: 12, color: '#666', marginTop: 2 },
+  chatContent: { padding: 16, paddingBottom: 20 },
+  messageContainer: { marginVertical: 4 },
+  outgoingMessage: { alignItems: 'flex-end' },
+  incomingMessage: { alignItems: 'flex-start' },
+  messageBubble: { maxWidth: '80%', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 16 },
+  outgoingBubble: { backgroundColor: '#7ed321', borderBottomRightRadius: 4 },
+  incomingBubble: { backgroundColor: '#ffffff', borderBottomLeftRadius: 4 },
+  messageText: { fontSize: 14, lineHeight: 18 },
+  outgoingText: { color: '#000' },
+  incomingText: { color: '#333' },
+  senderName: { fontSize: 12, fontWeight: '600', marginBottom: 2 },
+  timeText: { fontSize: 10, color: '#666', marginTop: 4, textAlign: 'right' },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
@@ -510,13 +541,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  dateDivider: {
-    alignItems: 'center',
-    marginVertical: 16,
-  },
+  dateDivider: { alignItems: 'center', marginVertical: 16 },
   dateDividerText: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    color: '#fff',
+    backgroundColor: '#e0e0e0',
+    color: '#000',
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
@@ -529,18 +557,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
   },
-  loadingText: {
-    marginLeft: 8,
-    color: '#ccc',
-    fontSize: 12,
-  },
-  noMoreMessagesContainer: {
-    padding: 16,
-    alignItems: 'center',
-  },
+  loadingText: { marginLeft: 8, color: '#ccc', fontSize: 12 },
+  noMoreMessagesContainer: { padding: 16, alignItems: 'center' },
   noMoreMessagesText: {
-    color: '#ccc',
+    color: '#000',
     fontSize: 12,
+    backgroundColor: '#ccc',
+    borderRadius: 12,
+    paddingHorizontal: 5,
+    paddingVertical: 3,
   },
   scrollToBottomButton: {
     position: 'absolute',

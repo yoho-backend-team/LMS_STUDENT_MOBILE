@@ -29,10 +29,10 @@ import {
   TicketDetailScreen,
 } from '../screens';
 import StudentDrawer from '../tabs/StudentDrawer';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import ChatbotScreen from '~/screens/ChatbotScreen/chatbot';
 import TaskCard from '~/components/courses/TaskCard';
 import SessionExpiredModal from '~/components/Sessionexpired/sessionexpire';
+import { clearStudentData, getStudentToken } from '~/utils/storage';
 import Attendanceone from '~/screens/attendance-screen/Attendanceone';
 import CommunityList from '~/screens/community-screen/CommunityList';
 
@@ -70,13 +70,11 @@ const Routes = () => {
   const Stack: any = createNativeStackNavigator<RootStackParamList>();
   const navigation =
     useNavigation<import('@react-navigation/native').NavigationProp<RootStackParamList>>();
-
   const [showSessionModal, setShowSessionModal] = useState(false);
 
   const handleSessionExpired = async () => {
     try {
-      await AsyncStorage.removeItem('AuthStudentToken');
-      await AsyncStorage.removeItem('StudentData');
+      await clearStudentData();
       setShowSessionModal(false);
       navigation.reset({
         index: 0,
@@ -100,7 +98,7 @@ const Routes = () => {
   useEffect(() => {
     const checkAuthState = async () => {
       try {
-        const token = await AsyncStorage.getItem('AuthStudentToken');
+        const token = await getStudentToken();
         const isLoggedIn = token ? true : false;
         if (isLoggedIn) {
           navigation.reset({
