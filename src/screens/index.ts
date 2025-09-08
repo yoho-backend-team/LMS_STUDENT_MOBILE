@@ -11,18 +11,22 @@ import CommunityByIdScreen from './community-screen/CommunityById';
 import CouresScreen from './course-screen/Courses';
 import CourseByIdScreen from './course-screen/CourseById';
 import FAQScreen from './faq-screen/FAQ';
-import HelpCenterScreen from './helpCenter-screen/HelpCenter';
+// import HelpCenterScreen from './helpCenter-screen/HelpCenter';
+import HelpCentres from './helpCenter-screen/HelpCenters';
 import HomeScreen from './home-screen/Home';
 import NotificationsScreen from './notification-screen/Notifications';
 // import PaymentScreen from './payment-screen/Payment';
 import PaymentScreens from './payment-screen/Payments';
 import PlacementScreen from './placement-screen/Placement';
 import ProfileScreen from './profile-screen/Profile';
-import CreateTicketScreen from './ticket-screen/CreateTicket';
-import TicketByIdScreen from './ticket-screen/TicketById';
-import TicketsScreen from './ticket-screen/Tickets';
+// import CreateTicketScreen from './ticket-screen/CreateTicket';
+// import TicketByIdScreen from './ticket-screen/TicketById';
+// import TicketsScreen from './ticket-screen/Tickets';
 import SpokenEnglishScreen from './spoken-english-screen/SpokenEnglish';
  import Activity from './activityLogs-screen/Activity';
+ import TicketListScreen from './tickets/TicketListScreen';
+import TicketCreateScreen from './tickets/TicketCreateScreen';
+import TicketDetailScreen from './tickets/TicketDetailScreen';
 export {
    Activity,
   // ActivityLogsScreen,
@@ -33,10 +37,11 @@ export {
   CommunityByIdScreen,
   CouresScreen,
   CourseByIdScreen,
-  CreateTicketScreen,
+  // CreateTicketScreen,
   EmailVerificationScreen,
   FAQScreen,
-  HelpCenterScreen,
+  // HelpCenterScreen,
+   HelpCentres,
   HomeScreen,
   LoginScreen,
   NotificationsScreen,
@@ -46,7 +51,10 @@ export {
   PlacementScreen,
   ProfileScreen,
   ResetPasswordScreen,
-  TicketByIdScreen,
-  TicketsScreen,
+  // TicketByIdScreen,
+  // TicketsScreen,
   SpokenEnglishScreen,
+  TicketListScreen,
+  TicketCreateScreen,
+  TicketDetailScreen,
 };
