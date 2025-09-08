@@ -10,7 +10,7 @@ import {
   // CommunityByIdScreen,
   CouresScreen,
   CourseByIdScreen,
-  CreateTicketScreen,
+  // CreateTicketScreen,
   EmailVerificationScreen,
   FAQScreen,
   HelpCenterScreen,
@@ -22,8 +22,11 @@ import {
   ProfileScreen,
   ResetPasswordScreen,
   SpokenEnglishScreen,
-  TicketByIdScreen,
-  TicketsScreen,
+  // TicketByIdScreen,
+  // TicketsScreen,
+  TicketListScreen,
+  TicketCreateScreen,
+  TicketDetailScreen,
 } from '../screens';
 import StudentDrawer from '../tabs/StudentDrawer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -46,9 +49,9 @@ const Routes = () => {
     Payment: undefined;
     Helpcenter: undefined;
     ActivityLog: undefined;
-    TicketsScreen: undefined;
-    TicketViewScreen: undefined;
-    CreateTicket: undefined;
+    // TicketsScreen: undefined;
+    // TicketViewScreen: undefined;
+    // CreateTicket: undefined;
     ClassesScreen: undefined;
     ClassByIdScreen: undefined;
     ClassViewScreen: undefined;
@@ -59,6 +62,9 @@ const Routes = () => {
     Profile: undefined;
     CommunitiesScreen: undefined;
     CommunityViewScreen: undefined;
+      TicketListScreen: undefined;
+  TicketCreateScreen:undefined;
+  TicketDetailScreen:undefined;
   };
 
   const Stack: any = createNativeStackNavigator<RootStackParamList>();
@@ -132,9 +138,14 @@ const Routes = () => {
         <Stack.Screen name="Payment" component={PaymentScreen} />
         <Stack.Screen name="Helpcenter" component={HelpCenterScreen} />
         <Stack.Screen name="ActivityLog" component={ActivityLogsScreen} />
-        <Stack.Screen name="TicketsScreen" component={TicketsScreen} />
+        {/* <Stack.Screen name="TicketsScreen" component={TicketsScreen} />
         <Stack.Screen name="TicketViewScreen" component={TicketByIdScreen} />
-        <Stack.Screen name="CreateTicket" component={CreateTicketScreen} />
+        <Stack.Screen name="CreateTicket" component={CreateTicketScreen} /> */}
+        
+        <Stack.Screen name="TicketsScreen" component={TicketListScreen} />
+        <Stack.Screen name="TicketCreateScreen" component={TicketCreateScreen} />
+        <Stack.Screen name="TicketDetailScreen" component={TicketDetailScreen} />
+
         <Stack.Screen name="ClassesScreen" component={ClassesScreen} />
         <Stack.Screen name="ClassViewScreen" component={ClassByIdScreen} />
         <Stack.Screen name="CoursesScreen" component={CouresScreen} />

@@ -17,13 +17,17 @@ import NotificationsScreen from './notification-screen/Notifications';
 import PaymentScreen from './payment-screen/Payment';
 import PlacementScreen from './placement-screen/Placement';
 import ProfileScreen from './profile-screen/Profile';
-import CreateTicketScreen from './ticket-screen/CreateTicket';
-import TicketByIdScreen from './ticket-screen/TicketById';
-import TicketsScreen from './ticket-screen/Tickets';
+// import CreateTicketScreen from './ticket-screen/CreateTicket';
+// import TicketByIdScreen from './ticket-screen/TicketById';
+// import TicketsScreen from './ticket-screen/Tickets';
 import SpokenEnglishScreen from './spoken-english-screen/SpokenEnglish';
 import AttendanceoneScreen from './attendance-screen/Attendanceone';
 import CommunityListScreen from './community-screen/CommunityList';
 import ChatScreen from './community-screen/ChatScreen';
+import TicketListScreen from './tickets/TicketListScreen';
+import TicketCreateScreen from './tickets/TicketCreateScreen';
+import TicketDetailScreen from './tickets/TicketDetailScreen';
+
 export {
   ActivityLogsScreen,
   // AttendanceScreen,
@@ -33,7 +37,7 @@ export {
   CommunityByIdScreen,
   CouresScreen,
   CourseByIdScreen,
-  CreateTicketScreen,
+  // CreateTicketScreen,
   EmailVerificationScreen,
   FAQScreen,
   HelpCenterScreen,
@@ -45,10 +49,13 @@ export {
   PlacementScreen,
   ProfileScreen,
   ResetPasswordScreen,
-  TicketByIdScreen,
-  TicketsScreen,
+  // TicketByIdScreen,
+  // TicketsScreen,
   SpokenEnglishScreen,
   AttendanceoneScreen,
   CommunityListScreen,
-  ChatScreen
+  ChatScreen,
+  TicketListScreen,
+  TicketCreateScreen,
+  TicketDetailScreen,
 };

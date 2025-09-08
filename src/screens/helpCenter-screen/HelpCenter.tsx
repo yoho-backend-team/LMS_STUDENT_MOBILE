@@ -84,13 +84,13 @@ const HelpCenter = () => {
     });
   };
 
-  // === Detail page ===
+  
   if (selectedItem) {
     return (
       <SafeAreaView style={{ flex: 1 }}>
         <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
         <ScrollView style={styles.container}>
-          {/* Header with back button */}
+        
           <View style={styles.headerRow}>
             <TouchableOpacity
               onPress={() => {
@@ -106,7 +106,7 @@ const HelpCenter = () => {
             <Text style={{ ...FONTS.h1, color: COLORS.text_title }}>Learning Resources</Text>
           </View>
 
-          {/* Additional Info */}
+         
           <Text style={styles.sectionTitle}>Additional Information</Text>
           <Text style={styles.subtitle}>
             This section contains some dummy content. You can replace this with any relevant
@@ -114,7 +114,7 @@ const HelpCenter = () => {
             relevant information you want to display above the video link
           </Text>
 
-          {/* Video */}
+          
           {selectedItem.videolink && (
             <View style={styles.videoCard}>
               {showVideo ? (
@@ -205,7 +205,7 @@ const HelpCenter = () => {
         </ScrollView>
       </View>
 
-      {/* Search */}
+      
       <View style={styles.searchContainer}>
         <TextInput
           placeholder="Search"
@@ -215,7 +215,7 @@ const HelpCenter = () => {
         />
       </View>
 
-      {/* Pager */}
+    
       <PagerView
         ref={pagerRef}
         style={{ flex: 1 }}
