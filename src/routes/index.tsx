@@ -25,6 +25,7 @@ import {
   TicketsScreen,
   Notify,
   Class,
+  FaqPage,
 } from '../screens';
 import StudentDrawer from '../tabs/StudentDrawer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -60,6 +61,7 @@ const Routes = () => {
     SpokenEnglish: undefined;
     Notify: undefined;
     Class: undefined;
+    FaqPage: undefined;
   };
 
   const Stack: any = createNativeStackNavigator<RootStackParamList>();
@@ -143,7 +145,8 @@ const Routes = () => {
         {/* <Stack.Screen name="Notification" component={NotificationsScreen} /> */}
         <Stack.Screen name="Placement" component={PlacementScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
-        <Stack.Screen name="FAQ" component={FAQScreen} />
+        {/* <Stack.Screen name="FAQ" component={FAQScreen} /> */}
+        <Stack.Screen name="FAQ" component={FaqPage} />
         <Stack.Screen name="CommunitiesScreen" component={CommunitiesScreen} />
         <Stack.Screen name="CommunityViewScreen" component={CommunityByIdScreen} />
         <Stack.Screen name="SpokenEnglish" component={SpokenEnglishScreen} />

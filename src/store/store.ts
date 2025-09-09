@@ -11,9 +11,10 @@ import ActivitySlice from '../features/reducer/activitylog/reducers/ActivitySlic
 import PaymentSlice from '../features/payments/reducer/paymentSlice';
 import ClassSlice from '../features/classes/reducers/classslice';
 import ClassIdSlice from '../features/classid/reducers/classidslice';
-import FaqSlice from '../features/faq/reducers/faqSlice';
+// import FaqSlice from '../features/faq/reducers/faqSlice';
 import Community from '../features/Community/reducers.ts/ModuleSlice';
 import AttendanceSlice from '../features/Attendance/reducers/attendanceSlice';
+import faqSlice from '../features/faq/reducers/FAQSlice';
 
 const store = configureStore({
   reducer: {
@@ -29,9 +30,10 @@ const store = configureStore({
     PaymentSlice: PaymentSlice,
     ClassSlice: ClassSlice,
     ClassIdSlice: ClassIdSlice,
-    faqSlice: FaqSlice,
+    // faqSlice: FaqSlice,
     Community: Community,
     AttendanceSlice: AttendanceSlice,
+    FAQSlice: faqSlice,
   },
 });
 
