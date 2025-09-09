@@ -64,10 +64,11 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
     }
   };
 
-  const isCompleted = task.status === 'completed';
-  const instructorName = task.instructor?.full_name || 
-                         `${task.instructor?.first_name || ''} ${task.instructor?.last_name || ''}`.trim() || 
-                         'Instructor';
+  const isCompleted = task?.status === 'completed';
+  const instructorName =
+    task?.instructor?.full_name ||
+    `${task?.instructor?.first_name || ''} ${task?.instructor?.last_name || ''}`.trim() ||
+    'Instructor';
 
   return (
     <>
@@ -88,23 +89,25 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
 
             <View style={styles.textColumn}>
               <Text style={styles.taskText}>Task Name</Text>
-              <Text style={styles.taskValue}>{task.task_name}</Text>
+              <Text style={styles.taskValue}>{task?.task_name}</Text>
             </View>
 
             <View style={styles.textColumn}>
               <Text style={styles.taskText}>Deadline</Text>
-              <Text style={styles.taskValue}>{formatDateMonthandYear(task.deadline)}</Text>
+              <Text style={styles.taskValue}>{formatDateMonthandYear(task?.deadline)}</Text>
             </View>
 
             <View style={styles.textColumn}>
               <Text style={styles.taskText}>Question</Text>
               <View style={styles.questionBox}>
-                <Text style={styles.questionText}>{task.question}</Text>
+                <Text style={styles.questionText}>{task?.question}</Text>
               </View>
 
               {!isCompleted && (
                 <>
-                  <TouchableOpacity onPress={pickDocument} style={{ borderRadius: 8, marginTop: 6, alignSelf: 'flex-start' }}>
+                  <TouchableOpacity
+                    onPress={pickDocument}
+                    style={{ borderRadius: 8, marginTop: 6, alignSelf: 'flex-start' }}>
                     <LinearGradient
                       colors={['#7B00FF', '#B200FF']}
                       start={{ x: 0.134, y: 0.021 }}
@@ -115,7 +118,11 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
                     </LinearGradient>
                   </TouchableOpacity>
 
-                  <Text style={[styles.fileName, !selectedFile && { color: '#9CA3AF', fontStyle: 'italic' }]}>
+                  <Text
+                    style={[
+                      styles.fileName,
+                      !selectedFile && { color: '#9CA3AF', fontStyle: 'italic' },
+                    ]}>
                     {selectedFile ? selectedFile : 'No file selected'}
                   </Text>
                 </>
@@ -129,10 +136,9 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
                   style={[
                     styles.statusButtonInsideBox,
                     isCompleted ? styles.completedStatus : styles.pendingStatus,
-                  ]}
-                >
+                  ]}>
                   <Text style={styles.statusTextInside}>
-                    {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
+                    {task?.status?.charAt(0)?.toUpperCase() + task?.status?.slice(1)}
                   </Text>
                 </View>
               </View>
@@ -141,39 +147,37 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
             <View style={styles.textColumn}>
               <Text style={styles.taskText}>Score</Text>
               <Text style={styles.taskValue}>
-                {task.mark !== null && task.mark !== undefined
-                  ? `${task.mark} / 10`
+                {task?.mark !== null && task?.mark !== undefined
+                  ? `${task?.mark} / 10`
                   : 'Not graded yet'}
               </Text>
             </View>
 
-            {task.remark && (
+            {task?.remark && (
               <View style={styles.textColumn}>
                 <Text style={styles.taskText}>Instructor Remark</Text>
                 <View style={styles.questionBox}>
-                  <Text style={styles.questionText}>{task.remark}</Text>
+                  <Text style={styles.questionText}>{task?.remark}</Text>
                 </View>
               </View>
             )}
 
-            {isCompleted && task.answer_file && (
+            {isCompleted && task?.answer_file && (
               <View style={styles.textColumn}>
                 <Text style={styles.taskText}>Submitted File</Text>
                 <View style={styles.viewNotesBox}>
-                  <Text style={styles.notesText}>{task.answer_file}</Text>
+                  <Text style={styles.notesText}>{task?.answer_file}</Text>
                   <TouchableOpacity
                     style={{ borderRadius: 8, marginLeft: 10 }}
                     onPress={() => {
                       Alert.alert('View File', 'Opening submitted file...');
                       // Here you would typically open the file
-                    }}
-                  >
+                    }}>
                     <LinearGradient
                       colors={['#7B00FF', '#B200FF']}
                       start={{ x: 0.134, y: 0.021 }}
                       end={{ x: 1, y: 1 }}
-                      style={styles.uploadButtonGradient} 
-                    >
+                      style={styles.uploadButtonGradient}>
                       <Text style={styles.uploadText}>View</Text>
                     </LinearGradient>
                   </TouchableOpacity>
@@ -183,9 +187,7 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
 
             {!isCompleted && (
               <View style={styles.submitContainers}>
-                <TouchableOpacity
-                  style={[styles.cancelButton]}
-                  onPress={() => navigation.goBack()}>
+                <TouchableOpacity style={[styles.cancelButton]} onPress={() => navigation.goBack()}>
                   <Text style={styles.cancelText}>Cancel</Text>
                 </TouchableOpacity>
 
@@ -201,14 +203,12 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
                       navigation.goBack();
                     }
                   }}
-                  style={{ flex: 1, borderRadius: 8 }}
-                >
+                  style={{ flex: 1, borderRadius: 8 }}>
                   <LinearGradient
                     colors={selectedFile ? ['#7B00FF', '#B200FF'] : ['#9CA3AF', '#9CA3AF']}
                     start={{ x: 0.134, y: 0.021 }}
                     end={{ x: 1, y: 1 }}
-                    style={styles.submitButtonGradient}
-                  >
+                    style={styles.submitButtonGradient}>
                     <Text style={styles.submitText}>Submit</Text>
                   </LinearGradient>
                 </TouchableOpacity>
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E5E7EB',
     flex: 1,
-    gap: 5
+    gap: 5,
   },
   textColumn: {
     flexDirection: 'column',

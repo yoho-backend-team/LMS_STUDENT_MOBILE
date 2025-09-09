@@ -266,7 +266,7 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
                   onPress={() => navigation.navigate('TaskCard', { task })}>
                   <View style={styles.textRow}>
                     <Text style={styles.taskText}>Task Name</Text>
-                    <Text style={styles.taskValue}>{task.task_name.substring(0, 15)}</Text>
+                    <Text style={styles.taskValue}>{task?.task_name.substring(0, 15)}</Text>
                   </View>
 
                   <View style={styles.textRow}>
@@ -279,10 +279,10 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
                     <View
                       style={[
                         styles.statusButton,
-                        task.status === 'completed' ? styles.completed : styles.pending,
+                        task?.status === 'completed' ? styles.completed : styles.pending,
                       ]}>
                       <Text style={styles.statusText}>
-                        {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
+                        {task?.status?.charAt(0).toUpperCase() + task?.status?.slice(1)}
                       </Text>
                     </View>
                   </View>

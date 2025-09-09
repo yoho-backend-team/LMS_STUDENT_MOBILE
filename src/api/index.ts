@@ -27,7 +27,12 @@ class Client {
           'student'
         ),
 
-      getTask: (params: any) => httpClient.get(HTTP_END_POINTS.course.get_task, params, 'student'),
+      getTask: (params: any) =>
+        httpClient.get(
+          HTTP_END_POINTS.course.get_task.replace(':course', params?.course),
+          params,
+          'student'
+        ),
       taskUpdate: (data: any) =>
         httpClient.update(HTTP_END_POINTS.course.updatetask, data, 'student'),
     },
