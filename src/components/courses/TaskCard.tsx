@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  TouchableOpacity, 
+  Image, 
+  Alert, 
+  ScrollView 
+} from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, icons } from '~/constants';
@@ -8,6 +16,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import toast from '~/utils/toasts';
 import { LinearGradient } from 'expo-linear-gradient';
 import { formatDateMonthandYear } from '~/utils/formatDate';
+import { uploadticketfile } from '~/features/Ticket/Services';
+import { updatetaskdata } from '~/features/Courses/Services';
+import { getFileUrl } from '~/utils/imageUtils';
+import { TrendingUpDown } from 'lucide-react-native';
 
 type RootStackParamList = {
   TaskCard: { task: any };
@@ -32,7 +44,6 @@ type Task = {
       address2: string;
       pincode: number;
     };
-    // Add other instructor properties as needed
   };
   question: string;
   answer_file: string | null;
@@ -46,7 +57,8 @@ type Props = NativeStackScreenProps<RootStackParamList, 'TaskCard'>;
 
 const TaskCard: React.FC<Props> = ({ route, navigation }) => {
   const { task } = route.params;
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<any>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const pickDocument = async () => {
     try {
@@ -57,10 +69,61 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const file = result.assets[0];
-        setSelectedFile(file.name);
+        setSelectedFile(file);
       }
     } catch (error) {
       console.log('Error picking document:', error);
+      toast.error('Error', 'Failed to select file');
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!selectedFile) {
+      toast.error('Missing File', 'Please upload a file before submitting.');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+     
+      const formData = new FormData();
+      formData.append('file', {
+        uri: selectedFile.uri,
+        name: selectedFile.name,
+        type: selectedFile.mimeType || 'application/octet-stream',
+      } as any);
+
+    
+      const uploadRes = await uploadticketfile(formData);
+
+      console.log(uploadRes,'uploaded successdssdd')
+       const taskUpdateData = {
+        taskid: task._id,
+        file: getFileUrl,
+        is_active: !task?.is_active,
+        submittedAt: new Date().toISOString(),
+      }
+
+      console.log(taskUpdateData,'updatetaskDataaa')
+
+      const response = await updatetaskdata(taskUpdateData)
+      console.log(response, 'update api response')
+
+      
+      if (uploadRes ) {
+        toast.success('Success', 'File uploaded successfully!');
+        navigation.goBack();
+      } else {
+       
+        const errorMessage = uploadRes || 'Failed to upload file';
+        toast.error('Upload Failed', errorMessage);
+      }
+    } catch (error: any) {
+      console.log('Error uploading file:', error);
+      const errorMessage = error.message || 'Failed to upload file';
+      toast.error('Error', errorMessage);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -81,140 +144,151 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
             <Text style={styles.headerTitle}>Assessment Page</Text>
           </View>
 
-          <View style={styles.taskCard}>
-            <View style={styles.textColumn}>
-              <Text style={styles.taskText}>Instructor Name</Text>
-              <Text style={styles.taskValue}>{instructorName}</Text>
-            </View>
-
-            <View style={styles.textColumn}>
-              <Text style={styles.taskText}>Task Name</Text>
-              <Text style={styles.taskValue}>{task?.task_name}</Text>
-            </View>
-
-            <View style={styles.textColumn}>
-              <Text style={styles.taskText}>Deadline</Text>
-              <Text style={styles.taskValue}>{formatDateMonthandYear(task?.deadline)}</Text>
-            </View>
-
-            <View style={styles.textColumn}>
-              <Text style={styles.taskText}>Question</Text>
-              <View style={styles.questionBox}>
-                <Text style={styles.questionText}>{task?.question}</Text>
+          <ScrollView 
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollViewContent}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.taskCard}>
+              <View style={styles.textColumn}>
+                <Text style={styles.taskLabel}>Instructor Name</Text>
+                <Text style={styles.taskValue}>{task?.instructor?.full_name?.substring(0, 15) || 'N/A'}</Text>
               </View>
+              <View style={styles.textColumn}>
+                <Text style={styles.taskLabel}>Type</Text>
+                <Text style={styles.taskValue}>{task?.task_type?.substring(0, 15) || 'N/A'}</Text>
+              </View>
+
+              <View style={styles.textColumn}>
+                <Text style={styles.taskLabel}>Task Name</Text>
+                <Text style={styles.taskValue}>{task?.task_name || 'N/A'}</Text>
+              </View>
+
+              <View style={styles.textColumn}>
+                <Text style={styles.taskLabel}>Deadline</Text>
+                <Text style={styles.taskValue}>{formatDateMonthandYear(task?.deadline) || 'N/A'}</Text>
+              </View>
+
+              <View style={styles.textColumn}>
+                <Text style={styles.taskLabel}>Question</Text>
+                <View style={styles.questionBox}>
+                  <Text style={styles.questionText}>{task?.question || 'No question provided'}</Text>
+                </View>
+
+                {!isCompleted && (
+                  <>
+                    <TouchableOpacity
+                      onPress={pickDocument}
+                      style={{ borderRadius: 8, marginTop: 6, alignSelf: 'flex-start' }}
+                      disabled={isUploading}
+                    >
+                      <LinearGradient
+                        colors={['#7B00FF', '#B200FF']}
+                        start={{ x: 0.134, y: 0.021 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.uploadButtonGradient}>
+                        <Ionicons name="cloud-upload-outline" size={20} color="#fff" />
+                        <Text style={styles.uploadText}>Upload</Text>
+                      </LinearGradient>
+                    </TouchableOpacity>
+
+                    <Text
+                      style={[
+                        styles.fileName,
+                        !selectedFile && { color: '#9CA3AF', fontStyle: 'italic' },
+                      ]}>
+                      {selectedFile ? selectedFile.name : 'No file selected'}
+                    </Text>
+                  </>
+                )}
+              </View>
+
+              <View style={styles.textColumn}>
+                <Text style={styles.taskLabel}>Status</Text>
+                <View style={styles.taskValueBox}>
+                  <View
+                    style={[
+                      styles.statusButtonInsideBox,
+                      isCompleted ? styles.completedStatus : styles.pendingStatus,
+                    ]}>
+                    <Text style={styles.statusTextInside}>
+                      {isCompleted ? 'Completed' : 'Pending'}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              <View style={styles.textColumn}>
+                <Text style={styles.taskLabel}>Score</Text>
+                <Text style={styles.taskValue}>
+                  {task?.mark !== null && task?.mark !== undefined
+                    ? `${task?.mark} / 10`
+                    : 'Not graded yet'}
+                </Text>
+              </View>
+
+              {task?.remark && (
+                <View style={styles.textColumn}>
+                  <Text style={styles.taskLabel}>Instructor Remark</Text>
+                  <View style={styles.questionBox}>
+                    <Text style={styles.questionText}>{task?.remark}</Text>
+                  </View>
+                </View>
+              )}
+
+              {isCompleted && task?.answer_file && (
+                <View style={styles.textColumn}>
+                  <Text style={styles.taskLabel}>Submitted File</Text>
+                  <View style={styles.viewNotesBox}>
+                    <Text style={styles.notesText}>{task?.answer_file}</Text>
+                    <TouchableOpacity
+                      style={{ borderRadius: 8, marginLeft: 10 }}
+                      onPress={() => {
+                        Alert.alert('View File', 'Opening submitted file...');
+                        // Here you would typically open the file
+                      }}>
+                      <LinearGradient
+                        colors={['#7B00FF', '#B200FF']}
+                        start={{ x: 0.134, y: 0.021 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.uploadButtonGradient}>
+                        <Text style={styles.uploadText}>View</Text>
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
 
               {!isCompleted && (
-                <>
-                  <TouchableOpacity
-                    onPress={pickDocument}
-                    style={{ borderRadius: 8, marginTop: 6, alignSelf: 'flex-start' }}>
-                    <LinearGradient
-                      colors={['#7B00FF', '#B200FF']}
-                      start={{ x: 0.134, y: 0.021 }}
-                      end={{ x: 1, y: 1 }}
-                      style={styles.uploadButtonGradient}>
-                      <Ionicons name="cloud-upload-outline" size={20} color="#fff" />
-                      <Text style={styles.uploadText}>Upload</Text>
-                    </LinearGradient>
+                <View style={styles.submitContainers}>
+                  <TouchableOpacity 
+                    style={[styles.cancelButton]} 
+                    onPress={() => navigation.goBack()}
+                    disabled={isUploading}
+                  >
+                    <Text style={styles.cancelText}>Cancel</Text>
                   </TouchableOpacity>
 
-                  <Text
-                    style={[
-                      styles.fileName,
-                      !selectedFile && { color: '#9CA3AF', fontStyle: 'italic' },
-                    ]}>
-                    {selectedFile ? selectedFile : 'No file selected'}
-                  </Text>
-                </>
+                  <TouchableOpacity
+                    disabled={!selectedFile || isUploading}
+                    onPress={handleSubmit}
+                    style={{ flex: 1, borderRadius: 8 }}
+                  >
+                    <LinearGradient
+                      colors={selectedFile && !isUploading ? ['#7B00FF', '#B200FF'] : ['#9CA3AF', '#9CA3AF']}
+                      start={{ x: 0.134, y: 0.021 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.submitButtonGradient}
+                    >
+                      <Text style={styles.submitText}>
+                        {isUploading ? 'Uploading...' : 'Submit'}
+                      </Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                </View>
               )}
             </View>
-
-            <View style={styles.textColumn}>
-              <Text style={styles.taskText}>Status</Text>
-              <View style={styles.taskValueBox}>
-                <View
-                  style={[
-                    styles.statusButtonInsideBox,
-                    isCompleted ? styles.completedStatus : styles.pendingStatus,
-                  ]}>
-                  <Text style={styles.statusTextInside}>
-                    {task?.status?.charAt(0)?.toUpperCase() + task?.status?.slice(1)}
-                  </Text>
-                </View>
-              </View>
-            </View>
-
-            <View style={styles.textColumn}>
-              <Text style={styles.taskText}>Score</Text>
-              <Text style={styles.taskValue}>
-                {task?.mark !== null && task?.mark !== undefined
-                  ? `${task?.mark} / 10`
-                  : 'Not graded yet'}
-              </Text>
-            </View>
-
-            {task?.remark && (
-              <View style={styles.textColumn}>
-                <Text style={styles.taskText}>Instructor Remark</Text>
-                <View style={styles.questionBox}>
-                  <Text style={styles.questionText}>{task?.remark}</Text>
-                </View>
-              </View>
-            )}
-
-            {isCompleted && task?.answer_file && (
-              <View style={styles.textColumn}>
-                <Text style={styles.taskText}>Submitted File</Text>
-                <View style={styles.viewNotesBox}>
-                  <Text style={styles.notesText}>{task?.answer_file}</Text>
-                  <TouchableOpacity
-                    style={{ borderRadius: 8, marginLeft: 10 }}
-                    onPress={() => {
-                      Alert.alert('View File', 'Opening submitted file...');
-                      // Here you would typically open the file
-                    }}>
-                    <LinearGradient
-                      colors={['#7B00FF', '#B200FF']}
-                      start={{ x: 0.134, y: 0.021 }}
-                      end={{ x: 1, y: 1 }}
-                      style={styles.uploadButtonGradient}>
-                      <Text style={styles.uploadText}>View</Text>
-                    </LinearGradient>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            )}
-
-            {!isCompleted && (
-              <View style={styles.submitContainers}>
-                <TouchableOpacity style={[styles.cancelButton]} onPress={() => navigation.goBack()}>
-                  <Text style={styles.cancelText}>Cancel</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  disabled={!selectedFile}
-                  onPress={() => {
-                    if (!selectedFile) {
-                      toast.error('Missing File', 'Please upload a file before submitting.');
-                      return;
-                    } else {
-                      // Here you would typically submit the file to your API
-                      toast.success('Success', 'File uploaded successfully!');
-                      navigation.goBack();
-                    }
-                  }}
-                  style={{ flex: 1, borderRadius: 8 }}>
-                  <LinearGradient
-                    colors={selectedFile ? ['#7B00FF', '#B200FF'] : ['#9CA3AF', '#9CA3AF']}
-                    start={{ x: 0.134, y: 0.021 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.submitButtonGradient}>
-                    <Text style={styles.submitText}>Submit</Text>
-                  </LinearGradient>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
+          </ScrollView>
         </View>
       </SafeAreaView>
     </>
@@ -225,6 +299,13 @@ export default TaskCard;
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16 },
+  scrollView: {
+    flex: 1,
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -240,7 +321,6 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     marginTop: 5,
   },
-
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -266,7 +346,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     marginBottom: 12,
   },
-  taskText: {
+  taskLabel: {
     fontSize: 14,
     color: '#000',
     fontWeight: 'bold',
@@ -274,7 +354,7 @@ const styles = StyleSheet.create({
   },
   taskValue: {
     fontSize: 16,
-    color: '#6B7280',
+    color: '##6B7280',
     backgroundColor: '#F3F4F6',
     paddingVertical: 8,
     paddingHorizontal: 12,

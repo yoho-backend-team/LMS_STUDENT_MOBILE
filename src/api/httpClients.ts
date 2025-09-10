@@ -69,6 +69,15 @@ class HttpClient {
     return response;
   }
 
+  async patch(url: string, data?: any, userType?: string) {
+    const response = await Axios.patch(url, data, {
+      headers: {
+        'User-Type': userType,
+      },
+    });
+    return response;
+  }
+
   async delete(url: string, data?: { uuid: string }, userType?: string) {
     const response = await Axios.delete(url, {
       headers: {
