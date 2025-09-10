@@ -1,13 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TouchableOpacity, 
-  Image, 
-  Alert, 
-  ScrollView 
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, ScrollView } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, icons } from '~/constants';
@@ -85,7 +77,6 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
 
     setIsUploading(true);
     try {
-     
       const formData = new FormData();
       formData.append('file', {
         uri: selectedFile.uri,
@@ -93,28 +84,23 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
         type: selectedFile.mimeType || 'application/octet-stream',
       } as any);
 
-    
       const uploadRes = await uploadticketfile(formData);
 
-      console.log(uploadRes,'uploaded successdssdd')
-       const taskUpdateData = {
-        taskid: task._id,
-        file: getFileUrl,
-        is_active: !task?.is_active,
-        submittedAt: new Date().toISOString(),
-      }
-
-      console.log(taskUpdateData,'updatetaskDataaa')
-
-      const response = await updatetaskdata(taskUpdateData)
-      console.log(response, 'update api response')
-
-      
-      if (uploadRes ) {
+      if (uploadRes) {
         toast.success('Success', 'File uploaded successfully!');
-        navigation.goBack();
+        const taskUpdateData = {
+          taskid: task._id,
+          file: getFileUrl(uploadRes?.data?.data?.file),
+          is_active: true,
+          submittedAt: new Date().toISOString(),
+        };
+
+        const response = await updatetaskdata(taskUpdateData);
+        if (response) {
+          toast.success('Task Updated', 'Your task has been updated successfully.');
+          navigation.goBack();
+        }
       } else {
-       
         const errorMessage = uploadRes || 'Failed to upload file';
         toast.error('Upload Failed', errorMessage);
       }
@@ -127,11 +113,7 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
     }
   };
 
-  const isCompleted = task?.status === 'completed';
-  const instructorName =
-    task?.instructor?.full_name ||
-    `${task?.instructor?.first_name || ''} ${task?.instructor?.last_name || ''}`.trim() ||
-    'Instructor';
+  const isCompleted = task?.is_active === true ? true : false;
 
   return (
     <>
@@ -144,15 +126,16 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
             <Text style={styles.headerTitle}>Assessment Page</Text>
           </View>
 
-          <ScrollView 
+          <ScrollView
             style={styles.scrollView}
             contentContainerStyle={styles.scrollViewContent}
-            showsVerticalScrollIndicator={false}
-          >
+            showsVerticalScrollIndicator={false}>
             <View style={styles.taskCard}>
               <View style={styles.textColumn}>
                 <Text style={styles.taskLabel}>Instructor Name</Text>
-                <Text style={styles.taskValue}>{task?.instructor?.full_name?.substring(0, 15) || 'N/A'}</Text>
+                <Text style={styles.taskValue}>
+                  {task?.instructor?.full_name?.substring(0, 15) || 'N/A'}
+                </Text>
               </View>
               <View style={styles.textColumn}>
                 <Text style={styles.taskLabel}>Type</Text>
@@ -166,13 +149,17 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
 
               <View style={styles.textColumn}>
                 <Text style={styles.taskLabel}>Deadline</Text>
-                <Text style={styles.taskValue}>{formatDateMonthandYear(task?.deadline) || 'N/A'}</Text>
+                <Text style={styles.taskValue}>
+                  {formatDateMonthandYear(task?.deadline) || 'N/A'}
+                </Text>
               </View>
 
               <View style={styles.textColumn}>
                 <Text style={styles.taskLabel}>Question</Text>
                 <View style={styles.questionBox}>
-                  <Text style={styles.questionText}>{task?.question || 'No question provided'}</Text>
+                  <Text style={styles.questionText}>
+                    {task?.question || 'No question provided'}
+                  </Text>
                 </View>
 
                 {!isCompleted && (
@@ -180,8 +167,7 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
                     <TouchableOpacity
                       onPress={pickDocument}
                       style={{ borderRadius: 8, marginTop: 6, alignSelf: 'flex-start' }}
-                      disabled={isUploading}
-                    >
+                      disabled={isUploading}>
                       <LinearGradient
                         colors={['#7B00FF', '#B200FF']}
                         start={{ x: 0.134, y: 0.021 }}
@@ -261,25 +247,26 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
 
               {!isCompleted && (
                 <View style={styles.submitContainers}>
-                  <TouchableOpacity 
-                    style={[styles.cancelButton]} 
+                  <TouchableOpacity
+                    style={[styles.cancelButton]}
                     onPress={() => navigation.goBack()}
-                    disabled={isUploading}
-                  >
+                    disabled={isUploading}>
                     <Text style={styles.cancelText}>Cancel</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
                     disabled={!selectedFile || isUploading}
                     onPress={handleSubmit}
-                    style={{ flex: 1, borderRadius: 8 }}
-                  >
+                    style={{ flex: 1, borderRadius: 8 }}>
                     <LinearGradient
-                      colors={selectedFile && !isUploading ? ['#7B00FF', '#B200FF'] : ['#9CA3AF', '#9CA3AF']}
+                      colors={
+                        selectedFile && !isUploading
+                          ? ['#7B00FF', '#B200FF']
+                          : ['#9CA3AF', '#9CA3AF']
+                      }
                       start={{ x: 0.134, y: 0.021 }}
                       end={{ x: 1, y: 1 }}
-                      style={styles.submitButtonGradient}
-                    >
+                      style={styles.submitButtonGradient}>
                       <Text style={styles.submitText}>
                         {isUploading ? 'Uploading...' : 'Submit'}
                       </Text>

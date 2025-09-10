@@ -82,7 +82,6 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
     dispatch(getStudentTask({ course: course?._id }));
   }, [dispatch]);
 
-  console.log(taskData, 'taskdataaaaaaa');
   useEffect(() => {
     if (course?.coursemodules?.length) {
       const stepData = getSteps(course.coursemodules);
@@ -265,21 +264,21 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
                   <View style={styles.textRow}>
                     <Text style={styles.taskText}>Instructor Name</Text>
                     <Text style={styles.taskValue}>
-                      {task?.instructor?.full_name.substring(0, 15)}
+                      : {task?.instructor?.full_name.substring(0, 15)}
                     </Text>
                   </View>
                   <View style={styles.textRow}>
                     <Text style={styles.taskText}>Task Name</Text>
-                    <Text style={styles.taskValue}>{task?.task_name.substring(0, 15)}</Text>
+                    <Text style={styles.taskValue}>: {task?.task_name.substring(0, 15)}</Text>
                   </View>
                   <View style={styles.textRow}>
                     <Text style={styles.taskText}>Type</Text>
-                    <Text style={styles.taskValue}>{task?.task_type.substring(0, 15)}</Text>
+                    <Text style={styles.taskValue}>: {task?.task_type.substring(0, 15)}</Text>
                   </View>
 
                   <View style={styles.textRow}>
                     <Text style={styles.taskText}>Deadline</Text>
-                    <Text style={styles.taskValue}>{formatDateMonthandYear(task?.deadline)}</Text>
+                    <Text style={styles.taskValue}>: {formatDateMonthandYear(task?.deadline)}</Text>
                   </View>
 
                   <View style={styles.textRow}>
@@ -287,18 +286,17 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
                     <View
                       style={[
                         styles.statusButton,
-                        task?.is_active === 'true' ? styles.completed : styles.pending,
+                        task?.is_active === true ? styles.completed : styles.pending,
                       ]}>
                       <Text style={styles.statusText}>
-                        {/* {task?.is_active?.charAt(0).toUpperCase() + task?.is_active?.slice(1)} */}
-                        {!task?.is_active === true ? 'Completed' : 'Pending'}
+                        {task?.is_active === true ? 'Completed' : 'Pending'}
                       </Text>
                     </View>
                   </View>
                 </TouchableOpacity>
               ))
             ) : (
-              <Text style={{ textAlign: 'center', marginTop: 100 }}>"No tasks available"</Text>
+              <Text style={{ textAlign: 'center', marginTop: 100 }}>No tasks available</Text>
             )}
           </View>
         )}
@@ -479,7 +477,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     ...SHADOW,
   },
-  taskText: { fontSize: 18, color: '#716F6F', marginBottom: 6, width: '50%' },
+  taskText: { fontSize: 16, color: '#716F6F', marginBottom: 6, width: '50%' },
   taskValue: { fontSize: 16, color: '#716F6F' },
   statusButton: {
     marginLeft: 8,
