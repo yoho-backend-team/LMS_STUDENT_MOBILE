@@ -34,7 +34,7 @@ class Client {
           'student'
         ),
       taskUpdate: (data: any) =>
-        httpClient.update(HTTP_END_POINTS.course.updatetask, data, 'student'),
+        httpClient.patch(HTTP_END_POINTS.course.updatetask.replace(':taskid',data?.taskid), data, 'student'),
     },
 
     profile: {

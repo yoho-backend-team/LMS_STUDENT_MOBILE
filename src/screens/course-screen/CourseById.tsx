@@ -80,7 +80,7 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
   const taskData = useSelector(selectcoursetask);
   const [steps, setSteps] = useState<any[]>([]);
   const [currentModule, setCurrentModule] = useState<any>(null);
-
+console.log(taskData,'taskdataaaaaaa')
   useEffect(() => {
     dispatch(getStudentTask({ course: course?._id }));
   }, [dispatch]);
@@ -261,9 +261,17 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
                   key={task._id}
                   style={styles.taskCard}
                   onPress={() => navigation.navigate('TaskCard', { task })}>
+                     <View style={styles.textRow}>
+                    <Text style={styles.taskText}>Instructor Name</Text>
+                    <Text style={styles.taskValue}>{task?.instructor?.full_name.substring(0, 15)}</Text>
+                  </View>
                   <View style={styles.textRow}>
                     <Text style={styles.taskText}>Task Name</Text>
                     <Text style={styles.taskValue}>{task?.task_name.substring(0, 15)}</Text>
+                  </View>
+                  <View style={styles.textRow}>
+                    <Text style={styles.taskText}>Type</Text>
+                    <Text style={styles.taskValue}>{task?.task_type .substring(0, 15)}</Text>
                   </View>
 
                   <View style={styles.textRow}>
@@ -276,10 +284,11 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
                     <View
                       style={[
                         styles.statusButton,
-                        task?.status === 'completed' ? styles.completed : styles.pending,
+                        task?.is_active === 'true' ? styles.completed : styles.pending,
                       ]}>
                       <Text style={styles.statusText}>
-                        {task?.status?.charAt(0).toUpperCase() + task?.status?.slice(1)}
+                        {/* {task?.is_active?.charAt(0).toUpperCase() + task?.is_active?.slice(1)} */}
+                        {!task?.is_active === true ? 'Completed' : 'Pending'}
                       </Text>
                     </View>
                   </View>
