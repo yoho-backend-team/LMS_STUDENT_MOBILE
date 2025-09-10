@@ -20,6 +20,7 @@ import { EvilIcons, MaterialIcons } from '@expo/vector-icons';
 import toast from '~/utils/toasts';
 import { getStudentLoginClient } from '~/features/Authentication/services';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { saveStudentData } from '~/utils/storage';
 
 const Login = () => {
   const navigation = useNavigation<any>();
@@ -69,8 +70,7 @@ const Login = () => {
           if (response?.data?.step === 'otp') {
             navigation.navigate('OtpVerification' as never, { data: response?.data, email });
           } else {
-            await AsyncStorage.setItem('AuthStudentToken', response?.data?.token);
-            await AsyncStorage.setItem('StudentData', JSON.stringify(response?.data?.user));
+            await saveStudentData(response?.data?.token, response?.data?.user);
             toast.success('Success', 'Login successful!');
             navigation.reset({
               index: 0,

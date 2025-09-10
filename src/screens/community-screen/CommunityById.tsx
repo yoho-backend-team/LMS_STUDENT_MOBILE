@@ -26,6 +26,7 @@ import { COLORS } from '~/constants';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import socket from '~/utils/socket';
+import { getStudentData } from '~/utils/storage';
 
 interface Message {
   id: string;
@@ -129,12 +130,11 @@ const CommunityById: React.FC = () => {
 
   const getStudentId = async () => {
     try {
-      const data = await AsyncStorage.getItem('StudentData');
+      const data = await getStudentData();
       if (data) {
-        const parsed = JSON.parse(data);
-        setUserId(parsed._id);
-        setStudent(parsed);
-        return parsed;
+        setUserId(data?._id);
+        setStudent(data);
+        return data;
       }
       return null;
     } catch (error) {
@@ -148,7 +148,7 @@ const CommunityById: React.FC = () => {
       const studentData = await getStudentId();
 
       if (community?._id && studentData?._id) {
-        socket.emit('joinGroup', { groupId: community._id, userId: studentData._id });
+        socket.emit('joinGroup', { groupId: community?._id, userId: studentData?._id });
       }
     };
 
