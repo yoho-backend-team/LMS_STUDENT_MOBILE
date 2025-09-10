@@ -5,7 +5,8 @@ import CourseSlice from '../features/Courses/Reducers/courseSlice';
 import AuthSlice from '../features/Authentication/reducers/authSlice';
 import ProfileSlice from '../features/Profile/reducer/profileSlice';
 import DashboardSlice from '../features/home/reducer/DashboardSlice';
-import helpReducer from '../features/HelpCenter/Reducer/HelpSlice';
+// import helpReducer from '../features/HelpCenter/Reducer/HelpSlice';
+import helpSlice from '../features/HelpCenters/Reducers/HelpCentersSlice';
 import NotificationSlice from '../features/notification/reducers/notificationSlice';
 // import ActivitySlice from '../features/reducer/activitylog/reducers/ActivitySlice';
 import PaymentSlice from '../features/payments/reducer/paymentSlice';
@@ -16,6 +17,7 @@ import FaqSlice from '../features/faq/reducers/faqSlice';
 import Community from '../features/Community/reducers.ts/ModuleSlice';
 import AttendanceSlice from '../features/Attendance/reducers/attendanceSlice';
 import ActivitySlice from '../features/Activity/reducer/ActivitySlice';
+import HelpCenter from '~/screens/helpCenter-screen/HelpCenter';
 
 const store = configureStore({
   reducer: {
@@ -25,7 +27,8 @@ const store = configureStore({
     AuthSlice: AuthSlice,
     ProfileSlice: ProfileSlice,
     DashboardSlice: DashboardSlice,
-    helpSlice: helpReducer,
+    // helpSlice: helpReducer,
+    helpSlice:helpSlice,
     NotificationSlice: NotificationSlice,
      ActivitySlice: ActivitySlice,
     PaymentSlice: PaymentSlice,
