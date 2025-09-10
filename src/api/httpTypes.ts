@@ -9,6 +9,8 @@ export type Endpoints = {
   };
   course: {
     get: string;
+    get_task:string;
+    updatetask:string;
   };
   class: {
     get: string;

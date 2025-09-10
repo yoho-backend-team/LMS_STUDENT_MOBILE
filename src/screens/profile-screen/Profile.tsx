@@ -117,28 +117,28 @@ const Profile = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    if (profileDetails && profileDetails.data) {
-      const data = profileDetails.data;
-      const userDetail = data.userDetail || {};
-      const course = userDetail.course || {};
+    if (profileDetails && profileDetails?.data) {
+      const data = profileDetails?.data;
+      const userDetail = data?.userDetail || {};
+      const course = userDetail?.course || {};
 
       const newProfileData = {
-        first_name: data.first_name || '',
-        last_name: data.last_name || '',
-        email: data.email || '',
-        gender: data.gender || '',
-        dateOfBirth: data.dob ? formatDateToDDMMYYYY(data.dob) : '',
+        first_name: data?.first_name || '',
+        last_name: data?.last_name || '',
+        email: data?.email || '',
+        gender: data?.gender || '',
+        dateOfBirth: data.dob ? formatDateToDDMMYYYY(data?.dob) : '',
         contact_info: {
-          phone_number: data.contact_info?.phone_number || '',
-          alternate_phone_number: data.contact_info?.alternate_phone_number || '',
-          address1: data.contact_info?.address1 || '',
-          address2: data.contact_info?.address2 || '',
-          pincode: data.contact_info?.pincode?.toString() || '',
+          phone_number: data?.contact_info?.phone_number || '',
+          alternate_phone_number: data?.contact_info?.alternate_phone_number || '',
+          address1: data?.contact_info?.address1 || '',
+          address2: data?.contact_info?.address2 || '',
+          pincode: data?.contact_info?.pincode?.toString() || '',
         },
-        course: course.course_name || '',
+        course: course?.course_name || '',
         batch: 'Batch 2024-25',
-        rollNumber: data.roll_no?.toString() || '',
-        studentID: userDetail.studentId || '',
+        rollNumber: data?.roll_no?.toString() || '',
+        studentID: userDetail?.studentId || '',
       };
 
       setProfileData(newProfileData);
