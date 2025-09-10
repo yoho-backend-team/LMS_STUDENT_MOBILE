@@ -3,6 +3,7 @@ import { Car, Scroll } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
   Image,
+  RefreshControl,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -26,19 +27,28 @@ const Payment = () => {
   const [student, setStudent] = useState<any>(null);
   const currentPendingLength = paymentData?.payment_history?.length;
   const currentPending = paymentData?.payment_history?.[currentPendingLength - 1];
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    (async () => {
-      const data = await getStudentData();
-      setStudent(data);
-    })();
-  }, []);
+ useEffect(() => {
+  (async () => {
+    const data = await getStudentData();
+    setStudent(data);
+  })();
+}, []);
 
-  useEffect(() => {
-    if (student) {
-      dispatch(getPaymentthunks({ paymentId: student?.uuid }) as any);
-    }
-  }, [dispatch, student]);
+useEffect(() => {
+  if (student) {
+    dispatch(getPaymentthunks({ paymentId: student?.uuid }) as any);
+  }
+}, [dispatch, student]);
+
+const onRefresh = async () => {
+  setRefreshing(true);
+  if (student) {
+    await dispatch(getPaymentthunks({ paymentId: student?.uuid }) as any);
+  }
+  setRefreshing(false);
+};
 
   const statsCards = [
     {
@@ -90,13 +100,18 @@ const Payment = () => {
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
       <SafeAreaView edges={['top']} style={styles.container}>
         {/* Header */}
-        <ScrollView>
+        <ScrollView
+         refreshControl={
+      <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+    }>
+          
           <View style={styles.headerRow}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <Image source={require('../../assets/profile/back.png')} style={styles.backbutton} />
             </TouchableOpacity>
             <Text style={styles.header}>Payment</Text>
           </View>
+          
 
           <View style={styles.cardsbg}>
             {/* Stats Cards */}
@@ -113,7 +128,7 @@ const Payment = () => {
                     <Text style={styles.statsTitle}>{item?.title}</Text>
                   </View>
                   {/* Value with same color */}
-                  <Text style={[styles.statsValue, { color: item.color }]}>{item.value}</Text>
+                  <Text style={[styles.statsValue, { color: item.color }]}>{item?.value}</Text>
                 </View>
               ))}
             </View>
@@ -165,7 +180,7 @@ const Payment = () => {
             </View>
           </View>
           {/* feedetails */}
-          <FeesDetails paymentData={paymentData} />
+          <FeesDetails paymentData={paymentData ? paymentData : []} />
         </ScrollView>
       </SafeAreaView>
     </>

@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
-import { Image } from 'react-native';
+import { Image, RefreshControl } from 'react-native';
 import {
   StatusBar,
   Text,
@@ -73,28 +73,35 @@ const FAQ = () => {
   const dispatch = useDispatch<any>();
   const selectData = useSelector(selectFaq)?.data;
   const [student, setStudent] = useState<any>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    (async () => {
-      const data = await getStudentData();
-      setStudent(data);
-    })();
-  }, []);
+useEffect(() => {
+  (async () => {
+    const data = await getStudentData();
+    setStudent(data);
+  })();
+}, []);
 
-  const getFaqData = async () => {
-    await dispatch(
-      getFaqThunk({
-        instituteId: student?.institute_id?.uuid,
-        branchid: student?.branch_id?.uuid,
-      })
-    );
-  };
+const getFaqData = async () => {
+  await dispatch(
+    getFaqThunk({
+      instituteId: student?.institute_id?.uuid,
+      branchid: student?.branch_id?.uuid,
+    })
+  );
+};
 
-  useEffect(() => {
-    if (student) {
-      getFaqData();
-    }
-  }, [dispatch, student]);
+useEffect(() => {
+  if (student) {
+    getFaqData();
+  }
+}, [dispatch, student]);
+
+const onRefresh = async () => {
+  setRefreshing(true);
+  await getFaqData();
+  setRefreshing(false);
+};
 
   const toggleExpand = (index: number) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -129,7 +136,10 @@ const FAQ = () => {
           <ScrollView
             style={{ marginBottom: 20 }}
             contentContainerStyle={{ paddingBottom: 20 }}
-            showsVerticalScrollIndicator={false}>
+            showsVerticalScrollIndicator={false}
+             refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              }>
             {selectData
               ?.filter((i: any) => i.title.toLowerCase().includes(search.toLowerCase()))
               .map((item: any, index: any) => {

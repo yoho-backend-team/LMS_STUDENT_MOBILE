@@ -11,9 +11,14 @@ import {
 import * as Print from 'expo-print';
 import { shareAsync } from 'expo-sharing';
 import { COLORS } from '~/constants';
-import { getImageUrl } from '~/utils/imageUtils';
 
 const { height } = Dimensions.get('window');
+
+const formatDate = (dateStr?: string) => {
+  if (!dateStr) return 'N/A';
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+};
 
 type PaymentSlipProps = {
   onClose: () => void;
@@ -23,101 +28,32 @@ type PaymentSlipProps = {
 
 const PaymentSlip = ({ onClose, paymentData, visible }: PaymentSlipProps) => {
   const currentPendingLength = paymentData?.payment_history?.length;
-  const currentPending =
-    paymentData?.payment_history?.[currentPendingLength - 1];
+  const currentPending = paymentData?.payment_history[currentPendingLength - 1];
 
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return 'N/A';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
-  };
-  // Full HTML content styled like your sample
- const htmlContent = `
-<html>
-<head>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 30px; color: #333; }
-    .header { text-align: center; margin-bottom: 20px; }
-    .logo { max-height: 80px; margin-bottom: 10px; }
-    .institute-name { font-size: 22px; font-weight: bold; margin: 5px 0; }
-    .address { font-size: 14px; color: #555; line-height: 1.4; margin-bottom: 20px; }
-    .title { font-size: 20px; font-weight: bold; text-align: center; margin: 20px 0; text-decoration: underline; }
-    .details { margin: 20px 0; }
-    .details p { margin: 6px 0; font-size: 14px; }
-    .details b { display: inline-block; width: 130px; }
-    .table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    .table th, .table td { padding: 10px; border: 1px solid #ccc; text-align: left; }
-    .table th { background-color: #f5f5f5; font-weight: bold; }
-    .total-row td { font-weight: bold; }
-    .footer { margin-top: 40px; font-size: 13px; text-align: center; color: #444; }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <img class="logo" src="${getImageUrl(paymentData?.fees?.[0]?.institute_id?.image)}" alt="Logo" />
-    <div class="institute-name">${paymentData?.fees?.[0]?.institute_id?.institute_name || 'N/A'}</div>
-    <div class="address">
-      ${paymentData?.fees?.[0]?.institute_id?.contact_info?.address?.address1 || ''} 
-      ${paymentData?.fees?.[0]?.institute_id?.contact_info?.address?.address2 || ''}, 
-      ${paymentData?.fees?.[0]?.institute_id?.contact_info?.address?.city || ''}, 
-      ${paymentData?.fees?.[0]?.institute_id?.contact_info?.address?.state || ''} 
-      - ${paymentData?.fees?.[0]?.institute_id?.contact_info?.address?.pincode || ''}
-    </div>
-  </div>
-
-  <div class="title">Payment Receipt</div>
-
-  <div class="details">
-    <p><b>Date:</b> ${currentPending?.payment_date ? formatDate(currentPending?.payment_date) : 'N/A'}</p>
-    <p><b>Receipt No.:</b> ${paymentData?.receipt_no || '123'}</p>
-    <p><b>Student Name:</b> ${paymentData?.fees?.[0]?.student?.full_name || 'N/A'}</p>
-    <p><b>Student ID:</b> ${paymentData?.fees?.[0]?.student?.id || '-'}</p>
-    <p><b>Payment Type:</b> ${currentPending?.payment_type || 'Cash'}</p>
-  </div>
-
-  <table class="table">
-    <tr>
-      <th>Description</th>
-      <th>Amount (₹)</th>
-    </tr>
-    <tr>
-      <td>Tuition Fee</td>
-      <td>${currentPending?.paid_amount || '0'}</td>
-    </tr>
-    <tr>
-      <td>Course Amount</td>
-      <td>${paymentData?.course_fees || '0'}</td>
-    </tr>
-    <tr>
-      <td>Payment Status</td>
-      <td>${paymentData?.payment_status || '0'}</td>
-    </tr>
-    <tr class="">
-    <td>Paid Amount</td>
-    <td>${currentPending?.paid_amount|| '0'}</td>
-    </tr>
-    <tr>
-    <td>Payment Method</td>
-    <td>${currentPending?.payment_method || '0'}</td>
-    </tr>
-    <tr>
-      <td>Pending Amount</td>
-      <td>${currentPending?.balance|| '0'}</td>
-    </tr>
-  </table>
-
-  <div class="footer">
-    Thank you for your payment.<br/>
-    For inquiries, contact us at <b>${paymentData?.fees?.[0]?.institute_id?.email || 'N/A'}</b><br/>
-    Phone: <b>${paymentData?.fees?.[0]?.institute_id?.contact_info?.phone_no || 'N/A'} / ${paymentData?.fees?.[0]?.institute_id?.contact_info?.alternate_no || 'N/A'}</b>
-  </div>
-</body>
-</html>
-  `;
+  const htmlContent = `
+  <html>
+  <head>
+    <style>
+      body { font-family: Arial, sans-serif; padding: 30px; }
+      .title { font-size: 24px; font-weight: bold; text-align: center; margin-bottom: 20px; }
+      .table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+      .table th, .table td { padding: 10px; border: 1px solid #ccc; text-align: left; }
+      .table th { background-color: #f5f5f5; font-weight: bold; }
+      .footer { text-align: center; font-size: 14px; margin-top: 20px; }
+    </style>
+  </head>
+  <body>
+    <div class="title">Payment Slip</div>
+    <table class="table">
+      <tr><th>Student Name</th><td>${paymentData?.fees?.[0]?.student?.full_name || 'N/A'}</td></tr>
+      <tr><th>Student ID</th><td>${paymentData?.fees?.[0]?.student?.id || 'N/A'}</td></tr>
+      <tr><th>Payment Date</th><td>${currentPending?.payment_date ? formatDate(currentPending?.payment_date) : 'N/A'}</td></tr>
+      <tr><th>Paid Amount</th><td>${currentPending?.paid_amount || '0'}</td></tr>
+      <tr><th>Pending Amount</th><td>${currentPending?.balance || '0'}</td></tr>
+    </table>
+    <div class="footer">Thank you for your service!</div>
+  </body>
+  </html>`;
 
   const generatePDF = async () => {
     try {
@@ -148,7 +84,7 @@ const PaymentSlip = ({ onClose, paymentData, visible }: PaymentSlipProps) => {
           <Text style={styles.title}>Payment Slip</Text>
 
           {paymentData ? (
-            <View style={styles.tablePreview}>
+            <View style={styles.table}>
               <View style={styles.row}>
                 <Text style={styles.label}>Student Name:</Text>
                 <Text style={styles.value}>
@@ -157,29 +93,21 @@ const PaymentSlip = ({ onClose, paymentData, visible }: PaymentSlipProps) => {
               </View>
               <View style={styles.row}>
                 <Text style={styles.label}>Student ID:</Text>
-                <Text style={styles.value}>
-                  {paymentData?.fees?.[0]?.student?.id || 'N/A'}
-                </Text>
+                <Text style={styles.value}>{paymentData?.fees?.[0]?.student?.id || 'N/A'}</Text>
               </View>
               <View style={styles.row}>
                 <Text style={styles.label}>Payment Date:</Text>
                 <Text style={styles.value}>
-                  {currentPending?.payment_date
-                    ? formatDate(currentPending?.payment_date)
-                    : 'N/A'}
+                  {currentPending?.payment_date ? formatDate(currentPending?.payment_date) : 'N/A'}
                 </Text>
               </View>
               <View style={styles.row}>
                 <Text style={styles.label}>Paid Amount:</Text>
-                <Text style={styles.value}>
-                  ₹{currentPending?.paid_amount || '0'}
-                </Text>
+                <Text style={styles.value}>{`₹${currentPending?.paid_amount}` || '0'}</Text>
               </View>
               <View style={styles.row}>
                 <Text style={styles.label}>Pending Amount:</Text>
-                <Text style={styles.value}>
-                  ₹{currentPending?.balance || '0'}
-                </Text>
+                <Text style={styles.value}>{`₹${currentPending?.balance}` || '0'}</Text>
               </View>
             </View>
           ) : (
@@ -193,10 +121,7 @@ const PaymentSlip = ({ onClose, paymentData, visible }: PaymentSlipProps) => {
               <Text style={styles.backButtonText}>Close</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[
-                styles.downloadButton,
-                !paymentData && styles.disabledButton,
-              ]}
+              style={[styles.downloadButton, !paymentData && styles.disabledButton]}
               onPress={generatePDF}
               disabled={!paymentData}>
               <Text style={styles.downloadButtonText}>Download PDF</Text>
@@ -212,12 +137,7 @@ export default PaymentSlip;
 
 const styles = StyleSheet.create({
   modalContainer: { flex: 1, backgroundColor: '#f5f5f5' },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    padding: 20,
-    paddingTop: 50,
-  },
+  header: { flexDirection: 'row', justifyContent: 'flex-end', padding: 20, paddingTop: 50 },
   closeButton: {
     backgroundColor: COLORS.bg_Colour,
     width: 30,
@@ -229,7 +149,7 @@ const styles = StyleSheet.create({
   closeButtonText: { color: COLORS.text_title, fontSize: 16, fontWeight: 'bold' },
   scrollContent: { padding: 20, alignItems: 'center', minHeight: height - 150 },
   title: { fontSize: 24, fontWeight: 'bold', color: '#333', marginBottom: 20 },
-  tablePreview: {
+  table: {
     width: '100%',
     backgroundColor: '#fff',
     padding: 15,

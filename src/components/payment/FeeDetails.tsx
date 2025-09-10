@@ -30,9 +30,9 @@ const FeesDetails: React.FC<PaymentDataProps> = ({ paymentData }) => {
       {/* Header */}
       <View style={styles.headerRow}>
         <Text style={styles.title}>Fees Details</Text>
-        <TouchableOpacity style={styles.downloadBtn}>
+        {/* <TouchableOpacity style={styles.downloadBtn}>
           <Text style={styles.downloadText}>Download Receipt</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/* Student Info */}
@@ -233,6 +233,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: COLORS.purple_01,
+    textAlign: 'center'
   },
   dueText: {
     fontSize: 15,

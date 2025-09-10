@@ -109,12 +109,9 @@ const HelpCenter = () => {
                 setShowVideo(false);
               }}
               style={styles.backIcon}>
-              <Image
-                source={require('./../../assets/icons/backarrow.png')}
-                style={{ width: 24, height: 24 }}
-              />
+            <Image source={require('../../assets/profile/back.png')} style={styles.backbutton} />  
             </TouchableOpacity>
-            <Text style={{ ...FONTS.h1, color: COLORS.text_title }}>Learning Resources</Text>
+            <Text style={{ ...FONTS.h1, color: COLORS.text_title , marginBottom:5}}>Learning Resources</Text>
           </View>
 
           {/* Additional Info */}
@@ -283,7 +280,7 @@ export default HelpCenter;
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 15, backgroundColor: '#F8FAFC' },
-  backbutton: {
+backbutton: {
     width: 48,
     height: 48,
     resizeMode: 'contain',

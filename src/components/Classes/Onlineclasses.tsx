@@ -327,7 +327,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     minHeight: 300,
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
   },
   sectionTitle: { fontSize: 18, fontWeight: '500', color: '#333' },
   pagination: {
