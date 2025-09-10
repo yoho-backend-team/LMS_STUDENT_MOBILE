@@ -48,17 +48,6 @@ class Client {
       get: (params: any) =>
         httpClient.get(HTTP_END_POINTS.payments.getFees + params.paymentId, {}, 'student'),
     },
-<<<<<<< HEAD
-   attendance: {
-  get: (params: any) => httpClient.get(`${HTTP_END_POINTS.attendance.get}`, params, 'student'),
-  getByDate: (params: any) =>
-    httpClient.get(`${HTTP_END_POINTS.attendance.getDate}`, params, 'student'),
-  get_class_attendance: (data: { classId: any }) =>
-    httpClient.get(`${HTTP_END_POINTS.attendance.class_attendance}/${data.classId}`, {
-      params: data,
-    }, 'student'),
-},
-=======
 
     attendance: {
       get: (params: any) => httpClient.get(`${HTTP_END_POINTS.attendance.get}`, params, 'student'),
@@ -70,7 +59,6 @@ class Client {
         }),
     },
 
->>>>>>> 29f4b2fc452804e8e72f8ae20933f1418b423841
     notification: {
       get: (params: any) => httpClient.get(HTTP_END_POINTS.notification.get, params, 'student'),
       update: (data: any) =>
@@ -127,7 +115,6 @@ class Client {
   notificatinsubscription = {
     post: (data: any) => httpClient.post(HTTP_END_POINTS.notificationSubscription.post, data),
   };
-  attendance: any;
 }
 
 export default new Client();

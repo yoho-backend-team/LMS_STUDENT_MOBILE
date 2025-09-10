@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StatusBar,
   StyleSheet,
@@ -13,23 +13,31 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, FONTS, icons } from "~/constants";
 import { useNavigation } from "@react-navigation/native";
 import * as DocumentPicker from "expo-document-picker";
-import { Picker } from "@react-native-picker/picker";
 import Icon from "react-native-vector-icons/Feather";
-import { createticketdata, uploadticketfile } from "~/features/Ticket/Services";
 import toast from "~/utils/toasts";
 import { LinearGradient } from "expo-linear-gradient";
+import { createticketdata, uploadticketfile } from "~/features/Ticketpage/services";
+import { getStudentData } from "~/utils/storage";
+import { Dropdown } from "react-native-element-dropdown";
 
 const TicketCreateScreen = () => {
   const navigation = useNavigation();
   const [subject, setSubject] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
-  const [attachment, setAttachment] = useState<any>(null);
   const [priority, setPriority] = useState("");
+  const [attachment, setAttachment] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [student, setStudent] = useState<any>(null);
+
+  useEffect(() => {
+    (async () => {
+      const data = await getStudentData();
+      setStudent(data);
+    })();
+  }, []);
 
   const problemCategories = [
-    { label: "Select your problem", value: "" },
     { label: "Attendance Issue", value: "attendance" },
     { label: "Grade Issue", value: "grade" },
     { label: "Course Material", value: "material" },
@@ -39,7 +47,12 @@ const TicketCreateScreen = () => {
     { label: "Others", value: "other" },
   ];
 
- 
+  const priorities = [
+    { label: "Low", value: "Low" },
+    { label: "Medium", value: "Medium" },
+    { label: "High", value: "High" },
+  ];
+
   const pickFile = async () => {
     try {
       const result: any = await DocumentPicker.getDocumentAsync({
@@ -55,7 +68,6 @@ const TicketCreateScreen = () => {
       toast.error("Error", "Failed to pick file");
     }
   };
-
 
   const handleSubmit = async () => {
     if (!subject || !description || !category || !priority) {
@@ -78,7 +90,6 @@ const TicketCreateScreen = () => {
           } as any);
 
           const uploadRes = await uploadticketfile(formData);
-      
           fileUrl = uploadRes?.data?.data?.file || uploadRes?.data?.url;
         } catch (uploadError) {
           console.error("File upload failed:", uploadError);
@@ -87,14 +98,14 @@ const TicketCreateScreen = () => {
       }
 
       const ticketData = {
-        branch: "67f3a26ef4b2c530acd16425",
+        branch: student?.branch_id?._id,
         category,
         description,
         file: fileUrl,
-        institute: "67f3a26df4b2c530acd16419",
+        institute: student?.institute_id?._id,
         priority,
         query: subject,
-        user: "67f3b8feb8d2634300cc8819",
+        user: student?._id,
       };
 
       await createticketdata(ticketData, {});
@@ -120,29 +131,20 @@ const TicketCreateScreen = () => {
         </View>
 
         <ScrollView contentContainerStyle={styles.formContainer}>
-        
           <Text style={styles.label}>Select Your Problem*</Text>
-          <View style={styles.dropdownContainer}>
-            <Picker
-              selectedValue={category}
-              onValueChange={(itemValue) => {
-                setCategory(itemValue);
-                const selectedProblem = problemCategories.find(
-                  (prob) => prob.value === itemValue
-                );
-                if (selectedProblem && selectedProblem.value) {
-                  setSubject(selectedProblem.label);
-                }
-              }}
-              style={styles.picker}
-            >
-              {problemCategories.map((problem) => (
-                <Picker.Item key={problem.value} label={problem.label} value={problem.value} />
-              ))}
-            </Picker>
-          </View>
+          <Dropdown
+            style={styles.dropdown}
+            data={problemCategories}
+            labelField="label"
+            valueField="value"
+            placeholder="Select your problem"
+            value={category}
+            onChange={(item) => {
+              setCategory(item.value);
+              setSubject(item.label);
+            }}
+          />
 
-          
           <Text style={styles.label}>Query*</Text>
           <TextInput
             style={styles.input}
@@ -151,7 +153,6 @@ const TicketCreateScreen = () => {
             onChangeText={setSubject}
           />
 
-         
           <Text style={styles.label}>Description*</Text>
           <TextInput
             style={[styles.input, styles.textarea]}
@@ -161,28 +162,19 @@ const TicketCreateScreen = () => {
             multiline
           />
 
-        
           <Text style={styles.label}>Priority*</Text>
-          <View style={styles.dropdownContainer}>
-            <Picker
-              selectedValue={priority}
-              onValueChange={(itemValue) => setPriority(itemValue)}
-              style={styles.picker}
-            >
-              <Picker.Item label="Select priority" value="" />
-              <Picker.Item label="Low" value="Low" />
-              <Picker.Item label="Medium" value="Medium" />
-              <Picker.Item label="High" value="High" />
-            </Picker>
-          </View>
+          <Dropdown
+            style={styles.dropdown}
+            data={priorities}
+            labelField="label"
+            valueField="value"
+            placeholder="Select priority"
+            value={priority}
+            onChange={(item) => setPriority(item.value)}
+          />
 
-          
           <Text style={styles.label}>Attachment</Text>
-          <TouchableOpacity
-            style={styles.attachmentButton}
-            onPress={pickFile}
-            disabled={isLoading}
-          >
+          <TouchableOpacity style={styles.attachmentButton} onPress={pickFile} disabled={isLoading}>
             <View style={styles.attachmentContent}>
               <Icon name="upload" size={24} color={COLORS.blue_01} />
               <Text style={styles.attachmentText}>
@@ -197,7 +189,6 @@ const TicketCreateScreen = () => {
             </TouchableOpacity>
           )}
 
-          
           <LinearGradient
             colors={["#7B00FF", "#B200FF"]}
             start={{ x: 0.134, y: 0.021 }}
@@ -242,15 +233,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9f9f9",
   },
   textarea: { height: 100, textAlignVertical: "top" },
-  dropdownContainer: {
+  dropdown: {
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 14,
     backgroundColor: "#f9f9f9",
-    overflow: "hidden",
     marginBottom: 15,
   },
-  picker: { height: 50, width: "100%" },
   attachmentButton: {
     borderWidth: 1,
     borderColor: "#ccc",
@@ -263,26 +254,10 @@ const styles = StyleSheet.create({
   },
   attachmentContent: { justifyContent: "center", alignItems: "center", gap: 5 },
   attachmentText: { ...FONTS.body6, color: COLORS.text_desc, textAlign: "center" },
-  removeAttachment: {
-    marginTop: 10,
-    alignSelf: "flex-end",
-  },
-  removeAttachmentText: {
-    color: COLORS.light_red,
-    ...FONTS.h5,
-    fontWeight: "500",
-  },
-  gradientButton: {
-    marginTop: 30,
-    borderRadius: 8,
-    overflow: "hidden",
-  },
-  submitButton: {
-    paddingVertical: 15,
-    alignItems: "center",
-  },
-  submitButtonDisabled: {
-    backgroundColor: COLORS.shadow_01,
-  },
+  removeAttachment: { marginTop: 10, alignSelf: "flex-end" },
+  removeAttachmentText: { color: COLORS.light_red, ...FONTS.h5, fontWeight: "500" },
+  gradientButton: { marginTop: 30, borderRadius: 8, overflow: "hidden" },
+  submitButton: { paddingVertical: 15, alignItems: "center" },
+  submitButtonDisabled: { backgroundColor: COLORS.shadow_01 },
   submitText: { color: "#fff", fontSize: 18, fontWeight: "600" },
 });

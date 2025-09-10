@@ -27,6 +27,7 @@ import {
   TicketListScreen,
   TicketCreateScreen,
   TicketDetailScreen,
+  TicketChatScreen
 } from '../screens';
 import StudentDrawer from '../tabs/StudentDrawer';
 import ChatbotScreen from '~/screens/ChatbotScreen/chatbot';
@@ -65,6 +66,7 @@ const Routes = () => {
       TicketListScreen: undefined;
   TicketCreateScreen:undefined;
   TicketDetailScreen:undefined;
+  TicketChatScreen:undefined;
   };
 
   const Stack: any = createNativeStackNavigator<RootStackParamList>();
@@ -143,6 +145,8 @@ const Routes = () => {
         <Stack.Screen name="TicketsScreen" component={TicketListScreen} />
         <Stack.Screen name="TicketCreateScreen" component={TicketCreateScreen} />
         <Stack.Screen name="TicketDetailScreen" component={TicketDetailScreen} />
+        <Stack.Screen name="TicketChatScreen" component={TicketChatScreen} />
+
 
         <Stack.Screen name="ClassesScreen" component={ClassesScreen} />
         <Stack.Screen name="ClassViewScreen" component={ClassByIdScreen} />

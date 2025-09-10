@@ -27,7 +27,7 @@ import ChatScreen from './community-screen/ChatScreen';
 import TicketListScreen from './tickets/TicketListScreen';
 import TicketCreateScreen from './tickets/TicketCreateScreen';
 import TicketDetailScreen from './tickets/TicketDetailScreen';
-
+import TicketChatScreen from './tickets/TicketChatScreen';
 export {
   ActivityLogsScreen,
   // AttendanceScreen,
@@ -58,4 +58,5 @@ export {
   TicketListScreen,
   TicketCreateScreen,
   TicketDetailScreen,
+  TicketChatScreen,
 };

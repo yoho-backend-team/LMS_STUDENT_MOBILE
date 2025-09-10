@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import {
   FlatList,
   StyleSheet,
@@ -5,15 +6,14 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
-import Header from "~/components/shared/Header";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import Header from "~/components/shared/Header";
 import { useDispatch, useSelector } from "react-redux";
-import { GetallTicketThunks } from "../../features/Ticket/reducers/Thunks";
-import { GetTicketSelector } from "../../features/Ticket/reducers/Selectors";
+import { getallTicketThunks } from "~/features/Ticketpage/reducers/thunk";
+import { getTicketSelector } from "~/features/Ticketpage/reducers/selector";
 
 const TicketListScreen = () => {
   const navigation = useNavigation<any>();
@@ -21,53 +21,47 @@ const TicketListScreen = () => {
 
   const [tab, setTab] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
-  const [expandedTicketId, setExpandedTicketId] = useState<string | null>(null);
 
-  const ticketState = useSelector(GetTicketSelector) || {};
+  const ticketState = useSelector(getTicketSelector) || {};
   const tickets = Array.isArray(ticketState)
     ? ticketState
     : ticketState?.tickets || [];
   const totalPages = ticketState?.totalPages || 1;
 
+ 
   useEffect(() => {
-    dispatch(GetallTicketThunks({ page: 1 }));
-  }, [dispatch]);
+    let statusParam: string | undefined;
 
-  const filtered = tickets.filter((t: any) =>
-    tab === "All"
-      ? true
-      : tab === "Open"
-      ? t.status?.toLowerCase() === "opened"
-      : t.status?.toLowerCase() === "closed"
-  );
+    if (tab === "Open") statusParam = "opened";
+    if (tab === "Close") statusParam = "closed";
+
+    dispatch(getallTicketThunks({ page: currentPage, status: statusParam }));
+  }, [dispatch, tab, currentPage]);
+
+  const handleTabChange = (t: string) => {
+    setTab(t);
+    setCurrentPage(1);
+  };
 
   const loadNextPage = () => {
     if (currentPage < totalPages) {
-      const nextPage = currentPage + 1;
-      setCurrentPage(nextPage);
-      dispatch(GetallTicketThunks({ page: nextPage }));
+      setCurrentPage((prev) => prev + 1);
     }
   };
 
   const loadPrevPage = () => {
     if (currentPage > 1) {
-      const prevPage = currentPage - 1;
-      setCurrentPage(prevPage);
-      dispatch(GetallTicketThunks({ page: prevPage }));
+      setCurrentPage((prev) => prev - 1);
     }
   };
 
-  const toggleExpand = (ticketId: string) => {
-    setExpandedTicketId(expandedTicketId === ticketId ? null : ticketId);
-  };
-
   const renderTicket = ({ item }: any) => {
-    const isExpanded = expandedTicketId === item.id;
-
     return (
       <TouchableOpacity
         style={styles.ticketCard}
-        onPress={() => toggleExpand(item.id)}
+        onPress={() =>
+          navigation.navigate("TicketDetailScreen", { ticket: item })
+        }
       >
         <View style={styles.ticketHeader}>
           <Text style={styles.ticketCode}>
@@ -77,19 +71,6 @@ const TicketListScreen = () => {
         </View>
 
         <Text style={styles.ticketTitle}>{item.query || item.title}</Text>
-
-        {/* Expanded Details */}
-        {isExpanded && (
-          <View style={{ marginTop: 8 }}>
-            <Text style={styles.ticketDesc}>{item.description}</Text>
-            <Text style={styles.ticketDetail}>
-              Priority: {item.priority || "N/A"}
-            </Text>
-            <Text style={styles.ticketDetail}>
-              Assigned To: {item.assignedTo || "Unassigned"}
-            </Text>
-          </View>
-        )}
 
         <View style={styles.ticketFooter}>
           <Text style={{ fontSize: 12, color: "#6B7280" }}>ID: {item.id}</Text>
@@ -127,26 +108,29 @@ const TicketListScreen = () => {
     <SafeAreaView edges={["top"]} style={styles.container}>
       <Header />
 
-      {/* Header Row */}
+      
       <View style={styles.topRow}>
-        <Text style={styles.heading}>Ticket</Text>
+        <Text style={styles.heading}>Tickets</Text>
         <TouchableOpacity
           onPress={() => navigation.navigate("TicketCreateScreen")}
         >
-          <LinearGradient colors={["#7B00FF", "#B200FF"]} style={styles.createBtn}>
+          <LinearGradient
+            colors={["#7B00FF", "#B200FF"]}
+            style={styles.createBtn}
+          >
             <Text style={{ color: "white", fontWeight: "600" }}>
-              Create Tickets
+              Create Ticket
             </Text>
           </LinearGradient>
         </TouchableOpacity>
       </View>
 
-      {/* Tabs */}
+      
       <View style={styles.tabRow}>
         {["All", "Open", "Close"].map((t) => (
           <TouchableOpacity
             key={t}
-            onPress={() => setTab(t)}
+            onPress={() => handleTabChange(t)}
             style={[styles.tabBtn, tab === t && styles.activeTab]}
           >
             <Text style={[styles.tabText, tab === t && styles.activeTabText]}>
@@ -156,9 +140,9 @@ const TicketListScreen = () => {
         ))}
       </View>
 
-      {/* List */}
+ 
       <FlatList
-        data={filtered}
+        data={tickets}
         keyExtractor={(item, index) =>
           item.id?.toString() || index.toString()
         }
@@ -220,7 +204,6 @@ export default TicketListScreen;
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F9FAFB" },
 
-  // Header
   topRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -230,7 +213,6 @@ const styles = StyleSheet.create({
   },
   heading: { fontSize: 16, fontWeight: "600", color: "#111827" },
 
-  // Tabs
   tabRow: {
     flexDirection: "row",
     justifyContent: "flex-start",
@@ -248,7 +230,6 @@ const styles = StyleSheet.create({
   activeTab: { backgroundColor: "#7B00FF" },
   activeTabText: { color: "white" },
 
-  // Create Button
   createBtn: {
     paddingHorizontal: 18,
     paddingVertical: 10,
@@ -257,7 +238,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  
   ticketCard: {
     backgroundColor: "#fff",
     borderRadius: 12,
@@ -276,9 +256,6 @@ const styles = StyleSheet.create({
   ticketCode: { color: "#7B00FF", fontWeight: "700" },
   ticketDate: { color: "#6B7280", fontSize: 12 },
   ticketTitle: { fontWeight: "600", marginBottom: 4, color: "#111827" },
-  ticketDesc: { fontSize: 12, color: "#6B7280", marginBottom: 8 },
-  ticketDetail: { fontSize: 12, color: "#374151", marginBottom: 4 },
-
   ticketFooter: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -287,7 +264,6 @@ const styles = StyleSheet.create({
   statusPill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
   statusText: { fontSize: 12, fontWeight: "600" },
 
-  // Pagination
   pagination: {
     flexDirection: "row",
     justifyContent: "space-between",

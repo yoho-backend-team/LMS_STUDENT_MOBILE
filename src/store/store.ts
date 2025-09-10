@@ -1,6 +1,6 @@
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit';
 import tabReducer from './tab/tabSlice';
-import Ticket from '../features/Ticket/reducers/ModuleSlice';
+// import Ticket from '../features/Ticket/reducers/ModuleSlice';
 import CourseSlice from '../features/Courses/Reducers/courseSlice';
 import AuthSlice from '../features/Authentication/reducers/authSlice';
 import ProfileSlice from '../features/Profile/reducer/profileSlice';
@@ -17,10 +17,11 @@ import Community from '../features/Community/reducers.ts/ModuleSlice';
 // import AttendanceSlice from '../features/Attendance/reducers/attendanceSlice';
 import AttendanceoneSlice from '../features/Attendanceone/reducers/attenSlice'
 import CommunitySlice from '../features/Communityone/reducer/communitySlice';
+import Tickets from '../features/Ticketpage/reducers/TicketSlice';        
 const store = configureStore({
   reducer: {
     tabReducer: tabReducer,
-    Ticket: Ticket,
+    // Ticket: Ticket,
     CourseSlice: CourseSlice,
     AuthSlice: AuthSlice,
     ProfileSlice: ProfileSlice,
@@ -37,6 +38,7 @@ const store = configureStore({
     // AttendanceSlice: AttendanceSlice,
     AttendanceoneSlice: AttendanceoneSlice,
     CommunitySlice: CommunitySlice,
+    Tickets: Tickets,
 
   },
 });
