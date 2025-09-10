@@ -32,10 +32,9 @@ const store = configureStore({
     PlacementSlice:PlacementSlice,
     ClassSlice: ClassSlice,
     ClassIdSlice: ClassIdSlice,
-    // faqSlice: FaqSlice,
+    faqSlice: faqSlice,
     Community: Community,
     AttendanceSlice: AttendanceSlice,
-    FAQSlice: faqSlice,
   },
 });
 

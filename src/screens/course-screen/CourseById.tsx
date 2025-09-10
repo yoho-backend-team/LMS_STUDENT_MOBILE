@@ -121,10 +121,7 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scroll}>
         <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
-          <Image
-            source={require('../../assets/courses/arrow.png')}
-            style={{ width: 24, height: 24 }}
-          />
+          <Image source={require('../../assets/profile/back.png')} style={styles.backbutton} />
         </TouchableOpacity>
 
         {/* Tabs */}
@@ -374,6 +371,12 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#ebeff3' },
   scroll: { padding: 16 },
   backButton: { marginBottom: 10 },
+  backbutton: {
+    width: 45,
+    height: 45,
+    resizeMode: 'contain',
+    marginTop: 5,
+  },
 
   tabScroll: { marginBottom: 16 },
   tabButton: {
@@ -506,7 +509,7 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     left: '53%',
-    width: 4,
+    width: 5,
     backgroundColor: '#E5E7EB',
     transform: [{ translateX: -1.5 }],
   },

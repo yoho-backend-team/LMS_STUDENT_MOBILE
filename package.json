@@ -11,7 +11,6 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@expo/cli": "^0.24.20",
     "@expo/metro-runtime": "~5.0.4",
     "@expo/vector-icons": "^14.1.0",
     "@react-native-async-storage/async-storage": "^2.1.2",
@@ -66,14 +65,13 @@
     "react-native-pager-view": "^6.7.1",
     "react-native-pdf": "^6.7.7",
     "react-native-progress": "^5.0.1",
-    "react-native-reanimated": "~3.17.4",
+    "react-native-reanimated": "^3.17.4",
     "react-native-responsive-fontsize": "^0.5.1",
     "react-native-responsive-screen": "^1.4.2",
     "react-native-safe-area-context": "^5.4.0",
     "react-native-screens": "~4.11.1",
     "react-native-shadow-2": "^7.1.2",
     "react-native-svg": "^15.11.2",
-    "react-native-svg-charts": "^5.4.0",
     "react-native-toast-message": "^2.3.3",
     "react-native-vector-icons": "^10.3.0",
     "react-native-web": "^0.20.0",

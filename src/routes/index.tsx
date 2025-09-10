@@ -141,8 +141,8 @@ const Routes = () => {
         {/* <Stack.Screen name="ClassViewScreen" component={ClassByIdScreen} /> */}
         <Stack.Screen name="CoursesScreen" component={CouresScreen} />
         <Stack.Screen name="CourseViewScreen" component={CourseByIdScreen} />
-        <Stack.Screen name="Notification" component={NotificationsScreen} />
-         <Stack.Screen name="PlacementViewScreen" component={PlacementViewScreen} />
+        {/* <Stack.Screen name="Notification" component={NotificationsScreen} /> */}
+        <Stack.Screen name="PlacementViewScreen" component={PlacementViewScreen} />
         {/* <Stack.Screen name="Notification" component={NotificationsScreen} /> */}
         <Stack.Screen name="Placement" component={PlacementScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />

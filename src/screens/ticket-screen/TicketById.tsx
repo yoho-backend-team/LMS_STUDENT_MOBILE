@@ -42,7 +42,7 @@ const TicketById = () => {
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.backContainer}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Image source={icons.back_arrow} style={{ width: 25, height: 25 }} />
+              <Image source={require('../../assets/profile/back.png')} style={styles.backbutton} />
             </TouchableOpacity>
             <Text style={styles.backText}>Ticket- #{ticket?.ticket_id}</Text>
           </View>
@@ -99,6 +99,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     marginLeft: 10,
+  },
+  backbutton: {
+    width: 45,
+    height: 45,
+    resizeMode: 'contain',
+    marginTop: 5,
   },
   viewCard: {
     backgroundColor: '#fff',
