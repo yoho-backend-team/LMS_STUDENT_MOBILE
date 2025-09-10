@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import PaymentSlip from '../../components/payment/Paymentslip';
 import { formatDate } from '../../utils/formatDate';
+import { COLORS } from '~/constants';
 
 interface PaymentDataProps {
   paymentData: any;
@@ -23,8 +24,6 @@ const FeesDetails: React.FC<PaymentDataProps> = ({ paymentData }) => {
   if (showPaymentSlip) {
     return <PaymentSlip paymentData={paymentData} onClose={handleCloseModal} visible={true} />;
   }
-
-  console.log(paymentData, 'payment data');
 
   return (
     <View style={styles.container}>
@@ -91,8 +90,7 @@ const FeesDetails: React.FC<PaymentDataProps> = ({ paymentData }) => {
 
       <View style={styles.historyCard}>
         <View style={styles.historyRow}>
-          <Text style={styles.historyDate}>{currentPending?.duepaymentdate}</Text>
-          <Text style={styles.historyDate}>paid</Text>
+          <Text style={styles.historyDate}>{currentPending?.duepaymentdate} (paid)</Text>
           <TouchableOpacity style={styles.pdfBtn} onPress={() => handleViewPDF()}>
             <Text style={styles.pdfText}>View PDF</Text>
           </TouchableOpacity>
@@ -102,8 +100,7 @@ const FeesDetails: React.FC<PaymentDataProps> = ({ paymentData }) => {
       {/* Pay Due */}
       <View style={styles.historyCard}>
         <View style={styles.historyRow}>
-          <Text style={styles.historyDate}>{currentPending?.duepaymentdate}</Text>
-          <Text style={styles.dueText}>pay due</Text>
+          <Text style={styles.historyDate}>{currentPending?.duepaymentdate} (pay due)</Text>
           <Text style={styles.noDue}>{`₹${currentPending?.balance}` || '₹0'}</Text>
         </View>
       </View>
@@ -219,23 +216,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   historyDate: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '600',
     color: '#555',
-    width: '30%',
+    width: '50%',
   },
   pdfBtn: {
     backgroundColor: '#F1F3F6',
     paddingVertical: 6,
     paddingHorizontal: 14,
-    borderRadius: 10,
+    borderRadius: 6,
     elevation: 2,
     width: '30%',
   },
   pdfText: {
-    fontSize: 15,
+    fontSize: 12,
     fontWeight: '600',
-    color: '#716F6F',
+    color: COLORS.purple_01,
   },
   dueText: {
     fontSize: 15,

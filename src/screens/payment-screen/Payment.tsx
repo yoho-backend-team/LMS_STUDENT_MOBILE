@@ -198,9 +198,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     marginTop: 5,
   },
-  // Stats Grid Styles
 
-  // Shadow effect
   cardsbg: {
     width: '90%',
     padding: 12,

@@ -69,8 +69,8 @@ const Tickets = () => {
         {/* <Header /> */}
 
         <View style={[styles.ticketRow, { justifyContent: 'flex-start' }]}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Image source={icons.back_arrow} style={{ width: 25, height: 25, marginLeft: 15 }} />
+          <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 15 }}>
+            <Image source={require('../../assets/profile/back.png')} style={styles.backbutton} />
           </TouchableOpacity>
           <Text style={styles.headerText}>Tickets</Text>
           <View style={{ flex: 1 }} />
@@ -200,6 +200,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginLeft: 10,
+  },
+  backbutton: {
+    width: 45,
+    height: 45,
+    resizeMode: 'contain',
+    marginTop: 5,
   },
   filterContainer: {
     flexDirection: 'row',

@@ -76,7 +76,7 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
         <View style={{ flex: 1 }}>
           <View style={styles.header}>
             <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-              <Image source={icons.back_arrow} style={{ width: 25, height: 25 }} />
+              <Image source={require('../../assets/profile/back.png')} style={styles.backbutton} />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>Assessment Page</Text>
           </View>
@@ -234,6 +234,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  backbutton: {
+    width: 45,
+    height: 45,
+    resizeMode: 'contain',
+    marginTop: 5,
+  },
+
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',

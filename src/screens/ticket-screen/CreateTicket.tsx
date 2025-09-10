@@ -121,7 +121,7 @@ const CreateTicket = () => {
 
         <View style={styles.headerRow}>
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-            <Image source={icons.back_arrow} style={{ width: 25, height: 25 }} />
+            <Image source={require('../../assets/profile/back.png')} style={styles.backbutton} />
           </TouchableOpacity>
           <Text style={styles.title}>Create Ticket</Text>
         </View>
@@ -224,6 +224,12 @@ const styles = StyleSheet.create({
   title: { fontSize: 20, fontWeight: 'bold' },
   backButton: { paddingHorizontal: 10, marginTop: 10 },
   formContainer: { paddingHorizontal: 15, paddingBottom: 30 },
+  backbutton: {
+    width: 45,
+    height: 45,
+    resizeMode: 'contain',
+    marginTop: 5,
+  },
   label: { fontSize: 16, fontWeight: '600', marginBottom: 8, marginTop: 15 },
   input: {
     borderWidth: 1,
@@ -242,7 +248,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginBottom: 15,
   },
-  picker: { height: 50, width: '100%' },
+  picker: { height: 55, width: '100%' },
   attachmentButton: {
     borderWidth: 1,
     borderColor: '#ccc',

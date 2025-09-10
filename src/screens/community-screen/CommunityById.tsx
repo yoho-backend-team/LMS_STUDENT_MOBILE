@@ -406,7 +406,10 @@ const CommunityById: React.FC = () => {
             {/* HEADER */}
             <View style={styles.header}>
               <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                <Ionicons name="arrow-back" size={24} color="#333" />
+                <Image
+                  source={require('../../assets/profile/back.png')}
+                  style={styles.backbutton}
+                />
               </TouchableOpacity>
               <View style={styles.profileContainer}>
                 <Image style={styles.avatar} source={{ uri: getImageUrl(community?.groupimage) }} />
@@ -486,6 +489,12 @@ export default CommunityById;
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f5' },
   avatar: { width: 40, height: 40, backgroundColor: '#000', borderRadius: 20, marginRight: 12 },
+  backbutton: {
+    width: 45,
+    height: 45,
+    resizeMode: 'contain',
+    marginTop: 5,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
