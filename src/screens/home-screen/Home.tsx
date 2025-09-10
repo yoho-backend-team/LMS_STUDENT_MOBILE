@@ -22,7 +22,7 @@ import UpdatesScreen from '~/components/home/UpdateScreen';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectDashboardData } from '~/features/home/reducer/selectors';
-import {  getDashboardthunks } from '~/features/home/reducer/thunks';
+import { getDashboardthunks } from '~/features/home/reducer/thunks';
 import { getImageUrl } from '~/utils/imageUtils';
 // Custom Progress Circle Component
 type ProgressCircleProps = {
@@ -82,14 +82,12 @@ const Home = () => {
   const dashboardData = useSelector(selectDashboardData);
   const [refreshing, setRefreshing] = useState(false);
 
-
-const onRefresh = React.useCallback(() => {
-  setRefreshing(true);
-  dispatch(getDashboardthunks({}) as any)
-    .then(() => setRefreshing(false))
-    .catch(() => setRefreshing(false));
-}, [dispatch]);
-
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    dispatch(getDashboardthunks({}) as any)
+      .then(() => setRefreshing(false))
+      .catch(() => setRefreshing(false));
+  }, [dispatch]);
 
   const classStats = dashboardData?.classes?.[0] || {};
 

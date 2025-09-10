@@ -9,8 +9,8 @@ export type Endpoints = {
   };
   course: {
     get: string;
-    get_task:string;
-    updatetask:string;
+    get_task: string;
+    updatetask: string;
   };
   class: {
     get: string;
@@ -45,7 +45,7 @@ export type Endpoints = {
   };
   reports: {
     get: string;
-    getassement:string;
+    getassement: string;
   };
   community: {
     get: string;

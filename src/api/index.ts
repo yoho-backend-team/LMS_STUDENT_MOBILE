@@ -82,7 +82,7 @@ class Client {
 
     reports: {
       get: () => httpClient.get(HTTP_END_POINTS.reports.get, {}, 'student'),
-      getassement:(params:any)=>httpClient.get(HTTP_END_POINTS.reports.getassement.replace(':studentid', params?.student).replace(':courseid',params?.course))
+      getassement: (params: any) => httpClient.get(HTTP_END_POINTS.reports.getassement.replace(':studentid', params?.student).replace(':courseid', params?.course))
     },
     activity: {
       get: (params: any) => httpClient.get(HTTP_END_POINTS.activity.get, params, 'student'),

@@ -130,16 +130,14 @@ const AssessmentsChart: React.FC = () => {
         style={styles.categoriesContainer}
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: 8 }}
-      >
+        contentContainerStyle={{ gap: 8 }}>
         {/* Total */}
         <TouchableOpacity style={styles.categoryWrapper} onPress={() => setActiveTab('Total')}>
           <LinearGradient
             colors={activeTab === 'Total' ? ['#00BFA5', '#40E0D0'] : ['#B2DFDB', '#E0F7FA']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={styles.categoryButton}
-          >
+            style={styles.categoryButton}>
             <Image source={require('../../assets/home/chart.png')} style={styles.profileicon} />
             <Text style={styles.categoryText}>Total ({total})</Text>
           </LinearGradient>
@@ -151,8 +149,7 @@ const AssessmentsChart: React.FC = () => {
             colors={activeTab === 'Pending' ? ['#40E0D0', '#2196F3'] : ['#BBDEFB', '#E3F2FD']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={styles.categoryButton}
-          >
+            style={styles.categoryButton}>
             <Image
               source={require('../../assets/home/clipboard-text.png')}
               style={styles.profileicon}
@@ -167,8 +164,7 @@ const AssessmentsChart: React.FC = () => {
             colors={activeTab === 'Completed' ? ['#2196F3', '#64B5F6'] : ['#C5CAE9', '#E8EAF6']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={styles.categoryButton}
-          >
+            style={styles.categoryButton}>
             <Image
               source={require('../../assets/home/task-square.png')}
               style={styles.profileicon}
