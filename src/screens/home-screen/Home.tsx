@@ -25,6 +25,8 @@ import { selectDashboardData } from '~/features/home/reducer/selectors';
 import { getDashboardthunks } from '~/features/home/reducer/thunks';
 import { getImageUrl } from '~/utils/imageUtils';
 import { Ionicons } from '@expo/vector-icons';
+import { getStudentTask } from '~/features/Courses/Reducers/thunks';
+import { selectCourse } from '~/features/Courses/Reducers/selectors';
 
 // Custom Progress Circle Component
 type ProgressCircleProps = {
@@ -83,22 +85,26 @@ const Home = () => {
   const dispatch = useDispatch();
   const dashboardData = useSelector(selectDashboardData);
   const [refreshing, setRefreshing] = useState(false);
+  const coursedata = useSelector(selectCourse)?.data;
 
   useEffect(() => {
     dispatch(getDashboardthunks({}) as any);
-  }, [dispatch]);
+    if (coursedata?._id) {
+      dispatch(getStudentTask({ course: coursedata._id }) as any);
+    }
+  }, [dispatch, coursedata?._id]);
 
-  // Refresh function
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
-    dispatch(getDashboardthunks({}) as any)
-      .then(() => {
-        setRefreshing(false);
-      })
-      .catch(() => {
-        setRefreshing(false);
-      });
-  }, [dispatch]);
+    dispatch(getDashboardthunks({}) as any);
+    if (coursedata?._id) {
+      dispatch(getStudentTask({ course: coursedata._id }) as any)
+        .then(() => setRefreshing(false))
+        .catch(() => setRefreshing(false));
+    } else {
+      setRefreshing(false);
+    }
+  }, [dispatch, coursedata?._id]);
 
   const classStats = dashboardData?.classes?.[0] || {};
 
@@ -167,8 +173,6 @@ const Home = () => {
             />
           }>
           <View style={styles.headerBox}>
-            <Text style={styles.header}>Classes</Text>
-
             {/* Profile Card */}
             <View style={styles.card}>
               <Image
@@ -196,6 +200,7 @@ const Home = () => {
             </View>
 
             {/* Stats Cards Grid */}
+            <Text style={styles.header}>Classes</Text>
             <View style={styles.statsGrid}>
               {statsCards.map((item, index) => (
                 <View key={index} style={[styles.statsCard, { backgroundColor: item.bgColor }]}>
@@ -230,7 +235,7 @@ const Home = () => {
           <AssessmentsChart />
           {/* update */}
           <UpdatesScreen />
-          <View style={{ marginBottom: 30 }}></View>
+          <View style={{ marginBottom: 60 }}></View>
         </ScrollView>
       </SafeAreaView>
     </>
@@ -264,6 +269,7 @@ const styles = StyleSheet.create({
     color: '#000',
     paddingLeft: 12,
     marginBottom: 15,
+    marginTop: 10,
   },
   card: {
     flexDirection: 'row',

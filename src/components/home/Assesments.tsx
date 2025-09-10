@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,10 +10,12 @@ import {
 } from 'react-native';
 import Svg, { Path, Circle } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectCourse, selectcoursetask } from '~/features/Courses/Reducers/selectors';
+import { getStudentTask } from '~/features/Courses/Reducers/thunks';
 
 const { width } = Dimensions.get('window');
 
-// Chart colors
 const CHART_COLORS = {
   primary: '#00BFA5',
   secondary: '#40E0D0',
@@ -25,51 +27,54 @@ const CHART_COLORS = {
   gray: '#E0E0E0',
 };
 
-interface AssessmentData {
-  percentage: number;
-  dataPoints: { x: number; y: number }[];
-}
+const AssessmentsChart: React.FC = () => {
+  const dispatch = useDispatch();
+  const Assesmentdata = useSelector(selectcoursetask);
+  const coursedata = useSelector(selectCourse)?.data;
+  useEffect(() => {
+    if (coursedata?._id) {
+      dispatch(getStudentTask({ course: coursedata._id }) as any);
+    }
+  }, [dispatch, coursedata?._id]);
 
-interface AssessmentsChartProps {
-  data?: AssessmentData;
-}
+  const [activeTab, setActiveTab] = useState<'Total' | 'Pending' | 'Completed'>('Total');
 
-const AssessmentsChart: React.FC<AssessmentsChartProps> = ({
-  data = {
-    percentage: 4,
-    dataPoints: [
-      { x: 20, y: 80 },
-      { x: 60, y: 40 },
-      { x: 100, y: 60 },
-      { x: 140, y: 30 },
-      { x: 180, y: 45 },
-      { x: 220, y: 25 },
-      { x: 260, y: 35 },
-    ],
-  },
-}) => {
-  const [activeTab, setActiveTab] = useState<'average' | 'exam' | 'completed'>('average');
+  // 👉 Calculate totals
+  const { total, pending, completed, progress } = useMemo(() => {
+    const total = Assesmentdata?.length || 0;
+    const pending =
+      Assesmentdata?.filter((item: any) => item?.module?.status === 'pending')?.length || 0;
+    const completed =
+      Assesmentdata?.filter((item: any) => item?.module?.status === 'completed')?.length || 0;
+    const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-  // Generate SVG path for the line chart
+    return { total, pending, completed, progress };
+  }, [Assesmentdata]);
+
+  // Fake chart data (can replace with API data later)
+  const chartWidth = width - 80;
+  const chartHeight = 120;
+  const chartPoints = [
+    { x: 20, y: 80 },
+    { x: 60, y: 40 },
+    { x: 100, y: 60 },
+    { x: 140, y: 30 },
+    { x: 180, y: 45 },
+    { x: 220, y: 25 },
+    { x: 260, y: 35 },
+  ];
+
   const generatePath = (points: { x: number; y: number }[]) => {
     if (points.length === 0) return '';
-
     let path = `M ${points[0].x} ${points[0].y}`;
-
     for (let i = 1; i < points.length; i++) {
       const current = points[i];
       const previous = points[i - 1];
-
-      // Smooth curves using quadratic bezier
       const cpx = (previous.x + current.x) / 2;
       path += ` Q ${cpx} ${previous.y} ${current.x} ${current.y}`;
     }
-
     return path;
   };
-
-  const chartWidth = width - 80;
-  const chartHeight = 120;
 
   return (
     <View style={styles.container}>
@@ -79,48 +84,48 @@ const AssessmentsChart: React.FC<AssessmentsChartProps> = ({
       <View style={styles.chartContainer}>
         <Svg width={chartWidth} height={chartHeight} style={styles.svg}>
           <Path
-            d={generatePath(data.dataPoints)}
+            d={generatePath(chartPoints)}
             stroke={CHART_COLORS.primary}
             strokeWidth="3"
             fill="none"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
-          {data.dataPoints.map((point, index) => (
+          {chartPoints.map((point, index) => (
             <Circle key={index} cx={point.x} cy={point.y} r="6" fill={CHART_COLORS.primary} />
           ))}
         </Svg>
 
-        {/* Percentage Circle */}
+        {/* Progress Percentage Circle */}
         <View style={styles.percentageContainer}>
           <View style={styles.percentageCircle}>
-            <Text style={styles.percentageText}>{data.percentage}%</Text>
+            <Text style={styles.percentageText}>{progress}%</Text>
           </View>
         </View>
       </View>
 
-      {/* Category Buttons with Gradient */}
+      {/* Tabs */}
       <ScrollView
         style={styles.categoriesContainer}
-        horizontal={true}
+        horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ gap: 8 }}>
-        {/* Average */}
-        <TouchableOpacity style={styles.categoryWrapper} onPress={() => setActiveTab('average')}>
+        {/* Total */}
+        <TouchableOpacity style={styles.categoryWrapper} onPress={() => setActiveTab('Total')}>
           <LinearGradient
-            colors={activeTab === 'average' ? ['#00BFA5', '#40E0D0'] : ['#B2DFDB', '#E0F7FA']}
+            colors={activeTab === 'Total' ? ['#00BFA5', '#40E0D0'] : ['#B2DFDB', '#E0F7FA']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.categoryButton}>
             <Image source={require('../../assets/home/chart.png')} style={styles.profileicon} />
-            <Text style={styles.categoryText}>Average</Text>
+            <Text style={styles.categoryText}>Total ({total})</Text>
           </LinearGradient>
         </TouchableOpacity>
 
-        {/* Exam */}
-        <TouchableOpacity style={styles.categoryWrapper} onPress={() => setActiveTab('exam')}>
+        {/* Pending */}
+        <TouchableOpacity style={styles.categoryWrapper} onPress={() => setActiveTab('Pending')}>
           <LinearGradient
-            colors={activeTab === 'exam' ? ['#40E0D0', '#2196F3'] : ['#BBDEFB', '#E3F2FD']}
+            colors={activeTab === 'Pending' ? ['#40E0D0', '#2196F3'] : ['#BBDEFB', '#E3F2FD']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.categoryButton}>
@@ -128,14 +133,14 @@ const AssessmentsChart: React.FC<AssessmentsChartProps> = ({
               source={require('../../assets/home/clipboard-text.png')}
               style={styles.profileicon}
             />
-            <Text style={styles.categoryText}>Exam</Text>
+            <Text style={styles.categoryText}>Pending ({pending})</Text>
           </LinearGradient>
         </TouchableOpacity>
 
-        {/* Completed Task */}
-        <TouchableOpacity style={styles.categoryWrapper} onPress={() => setActiveTab('completed')}>
+        {/* Completed */}
+        <TouchableOpacity style={styles.categoryWrapper} onPress={() => setActiveTab('Completed')}>
           <LinearGradient
-            colors={activeTab === 'completed' ? ['#2196F3', '#64B5F6'] : ['#C5CAE9', '#E8EAF6']}
+            colors={activeTab === 'Completed' ? ['#2196F3', '#64B5F6'] : ['#C5CAE9', '#E8EAF6']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.categoryButton}>
@@ -143,7 +148,7 @@ const AssessmentsChart: React.FC<AssessmentsChartProps> = ({
               source={require('../../assets/home/task-square.png')}
               style={styles.profileicon}
             />
-            <Text style={styles.categoryText}>Completed task</Text>
+            <Text style={styles.categoryText}>Completed ({completed})</Text>
           </LinearGradient>
         </TouchableOpacity>
       </ScrollView>

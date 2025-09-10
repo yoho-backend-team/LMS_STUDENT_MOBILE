@@ -133,14 +133,14 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: '#fff',
     borderRadius: 16,
-    padding: 20,
-    margin: 16,
+    padding: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
     marginBottom: 40,
+    marginTop:10,
     flex: 1,
   },
   header: {
