@@ -18,8 +18,6 @@ const CHART_COLORS = {
 
 const CoursesProgressChart: React.FC = () => {
   const dashboard = useSelector(selectDashboardData);
-  console.log("Dashboard",dashboard)
-
   const { progress, totalClasses } = useMemo(() => {
     const classStats = dashboard?.classes?.[0];
     if (!classStats) return { progress: 0, totalClasses: 0 };

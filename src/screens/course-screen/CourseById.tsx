@@ -77,8 +77,6 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
   const taskData = useSelector(selectcoursetask);
   const [steps, setSteps] = useState<any[]>([]);
   const [currentModule, setCurrentModule] = useState<any>(null);
-  console.log("Task,",taskData)
-
   useEffect(() => {
     dispatch(getStudentTask({ course: course?._id }));
   }, [dispatch]);
