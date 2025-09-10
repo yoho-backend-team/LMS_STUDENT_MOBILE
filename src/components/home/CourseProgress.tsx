@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import Svg, { Circle, Path } from 'react-native-svg';
+import Svg, { Circle } from 'react-native-svg';
 import { COLORS } from '~/constants';
+import { useSelector } from 'react-redux';
+import { selectDashboardData } from '~/features/home/reducer/selectors';
 
 const CHART_COLORS = {
   primary: '#7B00FF',
@@ -14,38 +16,39 @@ const CHART_COLORS = {
   lightGray: '#F0F0F0',
 };
 
-interface CourseProgressData {
-  progress: number; 
-  batchName: string;
-}
+const CoursesProgressChart: React.FC = () => {
+  const dashboard = useSelector(selectDashboardData);
+  const { progress, totalClasses } = useMemo(() => {
+    const classStats = dashboard?.classes?.[0];
+    if (!classStats) return { progress: 0, totalClasses: 0 };
 
-interface CoursesProgressChartProps {
-  data?: CourseProgressData;
-}
+    const completed =
+      (classStats.online_class?.completed || 0) +
+      (classStats.offline_class?.completed || 0);
 
-const CoursesProgressChart: React.FC<CoursesProgressChartProps> = ({
-  data = {
-    progress: 50,
-    batchName: 'Batch A',
-  },
-}) => {
+    const total = classStats.total || 0;
+    const progress = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+    return { progress, totalClasses: total };
+  }, [dashboard]);
+
+  // Circular chart math
   const size = 160;
   const strokeWidth = 18;
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
-  const progressOffset = circumference - (data.progress / 100) * circumference;
+  const progressOffset = circumference - (progress / 100) * circumference;
 
-  // Calculate sun and moon positions
   const centerX = size / 2;
   const centerY = size / 2;
 
-  // Sun position (start - top of circle) - on the progress line
-  const sunAngle = -Math.PI / 2; // -90 degrees (top)
+  // Sun position (start - top)
+  const sunAngle = -Math.PI / 2;
   const sunX = centerX + radius * Math.cos(sunAngle);
   const sunY = centerY + radius * Math.sin(sunAngle);
 
-  // Moon position (based on progress) - on the progress line
-  const progressAngle = -Math.PI / 2 + (data.progress / 100) * 2 * Math.PI;
+  // Moon position (based on progress)
+  const progressAngle = -Math.PI / 2 + (progress / 100) * 2 * Math.PI;
   const moonX = centerX + radius * Math.cos(progressAngle);
   const moonY = centerY + radius * Math.sin(progressAngle);
 
@@ -53,7 +56,6 @@ const CoursesProgressChart: React.FC<CoursesProgressChartProps> = ({
     <View style={styles.container}>
       <Text style={styles.title}>Courses Progress</Text>
 
-      {/* Circular Progress Chart */}
       <View style={styles.chartContainer}>
         <View style={styles.progressContainer}>
           <Svg width={size + 40} height={size + 40}>
@@ -86,12 +88,9 @@ const CoursesProgressChart: React.FC<CoursesProgressChartProps> = ({
           <View
             style={[
               styles.iconContainer,
-              styles.sunContainer,
-              {
-                left: sunX + 20 - 16,
-                top: sunY + 20 - 16,
-              },
-            ]}>
+              { left: sunX + 20 - 16, top: sunY + 20 - 16 },
+            ]}
+          >
             <Image
               source={require('../../assets/home/moon.png')}
               style={{ width: 30, height: 30 }}
@@ -102,22 +101,19 @@ const CoursesProgressChart: React.FC<CoursesProgressChartProps> = ({
           <View
             style={[
               styles.iconContainer,
-              styles.moonContainer,
-              {
-                left: moonX + 20 - 16,
-                top: moonY + 20 - 16,
-              },
-            ]}>
+              { left: moonX + 20 - 16, top: moonY + 20 - 16 },
+            ]}
+          >
             <Image
               source={require('../../assets/home/sun.png')}
               style={{ width: 30, height: 30 }}
             />
           </View>
 
-          {/* Center Content */}
+          {/* Center Text */}
           <View style={styles.centerContent}>
             <Text style={styles.progressLabel}>Progress</Text>
-            <Text style={styles.progressPercentage}>{data.progress}%</Text>
+            <Text style={styles.progressPercentage}>{progress}%</Text>
           </View>
         </View>
       </View>
@@ -125,11 +121,11 @@ const CoursesProgressChart: React.FC<CoursesProgressChartProps> = ({
       {/* Bottom Section */}
       <View style={styles.bottomSection}>
         <TouchableOpacity style={styles.batchButton}>
-          <Text style={styles.batchText}>{data.batchName}</Text>
+          <Text style={styles.batchText}>Total Classes</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.registerButton}>
-          <Text style={styles.registerText}>Register</Text>
+          <Text style={styles.registerText}>{totalClasses} Classes</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -142,10 +138,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 20,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 8,
@@ -172,20 +165,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-  },
-  sunContainer: {},
-  moonContainer: {},
-  sunIcon: {
-    fontSize: 16,
-    color: COLORS.white,
-  },
-  moonIcon: {
-    fontSize: 16,
   },
   centerContent: {
     position: 'absolute',

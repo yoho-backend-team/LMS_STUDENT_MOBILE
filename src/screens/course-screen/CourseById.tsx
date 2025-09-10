@@ -47,12 +47,10 @@ const SHADOW = {
   elevation: 3,
 };
 
-// helper: get first pending module
 const getCurrentModule = (modules: any[]) => {
   return modules?.find((m) => m.status === 'pending') || modules?.[0];
 };
 
-// helper: map steps
 const getSteps = (modules: any[]) => {
   return modules?.map((m, index) => ({
     id: index + 1,
@@ -60,11 +58,10 @@ const getSteps = (modules: any[]) => {
     description: m.description,
     status: m.status,
     video: m.video,
-    icon: require('../../assets/courses/modules.png'), // default icon
+    icon: require('../../assets/courses/modules.png'),
   }));
 };
 
-// helper: extract YouTube ID
 const extractVideoId = (url: string) => {
   if (!url) return '';
   const regex = /(?:embed\/|v=)([^&?]+)/;
@@ -80,7 +77,6 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
   const taskData = useSelector(selectcoursetask);
   const [steps, setSteps] = useState<any[]>([]);
   const [currentModule, setCurrentModule] = useState<any>(null);
-
   useEffect(() => {
     dispatch(getStudentTask({ course: course?._id }));
   }, [dispatch]);
@@ -119,12 +115,12 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scroll}>
+      {/* Fixed Header with Back + Tabs */}
+      <View style={styles.header}>
         <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
           <Image source={require('../../assets/profile/back.png')} style={styles.backbutton} />
         </TouchableOpacity>
 
-        {/* Tabs */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -144,15 +140,18 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
                 {tab === 'about'
                   ? 'About'
                   : tab === 'notes'
-                    ? 'Notes & Materials'
-                    : tab === 'tasks'
-                      ? 'Tasks & Projects'
-                      : 'Course Track'}
+                  ? 'Notes & Materials'
+                  : tab === 'tasks'
+                  ? 'Tasks & Projects'
+                  : 'Course Track'}
               </Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
+      </View>
 
+      {/* Scrollable Content */}
+      <ScrollView style={styles.scroll}>
         {/* ABOUT TAB */}
         {activeTab === 'about' && (
           <>
@@ -327,7 +326,6 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
               )}
             </View>
 
-            {/* Timeline */}
             <View style={styles.trackCard}>
               <View style={styles.verticalLine} />
 
@@ -369,7 +367,12 @@ export default CourseById;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#ebeff3' },
-  scroll: { padding: 16 },
+
+  header: {
+    backgroundColor: '#ebeff3',
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+  },
   backButton: { marginBottom: 10 },
   backbutton: {
     width: 45,
@@ -378,13 +381,13 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
 
-  tabScroll: { marginBottom: 16 },
+  tabScroll: { marginBottom: 0 },
   tabButton: {
     flex: 1,
     minWidth: 130,
+    height: 45, 
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 10,
     marginRight: 8,
     borderRadius: 8,
     backgroundColor: '#fff',
@@ -392,6 +395,8 @@ const styles = StyleSheet.create({
   activeTab: { backgroundColor: '#7B00FF' },
   tabText: { color: '#374151', fontSize: 14 },
   activeTabText: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
+
+  scroll: { flex: 1, padding: 16 },
 
   card: {
     backgroundColor: '#ebeff3',

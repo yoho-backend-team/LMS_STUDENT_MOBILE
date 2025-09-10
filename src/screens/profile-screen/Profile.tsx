@@ -520,80 +520,99 @@ const Profile = () => {
   );
 
   const renderCertificateContent = () => {
-    const completedCourses = profileDetails?.data?.userDetail?.completed_courses || [];
-    const currentCourse = profileDetails?.data?.userDetail?.course;
+  const completedCourses = profileDetails?.data?.userDetail?.completed_courses || [];
+  const currentCourse = profileDetails?.data?.userDetail?.course;
 
-    const allCourses = [];
+  const allCourses = [];
 
-    if (currentCourse) {
+  if (currentCourse) {
+    allCourses.push({
+      ...currentCourse,
+      status: 'In Progress',
+      cardImage: require('../../assets/profile/card1.png'),
+    });
+  }
+
+  if (completedCourses.length > 0) {
+    completedCourses.forEach((course: any) => {
       allCourses.push({
-        ...currentCourse,
-        status: 'In Progress',
-        cardImage: require('../../assets/profile/card1.png'),
+        ...course,
+        status: 'Completed',
+        cardImage: require('../../assets/profile/card2.png'),
       });
-    }
+    });
+  }
 
-    if (completedCourses.length > 0) {
-      completedCourses.forEach((course: any) => {
-        allCourses.push({
-          ...course,
-          status: 'Completed',
-          cardImage: require('../../assets/profile/card2.png'),
-        });
-      });
-    }
-
-    return (
-      <View style={styles.certificateContainer}>
-        {allCourses.length > 0 ? (
-          allCourses.map((course, index) => (
-            <View key={index} style={styles.card}>
-              <Image source={course.cardImage} style={styles.cardImage} />
-              <View style={styles.contentRow}>
-                <View style={styles.textContainer}>
-                  <Text style={styles.cardText}>Course Name: {course.course_name}</Text>
-                  <Text style={styles.cardText}>Duration: {course.duration}</Text>
-                  <Text style={styles.cardText}>Status: {course.status}</Text>
-                </View>
-                <Image source={require('../../assets/profile/down.png')} style={styles.downIcon} />
-              </View>
-            </View>
-          ))
-        ) : (
-          <View style={styles.card}>
-            <Text style={styles.cardText}>No courses available</Text>
-          </View>
-        )}
-      </View>
-    );
-  };
-
-  const renderIDCardContent = () => (
+  return (
     <View style={styles.certificateContainer}>
-      <View style={[styles.card, { alignItems: 'center', padding: 20 }]}>
-        <Text style={[styles.sectionTitle, { marginBottom: 20 }]}>Student ID Card</Text>
+      {allCourses.length > 0 ? (
+        allCourses.map((course, index) => (
+          <View key={index} style={styles.card}>
+            <Image source={course.cardImage} style={styles.cardImage} />
+            <View style={styles.contentRow}>
+              <View style={styles.textContainer}>
+                <Text style={styles.cardHeading}>Course Name</Text>
+                <Text style={styles.cardValue}>{course.course_name}</Text>
 
-        {profileDetails?.data?.image ? (
-          <Image
-            source={{ uri: getImageUrl(profileDetails.data.image) }}
-            style={styles.idCardImage}
-          />
-        ) : (
-          <Image source={require('../../assets/profile/man.png')} style={styles.idCardImage} />
-        )}
+                <Text style={styles.cardHeading}>Duration</Text>
+                <Text style={styles.cardValue}>{course.duration}</Text>
 
-        <View style={styles.idCardInfo}>
-          <Text style={styles.idCardName}>
-            {profileData.first_name} {profileData.last_name}
-          </Text>
-          <Text style={styles.idCardText}>Student ID: {profileData.studentID}</Text>
-          <Text style={styles.idCardText}>Roll No: {profileData.rollNumber}</Text>
-          <Text style={styles.idCardText}>Course: {profileData.course}</Text>
-          <Text style={styles.idCardText}>Batch: {profileData.batch}</Text>
+                <Text style={styles.cardHeading}>Status</Text>
+                <Text style={styles.cardValue}>{course.status}</Text>
+              </View>
+              <Image source={require('../../assets/profile/down.png')} style={styles.downIcon} />
+            </View>
+          </View>
+        ))
+      ) : (
+        <View style={styles.card}>
+          <Text style={styles.cardValue}>No courses available</Text>
+        </View>
+      )}
+    </View>
+  );
+};
+
+const renderIDCardContent = () => (
+  <View style={styles.certificateContainer}>
+    <View style={[styles.card, { alignItems: 'center', padding: 20 }]}>
+      <Text style={[styles.sectionTitle, { marginBottom: 20 }]}>Student ID Card</Text>
+
+      {profileDetails?.data?.image ? (
+        <Image
+          source={{ uri: getImageUrl(profileDetails.data.image) }}
+          style={styles.idCardImage}
+        />
+      ) : (
+        <Image source={require('../../assets/profile/man.png')} style={styles.idCardImage} />
+      )}
+
+      <View style={styles.idCardInfo}>
+        <View style={styles.idRow}>
+          <Text style={styles.idHeading}>Name:</Text>
+          <Text style={styles.idValue}>{profileData.first_name} {profileData.last_name}</Text>
+        </View>
+        <View style={styles.idRow}>
+          <Text style={styles.idHeading}>Student ID:</Text>
+          <Text style={styles.idValue}>{profileData.studentID}</Text>
+        </View>
+        <View style={styles.idRow}>
+          <Text style={styles.idHeading}>Roll No:</Text>
+          <Text style={styles.idValue}>{profileData.rollNumber}</Text>
+        </View>
+        <View style={styles.idRow}>
+          <Text style={styles.idHeading}>Course:</Text>
+          <Text style={styles.idValue}>{profileData.course}</Text>
+        </View>
+        <View style={styles.idRow}>
+          <Text style={styles.idHeading}>Batch:</Text>
+          <Text style={styles.idValue}>{profileData.batch}</Text>
         </View>
       </View>
     </View>
-  );
+  </View>
+);
+
 
   const renderContent = () => {
     switch (activeTab) {
@@ -942,4 +961,33 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     fontWeight: '500',
   },
+  idRow: {
+  flexDirection: 'row',
+  width: '100%',
+  justifyContent: 'space-between',
+  marginBottom: 8,
+},
+idHeading: {
+  fontWeight: '700',
+  color: '#2A2A2A',
+  fontSize: 16,
+},
+idValue: {
+  fontWeight: '500',
+  color: '#716F6F',
+  fontSize: 16,
+},
+cardHeading: {
+  fontWeight: '700',
+  color: '#2A2A2A',
+  fontSize: 16,
+  marginTop: 6,
+},
+cardValue: {
+  fontWeight: '500',
+  color: '#716F6F',
+  fontSize: 16,
+  marginBottom: 4,
+},
+
 });

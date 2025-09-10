@@ -24,8 +24,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectDashboardData } from '~/features/home/reducer/selectors';
 import { getDashboardthunks } from '~/features/home/reducer/thunks';
 import { getImageUrl } from '~/utils/imageUtils';
-import { Ionicons } from '@expo/vector-icons';
-
 // Custom Progress Circle Component
 type ProgressCircleProps = {
   percentage: number;
@@ -84,20 +82,11 @@ const Home = () => {
   const dashboardData = useSelector(selectDashboardData);
   const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    dispatch(getDashboardthunks({}) as any);
-  }, [dispatch]);
-
-  // Refresh function
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
     dispatch(getDashboardthunks({}) as any)
-      .then(() => {
-        setRefreshing(false);
-      })
-      .catch(() => {
-        setRefreshing(false);
-      });
+      .then(() => setRefreshing(false))
+      .catch(() => setRefreshing(false));
   }, [dispatch]);
 
   const classStats = dashboardData?.classes?.[0] || {};
@@ -167,8 +156,6 @@ const Home = () => {
             />
           }>
           <View style={styles.headerBox}>
-            <Text style={styles.header}>Classes</Text>
-
             {/* Profile Card */}
             <View style={styles.card}>
               <Image
@@ -196,6 +183,7 @@ const Home = () => {
             </View>
 
             {/* Stats Cards Grid */}
+            <Text style={styles.header}>Classes</Text>
             <View style={styles.statsGrid}>
               {statsCards.map((item, index) => (
                 <View key={index} style={[styles.statsCard, { backgroundColor: item.bgColor }]}>
@@ -230,7 +218,7 @@ const Home = () => {
           <AssessmentsChart />
           {/* update */}
           <UpdatesScreen />
-          <View style={{ marginBottom: 30 }}></View>
+          <View style={{ marginBottom: 60 }}></View>
         </ScrollView>
       </SafeAreaView>
     </>
@@ -264,6 +252,7 @@ const styles = StyleSheet.create({
     color: '#000',
     paddingLeft: 12,
     marginBottom: 15,
+    marginTop: 10,
   },
   card: {
     flexDirection: 'row',
