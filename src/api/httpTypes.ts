@@ -45,6 +45,7 @@ export type Endpoints = {
   };
   reports: {
     get: string;
+    getassement:string;
   };
   community: {
     get: string;

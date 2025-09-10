@@ -22,7 +22,7 @@ import UpdatesScreen from '~/components/home/UpdateScreen';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectDashboardData } from '~/features/home/reducer/selectors';
-import { getDashboardthunks } from '~/features/home/reducer/thunks';
+import {  getDashboardthunks } from '~/features/home/reducer/thunks';
 import { getImageUrl } from '~/utils/imageUtils';
 import { Ionicons } from '@expo/vector-icons';
 import { getStudentTask } from '~/features/Courses/Reducers/thunks';
@@ -86,7 +86,6 @@ const Home = () => {
   const dashboardData = useSelector(selectDashboardData);
   const [refreshing, setRefreshing] = useState(false);
   const coursedata = useSelector(selectCourse)?.data;
-
   useEffect(() => {
     dispatch(getDashboardthunks({}) as any);
     if (coursedata?._id) {

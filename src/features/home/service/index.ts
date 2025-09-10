@@ -6,3 +6,10 @@ export const getDashboard = async (params: any) => {
 		return response;
 	}
 }
+
+export const getDashboardAssement =async(params?:any)=>{
+	const res = await Client.student.reports.getassement(params)
+	if (res){
+		return res
+	}
+}

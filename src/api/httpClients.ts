@@ -2,7 +2,7 @@ import axios from 'axios';
 import { clearStudentData, getStudentToken } from '~/utils/storage';
 
 const backendUrl = 'https://lms-node-backend-v1.onrender.com/api';
-// const backendUrl = 'http://10.51.121.152:3001/api';
+// const backendUrl = 'http://192.168.1.32:3001/api';
 
 const Axios = axios.create({
   baseURL: backendUrl,

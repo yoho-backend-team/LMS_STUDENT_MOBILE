@@ -11,8 +11,9 @@ import {
 import Svg, { Path, Circle } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectCourse, selectcoursetask } from '~/features/Courses/Reducers/selectors';
-import { getStudentTask } from '~/features/Courses/Reducers/thunks';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getdashboardassementthunk } from '~/features/home/reducer/thunks';
+import { selectAssessmentData } from '~/features/home/reducer/selectors';
 
 const { width } = Dimensions.get('window');
 
@@ -27,31 +28,51 @@ const CHART_COLORS = {
   gray: '#E0E0E0',
 };
 
+type AssessmentTrack = {
+  total: number;
+  pending: number;
+  completed: number;
+};
+
 const AssessmentsChart: React.FC = () => {
   const dispatch = useDispatch();
-  const Assesmentdata = useSelector(selectcoursetask);
-  const coursedata = useSelector(selectCourse)?.data;
-  useEffect(() => {
-    if (coursedata?._id) {
-      dispatch(getStudentTask({ course: coursedata._id }) as any);
-    }
-  }, [dispatch, coursedata?._id]);
-
+  const assessmentData = useSelector(selectAssessmentData) as AssessmentTrack | null;
+  const [studentID, setStudentID] = useState<string | null>(null);
+  const [courseID, setCourseID] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'Total' | 'Pending' | 'Completed'>('Total');
 
-  // 👉 Calculate totals
+  useEffect(() => {
+    const fetchStudentData = async () => {
+      try {
+        const storedStudent = await AsyncStorage.getItem('StudentData');
+        if (storedStudent) {
+          const parsedStudent = JSON.parse(storedStudent);
+          const id = parsedStudent?.uuid;
+          const courseId = parsedStudent?.userDetail?.course;
+
+          setStudentID(id);
+          setCourseID(courseId);
+          dispatch(getdashboardassementthunk({ student: id, course: courseId }) as any);
+        }
+      } catch (error) {
+        console.log('Error fetching Student Data:', error);
+      }
+    };
+
+    fetchStudentData();
+  }, [dispatch]);
+
+  // Calculate totals safely
   const { total, pending, completed, progress } = useMemo(() => {
-    const total = Assesmentdata?.length || 0;
-    const pending =
-      Assesmentdata?.filter((item: any) => item?.module?.status === 'pending')?.length || 0;
-    const completed =
-      Assesmentdata?.filter((item: any) => item?.module?.status === 'completed')?.length || 0;
+    const total = assessmentData?.total ?? 0;
+    const pending = assessmentData?.pending ?? 0;
+    const completed = assessmentData?.completed ?? 0;
     const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
 
     return { total, pending, completed, progress };
-  }, [Assesmentdata]);
+  }, [assessmentData]);
 
-  // Fake chart data (can replace with API data later)
+  // Fake chart points (replace with real API points if needed)
   const chartWidth = width - 80;
   const chartHeight = 120;
   const chartPoints = [
@@ -86,13 +107,13 @@ const AssessmentsChart: React.FC = () => {
           <Path
             d={generatePath(chartPoints)}
             stroke={CHART_COLORS.primary}
-            strokeWidth="3"
+            strokeWidth={3}
             fill="none"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
           {chartPoints.map((point, index) => (
-            <Circle key={index} cx={point.x} cy={point.y} r="6" fill={CHART_COLORS.primary} />
+            <Circle key={index} cx={point.x} cy={point.y} r={6} fill={CHART_COLORS.primary} />
           ))}
         </Svg>
 
@@ -109,14 +130,16 @@ const AssessmentsChart: React.FC = () => {
         style={styles.categoriesContainer}
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: 8 }}>
+        contentContainerStyle={{ gap: 8 }}
+      >
         {/* Total */}
         <TouchableOpacity style={styles.categoryWrapper} onPress={() => setActiveTab('Total')}>
           <LinearGradient
             colors={activeTab === 'Total' ? ['#00BFA5', '#40E0D0'] : ['#B2DFDB', '#E0F7FA']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={styles.categoryButton}>
+            style={styles.categoryButton}
+          >
             <Image source={require('../../assets/home/chart.png')} style={styles.profileicon} />
             <Text style={styles.categoryText}>Total ({total})</Text>
           </LinearGradient>
@@ -128,7 +151,8 @@ const AssessmentsChart: React.FC = () => {
             colors={activeTab === 'Pending' ? ['#40E0D0', '#2196F3'] : ['#BBDEFB', '#E3F2FD']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={styles.categoryButton}>
+            style={styles.categoryButton}
+          >
             <Image
               source={require('../../assets/home/clipboard-text.png')}
               style={styles.profileicon}
@@ -143,7 +167,8 @@ const AssessmentsChart: React.FC = () => {
             colors={activeTab === 'Completed' ? ['#2196F3', '#64B5F6'] : ['#C5CAE9', '#E8EAF6']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={styles.categoryButton}>
+            style={styles.categoryButton}
+          >
             <Image
               source={require('../../assets/home/task-square.png')}
               style={styles.profileicon}
