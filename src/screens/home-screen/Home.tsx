@@ -24,10 +24,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectDashboardData } from '~/features/home/reducer/selectors';
 import {  getDashboardthunks } from '~/features/home/reducer/thunks';
 import { getImageUrl } from '~/utils/imageUtils';
-import { Ionicons } from '@expo/vector-icons';
-import { getStudentTask } from '~/features/Courses/Reducers/thunks';
-import { selectCourse } from '~/features/Courses/Reducers/selectors';
-
 // Custom Progress Circle Component
 type ProgressCircleProps = {
   percentage: number;
@@ -85,25 +81,15 @@ const Home = () => {
   const dispatch = useDispatch();
   const dashboardData = useSelector(selectDashboardData);
   const [refreshing, setRefreshing] = useState(false);
-  const coursedata = useSelector(selectCourse)?.data;
-  useEffect(() => {
-    dispatch(getDashboardthunks({}) as any);
-    if (coursedata?._id) {
-      dispatch(getStudentTask({ course: coursedata._id }) as any);
-    }
-  }, [dispatch, coursedata?._id]);
 
-  const onRefresh = React.useCallback(() => {
-    setRefreshing(true);
-    dispatch(getDashboardthunks({}) as any);
-    if (coursedata?._id) {
-      dispatch(getStudentTask({ course: coursedata._id }) as any)
-        .then(() => setRefreshing(false))
-        .catch(() => setRefreshing(false));
-    } else {
-      setRefreshing(false);
-    }
-  }, [dispatch, coursedata?._id]);
+
+const onRefresh = React.useCallback(() => {
+  setRefreshing(true);
+  dispatch(getDashboardthunks({}) as any)
+    .then(() => setRefreshing(false))
+    .catch(() => setRefreshing(false));
+}, [dispatch]);
+
 
   const classStats = dashboardData?.classes?.[0] || {};
 
