@@ -79,7 +79,8 @@
     "react-redux": "^9.2.0",
     "recharts": "^3.1.2",
     "socket.io-client": "^4.8.1",
-    "tailwindcss-react-native": "^1.7.10"
+    "tailwindcss-react-native": "^1.7.10",
+    "@shopify/react-native-skia": "v2.0.0-next.4"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
@@ -95,5 +96,21 @@
     "typescript": "~5.8.3"
   },
   "main": "node_modules/expo/AppEntry.js",
-  "private": true
+  "private": true,
+  "expo": {
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "exclude": [
+          "react-native-chart-kit",
+          "react-native-file-viewer",
+          "react-native-fs",
+          "react-native-keyboard-aware-scroll-view",
+          "react-native-neomorph-shadows",
+          "react-native-responsive-fontsize",
+          "react-native-responsive-screen"
+        ],
+        "listUnknownPackages": false
+      }
+    }
+  }
 }
