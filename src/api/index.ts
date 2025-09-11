@@ -121,6 +121,9 @@ class Client {
   notificatinsubscription = {
     post: (data: any) => httpClient.post(HTTP_END_POINTS.notificationSubscription.post, data),
   };
+  certificate={
+    get:(data:any)=>httpClient.get(HTTP_END_POINTS.certificate.get.replace(":studentId",data.studentId), data,"student")
+  }
 }
 
 export default new Client();

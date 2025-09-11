@@ -20,7 +20,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getStudentProfileThunk } from '~/features/Profile/reducer/thunks';
 import { selectProfile } from '~/features/Profile/reducer/selectors';
 import { getImageUrl } from '~/utils/imageUtils';
-import { updateStudentProfile, uploadProfileImage } from '~/features/Profile/services';
+import { getCertificate, updateStudentProfile, uploadProfileImage } from '~/features/Profile/services';
 import * as ImagePicker from 'expo-image-picker';
 import toast from '~/utils/toasts';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -111,6 +111,21 @@ const Profile = () => {
 
   const dispatch = useDispatch<any>();
   const profileDetails = useSelector(selectProfile);
+
+  const[cerificate,setCertificate] = useState<any>("");
+
+  const fetchCertificate = async()=>{
+    try {
+      const response = await getCertificate({studentId:profileDetails?.userDetail?._id})
+      console.log(response,"res")
+    } catch (error) {
+      console.log("error in fetchung certificate:",error)
+    }
+  }
+
+  useEffect(()=>{
+    fetchCertificate()
+  },[profileDetails])
 
   useEffect(() => {
     dispatch(getStudentProfileThunk({}));

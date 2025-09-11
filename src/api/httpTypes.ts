@@ -68,4 +68,8 @@ export type Endpoints = {
   placement: {
     get: string;
   };
+
+  certificate:{
+    get:string;
+  }
 };

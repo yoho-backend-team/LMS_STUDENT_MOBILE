@@ -71,6 +71,9 @@ const getEndpoints = (): Endpoints => {
     placement: {
       get: `/placements/fetch/`,
     },
+    certificate:{
+      get:`/certificate/getall/student/:studentId`
+    }
 
   };
 };
