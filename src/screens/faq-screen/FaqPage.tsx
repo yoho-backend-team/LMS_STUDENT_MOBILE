@@ -1,214 +1,333 @@
-import React, { useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+import React, { useEffect, useState } from "react";
+import { Image } from "react-native";
 import {
-  View,
+  StatusBar,
   Text,
+  View,
   TextInput,
   TouchableOpacity,
   ScrollView,
+  ImageBackground,
   StyleSheet,
+  LayoutAnimation,
+  Platform,
+  UIManager,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useDispatch, useSelector } from "react-redux";
+import { selectFaq } from "~/features/faq/reducers/selectors";
+import { getFaqThunk } from "~/features/faq/reducers/thunks";
+import { getStudentData } from "~/utils/storage";
+
+const UI = {
+  bg: "#EAEFF5",
+  surface: "#F2F5F9",
+  chip: "#EDF2F7",
+  text: "#1F2937",
+  sub: "#6B7280",
+  primary: "#5B84F8",
+  dark: "#C1CADC",
+  light: "#FFFFFF",
+};
+
+if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+const PlusMinusIcon = ({ open }: { open: boolean }) => (
+  <View style={[styles.pmWrap, styles.insetBox]}>
+    <View style={styles.hBar} />
+    {!open && <View style={styles.vBar} />}
+  </View>
+);
 
 const faqs = [
   {
-    question: "Introduction",
-    answer: "This is a quick introduction about how the app works.",
+    title: "Introduction",
+    description:
+      "Thanks For Your Interest In Teaching Your Courses Through Payil.\n\nPayil is designed to help you manage your courses effectively and track student progress with ease.",
   },
   {
-    question: "How To Access Payil?",
-    answer: "Login with your credentials and navigate to the Payil section.",
+    title: "How To Access Payil?",
+    description:
+      "You can access Payil via the official website or mobile application provided by your institute.",
   },
   {
-    question: "About Payil Dashboard",
-    answer: "The dashboard gives you a quick overview of all your courses.",
+    title: "About Payil Dashboard",
+    description:
+      "The dashboard provides an overview of your courses, student activities, and assignments.",
   },
   {
-    question: "About Payil Courses",
-    answer: "Payil courses are interactive and self-paced for easy learning.",
+    title: "About Payil Courses",
+    description:
+      "You can add, edit, and manage multiple courses seamlessly in Payil.",
   },
   {
-    question: "How To Access Payil Subject",
-    answer: "Select a subject from your dashboard to start learning.",
+    title: "How To Access Payil Subject",
+    description:
+      "Navigate to the course section, then click on a subject to view its details and assignments.",
   },
   {
-    question: "How to add a new course?",
-    answer: "Go to the courses section and click 'Add New Course'.",
+    title: "How to add a new course?",
+    description:
+      "Go to your dashboard → select 'Add Course' → enter details → save.",
   },
 ];
 
-export default function FAQScreen() {
+const FAQ = () => {
   const [search, setSearch] = useState("");
-  const [expanded, setExpanded] = useState<number | null>(null);
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+  const navigation = useNavigation<any>();
+  const dispatch = useDispatch<any>();
+  const selectData = useSelector(selectFaq)?.data;
+  const [student, setStudent] = useState<any>(null);
 
-  const toggleExpand = (index: number) => {
-    setExpanded(expanded === index ? null : index);
+  useEffect(() => {
+    (async () => {
+      const data = await getStudentData();
+      setStudent(data);
+    })();
+  }, []);
+
+  const getFaqData = async () => {
+    await dispatch(
+      getFaqThunk({
+        instituteId: student?.institute_id?.uuid,
+        branchid: student?.branch_id?.uuid,
+      })
+    );
   };
 
+  useEffect(() => {
+    if (student) {
+      getFaqData();
+    }
+  }, [dispatch, student]);
+
+  const toggleExpand = (index: number) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpandedIndex(expandedIndex === index ? null : index);
+  };
+
+  const allFaqs = [
+    ...(selectData ?? []),
+    ...faqs,
+  ];
+
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <Text style={styles.title}>FAQ - Frequently Asked Questions</Text>
+    <>
+      <StatusBar backgroundColor={"#000"} barStyle="light-content" />
+      <ImageBackground style={styles.background} resizeMode="cover">
+        <SafeAreaView style={styles.container}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Image
+                source={require("../../assets/profile/back.png")}
+                style={styles.backbutton}
+              />
+            </TouchableOpacity>
+            <Text style={styles.header}>FAQ - Frequently Asked Questions</Text>
+          </View>
 
-      {/* Search */}
-      <View style={styles.searchBox}>
-        <TextInput
-          placeholder="Search"
-          placeholderTextColor="#888"
-          style={styles.searchInput}
-          value={search}
-          onChangeText={setSearch}
-        />
-      </View>
+          <View style={[styles.searchBox, styles.insetBox]}>
+            <TextInput
+              placeholder="Search"
+              placeholderTextColor="#98A2B3"
+              style={styles.searchInput}
+              value={search}
+              onChangeText={setSearch}
+            />
+          </View>
 
-      {/* FAQ List */}
-      <ScrollView
-        style={{ marginBottom: 20 }}
-        contentContainerStyle={{ paddingBottom: 20 }}
-        showsVerticalScrollIndicator={false}
-      >
-        {faqs
-          .filter((faq) =>
-            faq.question.toLowerCase().includes(search.toLowerCase())
-          )
-          .map((faq, index) => {
-            const isOpen = expanded === index;
-            return (
-              <View key={index} style={styles.card}>
-                {/* Question row */}
-                <TouchableOpacity
-                  onPress={() => toggleExpand(index)}
-                  style={styles.cardHeader}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.question}>{faq.question}</Text>
-                  <Text style={styles.toggleIcon}>{isOpen ? "–" : "+"}</Text>
-                </TouchableOpacity>
+          <ScrollView
+            style={{ marginBottom: 20 }}
+            contentContainerStyle={{ paddingBottom: 20 }}
+            showsVerticalScrollIndicator={false}
+          >
+            {allFaqs
+              ?.filter((i: any) =>
+                (i.title || i).toLowerCase().includes(search.toLowerCase())
+              )
+              .map((item: any, index: number) => {
+                const title = item.title || item;
+                const description = item.description || "";
+                const open = expandedIndex === index;
 
-                {/* Answer */}
-                {isOpen && <Text style={styles.answer}>{faq.answer}</Text>}
-              </View>
-            );
-          })}
+                return (
+                  <React.Fragment key={index}>
+                    <View style={[styles.card, styles.insetBox]}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.cardText}>{title}</Text>
+                      </View>
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => toggleExpand(index)}
+                      >
+                        <PlusMinusIcon open={open} />
+                      </TouchableOpacity>
+                    </View>
 
-        {/* Support Section */}
-        <View style={styles.supportBox}>
-          <Text style={styles.supportTitle}>Need More Help?</Text>
-          <Text style={styles.supportText}>
-            If you have any further questions, feel free to reach out to our
-            support team.
+                    {open && (
+                      <View style={[styles.answerWrap, styles.insetBox]}>
+                        <Text style={styles.answerText}>
+                          {description || "No description available."}
+                        </Text>
+                      </View>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+          </ScrollView>
+
+          <Text style={styles.helpTitle}>Need More Help?</Text>
+          <Text style={styles.helpText}>
+            If You Have Any Further Questions, Feel Free To Reach Out To Our
+            Support Team.
           </Text>
-          <TouchableOpacity style={styles.supportBtn}>
-            <Text style={styles.btnText}>Contact Support</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </View>
-  );
-}
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    paddingHorizontal: 16,
-    paddingTop: 50,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "700",
-    textAlign: "center",
+          <TouchableOpacity
+            style={[styles.supportBtn, styles.insetBox]}
+            activeOpacity={0.9}
+          >
+            <Text style={styles.supportBtnText}>Contact Support</Text>
+          </TouchableOpacity>
+        </SafeAreaView>
+      </ImageBackground>
+    </>
+  );
+};
+
+export default FAQ;
+
+const commonRaisedShadow = {
+  shadowColor: UI.dark,
+  shadowOffset: { width: 8, height: 8 },
+  shadowOpacity: 1,
+  shadowRadius: 10,
+  ...(Platform.OS === "android" ? { elevation: 8 } : null),
+};
+const commonLightRim = {
+  borderWidth: 1,
+  borderColor: UI.light,
+};
+
+const styles = StyleSheet.create<any>({
+  background: { flex: 1, backgroundColor: UI.bg },
+  container: { flex: 1, paddingHorizontal: 16, paddingTop: 20 },
+
+  backbutton: { width: 48, height: 48 },
+
+  header: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: UI.text,
+    textAlign: "left",
     marginBottom: 16,
-    color: "#111827",
   },
+
+  insetBox: {
+    backgroundColor: UI.surface,
+    borderRadius: 16,
+    borderTopWidth: 2,
+    borderLeftWidth: 2,
+    borderBottomWidth: 2,
+    borderRightWidth: 2,
+    borderTopColor: UI.dark,
+    borderLeftColor: UI.dark,
+    borderBottomColor: UI.light,
+    borderRightColor: UI.light,
+  },
+
+  raisedBox: {
+    backgroundColor: UI.surface,
+    borderRadius: 16,
+    ...commonRaisedShadow,
+    ...commonLightRim,
+  },
+  raisedBoxStrong: {
+    backgroundColor: UI.surface,
+    borderRadius: 18,
+    shadowColor: UI.dark,
+    shadowOffset: { width: 12, height: 12 },
+    shadowOpacity: 1,
+    shadowRadius: 14,
+    ...(Platform.OS === "android" ? { elevation: 10 } : null),
+    ...commonLightRim,
+  },
+
   searchBox: {
-    backgroundColor: "#f3f4f6",
     borderRadius: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  searchInput: {
-    fontSize: 14,
-    color: "#111827",
-  },
-  card: {
-    backgroundColor: "#f3f4f6",
-    borderRadius: 16,
-    paddingVertical: 12,
     paddingHorizontal: 16,
-    marginBottom: 14,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 2,
+    paddingVertical: 3,
+    marginBottom: 16,
   },
-  cardHeader: {
+  searchInput: { fontSize: 14, color: UI.text },
+
+  card: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-  },
-  question: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#1f2937",
-    flex: 1,
-    paddingRight: 8,
-  },
-  toggleIcon: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#374151",
-    paddingLeft: 10,
-  },
-  answer: {
-    marginTop: 8,
-    fontSize: 14,
-    color: "#4b5563",
-    lineHeight: 20,
-  },
-  supportBox: {
-    marginTop: 24,
-    padding: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 16,
     borderRadius: 16,
-    backgroundColor: "#f9fafb",
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 1,
-    alignItems: "center",
+    marginBottom: 14,
+    backgroundColor: UI.surface,
   },
-  supportTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#2563eb",
+  cardText: { fontSize: 14, color: UI.text, fontWeight: "600" },
+
+  answerWrap: {
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    marginBottom: 14,
+    backgroundColor: UI.surface,
+  },
+  answerText: { fontSize: 12, color: UI.sub },
+
+  pmWrap: {
+    width: 30,
+    height: 30,
+    borderRadius: 2,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: UI.surface,
+  },
+  hBar: {
+    position: "absolute",
+    width: 12,
+    height: 2.6,
+    borderRadius: 2,
+    backgroundColor: "#6B7280",
+  },
+  vBar: {
+    position: "absolute",
+    width: 2.6,
+    height: 12,
+    borderRadius: 2,
+    backgroundColor: "#6B7280",
+  },
+
+  helpTitle: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: UI.primary,
+    textAlign: "center",
+    marginTop: 6,
     marginBottom: 6,
   },
-  supportText: {
+  helpText: {
+    fontSize: 12,
+    color: UI.sub,
     textAlign: "center",
-    fontSize: 13,
-    color: "#6b7280",
     marginBottom: 14,
+    paddingHorizontal: 20,
   },
   supportBtn: {
-    backgroundColor: "#e5e7eb",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 2,
+    borderRadius: 16,
+    paddingVertical: 14,
+    alignItems: "center",
+    marginBottom: 20,
   },
-  btnText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#111827",
-  },
+  supportBtnText: { color: UI.text, fontSize: 14, fontWeight: "700" },
 });
