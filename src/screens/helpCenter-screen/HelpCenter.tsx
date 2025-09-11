@@ -21,6 +21,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectHelpCenterData } from '~/features/HelpCenter/Reducer/Selector';
 import { fetchHelpCenterThunk } from '~/features/HelpCenter/Reducer/HelpThunk';
 import { useNavigation } from '@react-navigation/native';
+import { getStudentData } from '~/utils/storage';
 
 type HelpItem = {
   id: string;
@@ -41,15 +42,25 @@ const HelpCenter = () => {
   const dispatch = useDispatch<any>();
   const helpData = useSelector(selectHelpCenterData);
   const navigation = useNavigation<any>();
+  const [student, setStudent] = useState<any>(null);
 
   useEffect(() => {
-    const instituteid = '973195c0-66ed-47c2-b098-d8989d3e4529';
-    dispatch(fetchHelpCenterThunk({ instituteid }));
-  }, [dispatch]);
+    (async () => {
+      const data = await getStudentData();
+      setStudent(data);
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (student) {
+      const instituteid = student?.institute_id?.uuid;
+      dispatch(fetchHelpCenterThunk({ instituteid }));
+    }
+  }, [dispatch, student]);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    const instituteid = '973195c0-66ed-47c2-b098-d8989d3e4529';
+    const instituteid = student?.institute_id?.uuid;
     await dispatch(fetchHelpCenterThunk({ instituteid }));
     setRefreshing(false);
   };
@@ -98,12 +109,9 @@ const HelpCenter = () => {
                 setShowVideo(false);
               }}
               style={styles.backIcon}>
-              <Image
-                source={require('./../../assets/icons/backarrow.png')}
-                style={{ width: 24, height: 24 }}
-              />
+            <Image source={require('../../assets/profile/back.png')} style={styles.backbutton} />  
             </TouchableOpacity>
-            <Text style={{ ...FONTS.h1, color: COLORS.text_title }}>Learning Resources</Text>
+            <Text style={{ ...FONTS.h1, color: COLORS.text_title , marginBottom:5}}>Learning Resources</Text>
           </View>
 
           {/* Additional Info */}
@@ -272,7 +280,7 @@ export default HelpCenter;
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 15, backgroundColor: '#F8FAFC' },
-  backbutton: {
+backbutton: {
     width: 48,
     height: 48,
     resizeMode: 'contain',

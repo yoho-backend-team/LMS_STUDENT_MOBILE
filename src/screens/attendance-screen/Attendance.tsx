@@ -9,6 +9,8 @@ import {
   Modal,
   FlatList,
   Dimensions,
+  Image,
+  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '~/components/shared/Header';
@@ -18,6 +20,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectAttendance } from '~/features/Attendance/reducers/selectors';
 import { getattendanceByDate, getStudentattendance } from '~/features/Attendance/reducers/thunks';
 import AttendanceCards from '~/components/attendance/attCard';
+import { getStudentData } from '~/utils/storage';
 
 const { width } = Dimensions.get('window');
 
@@ -55,23 +58,55 @@ const Attendance = () => {
   attendance?.data?.formattedAttendance?.attendance?.forEach((item: any) => {
     attendanceByDate[item.date] = item.status;
   });
+  const [student, setStudent] = useState<any>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    if (selectedDate) {
-      const formattedDate = selectedDate.toISOString().split('T')[0];
-      dispatch(getattendanceByDate({ date: formattedDate }));
-    }
-  }, [selectedDate, dispatch]);
+  if (selectedDate) {
+    const formattedDate = selectedDate.toISOString().split('T')[0];
+    dispatch(getattendanceByDate({ date: formattedDate }));
+  }
+}, [selectedDate, dispatch]);
 
-  useEffect(() => {
-    const payload = {
-      userId: '60d59242-f922-4c34-8974-ea207acadeec',
-      month: selectedMonth,
-      year: selectedYear,
-      instituteId: '973195c0-66ed-47c2-b098-d8989d3e4529',
-    };
-    dispatch(getStudentattendance(payload));
-  }, [selectedMonth, selectedYear]);
+useEffect(() => {
+  (async () => {
+    const data = await getStudentData();
+    setStudent(data);
+  })();
+}, []);
+
+useEffect(() => {
+  if (student) {
+    fetchAttendance();
+  }
+}, [selectedMonth, selectedYear, student]);
+
+// 🔄 Extract fetch logic into a reusable function
+const fetchAttendance = async () => {
+  const payload = {
+    userId: student?.uuid,
+    month: selectedMonth,
+    year: selectedYear,
+    instituteId: student?.institute_id?.uuid,
+  };
+  await dispatch(getStudentattendance(payload));
+};
+
+// 🔄 Refresh function
+const onRefresh = async () => {
+  setRefreshing(true);
+
+  if (selectedDate) {
+    const formattedDate = selectedDate.toISOString().split('T')[0];
+    await dispatch(getattendanceByDate({ date: formattedDate }));
+  }
+
+  if (student) {
+    await fetchAttendance();
+  }
+
+  setRefreshing(false);
+};
 
   return (
     <>
@@ -83,7 +118,8 @@ const Attendance = () => {
         <View style={styles.headerRow}>
           <Text style={styles.headerTitle}>Attendance</Text>
           <TouchableOpacity style={styles.filterBtn} onPress={() => setShowFilter(!showFilter)}>
-            <Ionicons name="filter" size={20} color="#555" />
+            {/* <Ionicons name="filter" size={20} color="#555" /> */}
+            <Image source={require('../../assets/icons/filterbtn.png')}style={{width:20,height:22,}}/>
           </TouchableOpacity>
         </View>
 
@@ -170,7 +206,10 @@ const Attendance = () => {
         {/* Calendar */}
         <Text style={styles.calendarTitle}>Calendar</Text>
 
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView showsVerticalScrollIndicator={false}
+          refreshControl={
+    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+  }>
           <View style={styles.calendarCard}>
             {/* Calendar Header */}
             <View style={styles.calendarHeader}>
@@ -306,8 +345,9 @@ const styles = StyleSheet.create({
   },
   filterBtn: {
     backgroundColor: '#f4f5f7',
-    padding: 10,
+    padding: 8,
     borderRadius: 12,
+    marginRight:6
   },
   filterContainer: {
     flexDirection: 'row',
@@ -462,8 +502,8 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   selectedDate: {
-    backgroundColor: '#7B2FF7',
-    borderColor: '#7B2FF7',
+    backgroundColor: '#AA77FA',
+    borderColor: '#AA77FA',
   },
   selectedDateText: {
     color: '#fff',

@@ -24,6 +24,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import { updateVerifyOtpClient } from '~/features/Authentication/services';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { saveStudentData } from '~/utils/storage';
 
 type OtpVerificationRouteProp = RouteProp<{ params: { data: any; email: any } }, 'params'>;
 
@@ -118,8 +119,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ route }) => {
         if (response) {
           toast.success('Success', `OTP Verified successfully!`);
           if (data?.step === 'otp') {
-            await AsyncStorage.setItem('AuthStudentToken', response?.data?.token);
-            await AsyncStorage.setItem('StudentData', JSON.stringify(response?.data?.user));
+            await saveStudentData(response?.data?.token, response?.data?.user);
             toast.success('Success', 'OTP verified & Login successful!');
             navigation.reset({
               index: 0,

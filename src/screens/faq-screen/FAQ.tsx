@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
-import { Image } from 'react-native';
+import { Image, RefreshControl } from 'react-native';
 import {
   StatusBar,
   Text,
@@ -20,6 +20,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectFaq } from '~/features/faq/reducers/selectors';
 import { getFaqThunk } from '~/features/faq/reducers/thunks';
+import { getStudentData } from '~/utils/storage';
 
 const UI = {
   bg: '#EAEFF5', // page background
@@ -71,19 +72,36 @@ const FAQ = () => {
   const navigation = useNavigation<any>();
   const dispatch = useDispatch<any>();
   const selectData = useSelector(selectFaq)?.data;
+  const [student, setStudent] = useState<any>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const getFaqData = async () => {
-    await dispatch(
-      getFaqThunk({
-        instituteId: '973195c0-66ed-47c2-b098-d8989d3e4529',
-        branchid: '90c93163-01cf-4f80-b88b-4bc5a5dd8ee4',
-      })
-    );
-  };
+useEffect(() => {
+  (async () => {
+    const data = await getStudentData();
+    setStudent(data);
+  })();
+}, []);
 
-  useEffect(() => {
+const getFaqData = async () => {
+  await dispatch(
+    getFaqThunk({
+      instituteId: student?.institute_id?.uuid,
+      branchid: student?.branch_id?.uuid,
+    })
+  );
+};
+
+useEffect(() => {
+  if (student) {
     getFaqData();
-  }, [dispatch]);
+  }
+}, [dispatch, student]);
+
+const onRefresh = async () => {
+  setRefreshing(true);
+  await getFaqData();
+  setRefreshing(false);
+};
 
   const toggleExpand = (index: number) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -118,7 +136,10 @@ const FAQ = () => {
           <ScrollView
             style={{ marginBottom: 20 }}
             contentContainerStyle={{ paddingBottom: 20 }}
-            showsVerticalScrollIndicator={false}>
+            showsVerticalScrollIndicator={false}
+             refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              }>
             {selectData
               ?.filter((i: any) => i.title.toLowerCase().includes(search.toLowerCase()))
               .map((item: any, index: any) => {

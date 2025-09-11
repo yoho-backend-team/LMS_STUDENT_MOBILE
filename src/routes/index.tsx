@@ -32,10 +32,11 @@ import {
   
 } from '../screens';
 import StudentDrawer from '../tabs/StudentDrawer';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import ChatbotScreen from '~/screens/ChatbotScreen/chatbot';
 import TaskCard from '~/components/courses/TaskCard';
 import SessionExpiredModal from '~/components/Sessionexpired/sessionexpire';
+import { clearStudentData, getStudentToken } from '~/utils/storage';
+import PlacementViewScreen from '~/screens/placement-screen/PlacementViewScreen';
 
 const Routes = () => {
   type RootStackParamList = {
@@ -76,8 +77,7 @@ const Routes = () => {
 
   const handleSessionExpired = async () => {
     try {
-      await AsyncStorage.removeItem('AuthStudentToken');
-      await AsyncStorage.removeItem('StudentData');
+      await clearStudentData();
       setShowSessionModal(false);
       navigation.reset({
         index: 0,
@@ -101,7 +101,7 @@ const Routes = () => {
   useEffect(() => {
     const checkAuthState = async () => {
       try {
-        const token = await AsyncStorage.getItem('AuthStudentToken');
+        const token = await getStudentToken();
         const isLoggedIn = token ? true : false;
         if (isLoggedIn) {
           navigation.reset({
@@ -153,6 +153,7 @@ const Routes = () => {
         <Stack.Screen name="CoursesScreen" component={CouresScreen} />
         <Stack.Screen name="CourseViewScreen" component={CourseByIdScreen} />
         <Stack.Screen name="Notification" component={NotificationsScreen} />
+         <Stack.Screen name="PlacementViewScreen" component={PlacementViewScreen} />
         <Stack.Screen name="Placement" component={PlacementScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="FAQ" component={FAQScreen} />

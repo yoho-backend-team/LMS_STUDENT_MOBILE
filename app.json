@@ -1,39 +1,49 @@
 {
   "expo": {
-    "name": "LMS_Student_MobileApp",
+    "name": "LMS Student App",
     "slug": "LMS_Student_MobileApp",
     "version": "1.0.0",
-
     "web": {
-      "favicon": "./src/assets/icons/app-icon.png"
+      "favicon": "./src/assets/splash.png"
     },
-
     "experiments": {
       "tsconfigPaths": true
     },
-
-    "plugins": [],
-
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them.",
+          "cameraPermission": "The app accesses your camera to let you take photos."
+        }
+      ]
+    ],
     "orientation": "portrait",
     "icon": "./src/assets/icons/app-icon.png",
-
     "userInterfaceStyle": "light",
-
     "splash": {
-      "image": "./src/assets/icons/app-icon.png",
+      "image": "./src/assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "jsEngine": "jsc"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./src/assets/icons/app-icon.png",
+        "foregroundImage": "./src/assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.suryas_1805.LMS_Student_MobileApp",
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "extra": {
     }
   }
 }
