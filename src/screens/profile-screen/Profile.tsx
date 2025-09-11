@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   StatusBar,
   StyleSheet,
@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   Platform,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Pencil, Camera } from 'lucide-react-native';
@@ -20,11 +21,16 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getStudentProfileThunk } from '~/features/Profile/reducer/thunks';
 import { selectProfile } from '~/features/Profile/reducer/selectors';
 import { getImageUrl } from '~/utils/imageUtils';
-import { getCertificate, updateStudentProfile, uploadProfileImage } from '~/features/Profile/services';
+import {
+  getCertificate,
+  updateStudentProfile,
+  uploadProfileImage,
+} from '~/features/Profile/services';
 import * as ImagePicker from 'expo-image-picker';
 import toast from '~/utils/toasts';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { getStudentData } from '~/utils/storage';
+import CertificateTemplate from '~/components/profile/CertificateTemplate';
 
 const COLORS = {
   black: '#000000',
@@ -72,6 +78,8 @@ const Profile = () => {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showCertificateModal, setShowCertificateModal] = useState(false);
+  const [selectedCertificate, setSelectedCertificate] = useState<any>(null);
 
   const [profileData, setProfileData] = useState({
     first_name: '',
@@ -113,6 +121,8 @@ const Profile = () => {
   const dispatch = useDispatch<any>();
   const profileDetails = useSelector(selectProfile);
   const [studentData, setstudentData] = useState<any>('');
+  const certificateRef = useRef<View>(null);
+  const [cerificates, setCertificates] = useState<any>('');
 
   const getStudent = async () => {
     const data = await getStudentData();
@@ -121,25 +131,27 @@ const Profile = () => {
     }
   };
 
-  const[cerificate,setCertificate] = useState<any>("");
 
-  const fetchCertificate = async()=>{
+  const fetchCertificate = async () => {
     try {
-      const response = await getCertificate({studentId:profileDetails?.userDetail?._id})
-      console.log(response,"res")
+      const response = await getCertificate({ studentId: studentData?._id });
+      if (response) {
+        setCertificates(response?.data?.data || []);
+      }
     } catch (error) {
-      console.log("error in fetchung certificate:",error)
+      console.log('error in fetchung certificate:', error);
     }
-  }
+  };
 
-  useEffect(()=>{
-    fetchCertificate()
-  },[profileDetails])
+  useEffect(() => {
+    fetchCertificate();
+  }, [studentData?._id]);
 
   useEffect(() => {
     getStudent();
     dispatch(getStudentProfileThunk({}));
   }, [dispatch]);
+
 
   useEffect(() => {
     if (profileDetails && profileDetails?.data) {
@@ -544,54 +556,69 @@ const Profile = () => {
     </>
   );
 
+  const handleDownloadCertificate = async (certificate: any) => {
+    try {
+      // Set the selected certificate and show modal
+      setSelectedCertificate(certificate);
+      setShowCertificateModal(true);
+    } catch (error) {
+      console.error('Download error:', error);
+      Alert.alert('Error', 'Failed to download certificate. Please try again.', [{ text: 'OK' }]);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowCertificateModal(false);
+    setSelectedCertificate(null);
+  };
+
   const renderCertificateContent = () => {
-    const completedCourses = profileDetails?.data?.userDetail?.completed_courses || [];
-    const currentCourse = profileDetails?.data?.userDetail?.course;
-
-    const allCourses = [];
-
-    if (currentCourse) {
-      allCourses.push({
-        ...currentCourse,
-        status: 'In Progress',
-        cardImage: require('../../assets/profile/card1.png'),
-      });
-    }
-
-    if (completedCourses.length > 0) {
-      completedCourses.forEach((course: any) => {
-        allCourses.push({
-          ...course,
-          status: 'Completed',
-          cardImage: require('../../assets/profile/card2.png'),
-        });
-      });
-    }
-
     return (
       <View style={styles.certificateContainer}>
-        {allCourses.length > 0 ? (
-          allCourses.map((course, index) => (
+        {/* Hidden certificate template for capturing */}
+        <View style={{ position: 'absolute', left: -9999 }}>
+          <View ref={certificateRef}>
+            <CertificateTemplate
+              certificate={{
+                id: 0,
+                title: 'MEAN STACK 2024',
+                description: '',
+                branch: '',
+                batch: '',
+                student: `${profileData.first_name} ${profileData.last_name}`,
+                email: profileData.email,
+              }}
+            />
+          </View>
+        </View>
+
+        {cerificates?.length > 0 ? (
+          cerificates?.map((certificate: any, index: any) => (
             <View key={index} style={styles.card}>
-              <Image source={course.cardImage} style={styles.cardImage} />
+              <Image source={{ uri: getImageUrl(certificate?.image) }} style={styles.cardImage} />
               <View style={styles.contentRow}>
                 <View style={styles.textContainer}>
-                  <Text style={styles.cardHeading}>Course Name</Text>
-                  <Text style={styles.cardValue}>{course.course_name}</Text>
+                  <Text style={styles.cardHeading}>Certificate Name</Text>
+                  <Text style={styles.cardValue}>{certificate?.certificate_name || 'N/A'}</Text>
 
-                  <Text style={styles.cardHeading}>Duration</Text>
-                  <Text style={styles.cardValue}>{course.duration}</Text>
+                  <Text style={styles.cardHeading}>Course</Text>
+                  <Text style={styles.cardValue}>{certificate?.course?.course_name || 'N/A'}</Text>
 
                   <Text style={styles.cardHeading}>Status</Text>
-                  <Text style={styles.cardValue}>{course.status}</Text>
+                  <Text style={styles.cardValue}>{certificate?.status || 'OnProgress'}</Text>
                 </View>
-                <Image source={require('../../assets/profile/down.png')} style={styles.downIcon} />
+                <TouchableOpacity onPress={() => handleDownloadCertificate(certificate)}>
+                  <Image
+                    source={require('../../assets/profile/down.png')}
+                    style={styles.downIcon}
+                  />
+                </TouchableOpacity>
               </View>
             </View>
           ))
         ) : (
           <View style={styles.card}>
-            <Text style={styles.cardValue}>No courses available</Text>
+            <Text style={styles.cardValue}>No certificates available</Text>
           </View>
         )}
       </View>
@@ -739,6 +766,60 @@ const Profile = () => {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
           {renderContent()}
         </ScrollView>
+
+        {/* Certificate Modal */}
+        <Modal
+          visible={showCertificateModal}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={handleCloseModal}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Certificate</Text>
+                <TouchableOpacity onPress={handleCloseModal} style={styles.closeButton}>
+                  <Text style={styles.closeButtonText}>×</Text>
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView style={styles.modalBody}>
+                {selectedCertificate && (
+                  <CertificateTemplate
+                    certificate={{
+                      id: selectedCertificate.id,
+                      title: selectedCertificate.certificate_name,
+                      description: selectedCertificate.description || '',
+                      branch: selectedCertificate.branch_id,
+                      batch: selectedCertificate.batch_id,
+                      student: `${profileData.first_name} ${profileData.last_name}`,
+                      email: profileData.email,
+                    }}
+                  />
+                )}
+
+                <View style={styles.modalActions}>
+                  <TouchableOpacity
+                    style={styles.downloadButton}
+                    onPress={() => {
+                      // Implement download functionality here
+                      Alert.alert('Info', 'Download functionality would be implemented here');
+                    }}>
+                    <Text style={styles.downloadButtonText}>Download Certificate</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.shareButton}
+                    onPress={() => {
+                      // Implement share functionality here
+                      Alert.alert('Info', 'Share functionality would be implemented here');
+                    }}>
+                    <Text style={styles.shareButtonText}>Share</Text>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
       </SafeAreaView>
     </>
   );
@@ -747,6 +828,76 @@ const Profile = () => {
 export default Profile;
 
 const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+  },
+  modalContent: {
+    width: '95%',
+    maxHeight: '90%',
+    backgroundColor: 'white',
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e5e5',
+    backgroundColor: '#f8f9fa',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2A2A2A',
+  },
+  closeButton: {
+    padding: 4,
+  },
+  closeButtonText: {
+    fontSize: 24,
+    color: '#716F6F',
+    fontWeight: 'bold',
+  },
+  modalBody: {
+    padding: 16,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 20,
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#e5e5e5',
+  },
+  downloadButton: {
+    backgroundColor: '#7B00FF',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+    minWidth: 160,
+    alignItems: 'center',
+  },
+  downloadButtonText: {
+    color: 'white',
+    fontWeight: '600',
+  },
+  shareButton: {
+    backgroundColor: '#8b5cf6',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  shareButtonText: {
+    color: 'white',
+    fontWeight: '600',
+  },
   container: {
     flex: 1,
     backgroundColor: '#ebeff3',
@@ -933,6 +1084,7 @@ const styles = StyleSheet.create({
     height: 180,
     borderRadius: 8,
     resizeMode: 'cover',
+    backgroundColor: '#d1d5db',
   },
   cardText: {
     marginTop: 6,

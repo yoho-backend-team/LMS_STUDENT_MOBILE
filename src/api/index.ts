@@ -34,7 +34,11 @@ class Client {
           'student'
         ),
       taskUpdate: (data: any) =>
-        httpClient.patch(HTTP_END_POINTS.course.updatetask.replace(':taskid',data?.taskid), data, 'student'),
+        httpClient.patch(
+          HTTP_END_POINTS.course.updatetask.replace(':taskid', data?.taskid),
+          data,
+          'student'
+        ),
     },
 
     profile: {
@@ -82,7 +86,12 @@ class Client {
 
     reports: {
       get: () => httpClient.get(HTTP_END_POINTS.reports.get, {}, 'student'),
-      getassement: (params: any) => httpClient.get(HTTP_END_POINTS.reports.getassement.replace(':studentid', params?.student).replace(':courseid', params?.course))
+      getassement: (params: any) =>
+        httpClient.get(
+          HTTP_END_POINTS.reports.getassement
+            .replace(':studentid', params?.student)
+            .replace(':courseid', params?.course)
+        ),
     },
     activity: {
       get: (params: any) => httpClient.get(HTTP_END_POINTS.activity.get, params, 'student'),
@@ -121,9 +130,14 @@ class Client {
   notificatinsubscription = {
     post: (data: any) => httpClient.post(HTTP_END_POINTS.notificationSubscription.post, data),
   };
-  certificate={
-    get:(data:any)=>httpClient.get(HTTP_END_POINTS.certificate.get.replace(":studentId",data.studentId), data,"student")
-  }
+  certificate = {
+    get: (data: any) =>
+      httpClient.get(
+        HTTP_END_POINTS.certificate.get.replace(':studentId', data?.studentId),
+        data,
+        'student'
+      ),
+  };
 }
 
 export default new Client();

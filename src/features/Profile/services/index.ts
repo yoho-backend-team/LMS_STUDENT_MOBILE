@@ -24,13 +24,13 @@ export const uploadProfileImage = async (data: any) => {
   }
 };
 
-export const getCertificate = async(data:any)=>{
+export const getCertificate = async (data: any) => {
   try {
     const response = await Client.certificate.get(data);
-    if(response){
+    if (response) {
       return response;
     }
   } catch (error) {
-    console.error("error in getting certificate:",error)
+    console.error('error in getting certificate:', error);
   }
-}
+};
