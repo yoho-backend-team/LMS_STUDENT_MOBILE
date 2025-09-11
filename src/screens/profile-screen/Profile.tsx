@@ -24,6 +24,7 @@ import { updateStudentProfile, uploadProfileImage } from '~/features/Profile/ser
 import * as ImagePicker from 'expo-image-picker';
 import toast from '~/utils/toasts';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { getStudentData } from '~/utils/storage';
 
 const COLORS = {
   black: '#000000',
@@ -111,8 +112,17 @@ const Profile = () => {
 
   const dispatch = useDispatch<any>();
   const profileDetails = useSelector(selectProfile);
+  const [studentData, setstudentData] = useState<any>('');
+
+  const getStudent = async () => {
+    const data = await getStudentData();
+    if (data) {
+      setstudentData(data);
+    }
+  };
 
   useEffect(() => {
+    getStudent();
     dispatch(getStudentProfileThunk({}));
   }, [dispatch]);
 

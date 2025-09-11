@@ -1,5 +1,13 @@
 import React from 'react';
-import { Modal, View, Text, TouchableOpacity, TouchableWithoutFeedback, StyleSheet, Dimensions } from 'react-native';
+import {
+  Modal,
+  View,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  StyleSheet,
+  Dimensions,
+} from 'react-native';
 import { BlurView } from 'expo-blur';
 
 interface SessionExpiredModalProps {
@@ -11,12 +19,7 @@ const { width, height } = Dimensions.get('window');
 
 const SessionExpiredModal: React.FC<SessionExpiredModalProps> = ({ visible, onConfirm }) => {
   return (
-    <Modal
-      animationType="fade"
-      transparent={true}
-      visible={visible}
-      onRequestClose={onConfirm} 
-    >
+    <Modal animationType="fade" transparent={true} visible={visible} onRequestClose={onConfirm}>
       {/* Make entire overlay touchable */}
       <TouchableWithoutFeedback onPress={onConfirm}>
         <BlurView intensity={50} tint="dark" style={styles.overlay}>
@@ -79,7 +82,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
-    width: '100%',
+    width: '50%',
   },
   buttonText: {
     color: 'white',

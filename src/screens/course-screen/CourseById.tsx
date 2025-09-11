@@ -19,6 +19,7 @@ import { formatDateMonthandYear } from '~/utils/formatDate';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectcoursetask } from '~/features/Courses/Reducers/selectors';
 import { getStudentTask } from '~/features/Courses/Reducers/thunks';
+import toast from '~/utils/toasts';
 
 type RootStackParamList = {
   Courses: undefined;
@@ -81,10 +82,10 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
   useEffect(() => {
     dispatch(getStudentTask({ course: course?._id }));
   }, [dispatch]);
-
+  
   useEffect(() => {
     if (course?.coursemodules?.length) {
-      const stepData = getSteps(course.coursemodules);
+      const stepData = getSteps(course?.coursemodules);
       setSteps(stepData);
 
       const firstPending = getCurrentModule(course.coursemodules);
@@ -99,7 +100,7 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
       if (supported) {
         await Linking.openURL(PDF_URL);
       } else {
-        Alert.alert('Error', 'Cannot open this PDF URL');
+        toast.error('Error', 'Cannot open this PDF URL');
       }
     } catch (error) {
       console.error('Linking error:', error);
