@@ -10,9 +10,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { formatDate } from '~/utils/formatDate';
+import { getImageUrl } from '~/utils/imageUtils';
 
 const PlacementViewScreen = ({ route, navigation }: any) => {
-  const { placement } = route.params; // ✅ Correct way
+  const { placement } = route?.params;
 
   return (
     <>
@@ -33,7 +34,11 @@ const PlacementViewScreen = ({ route, navigation }: any) => {
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* Image */}
           <Image
-            source={require('../../assets/icons/Placement/placementimg.png')}
+            source={
+              placement?.company?.image
+                ? { uri: getImageUrl(placement?.company?.image) }
+                : require('../../assets/icons/Placement/placementimg.png')
+            }
             style={styles.image}
           />
 
@@ -51,15 +56,12 @@ const PlacementViewScreen = ({ route, navigation }: any) => {
             <Text style={styles.sectionTitle}>Job Details</Text>
             <Row label="Job Name" value={placement?.job?.name} />
             <Row label="Job Description" value={placement?.job?.description} />
-            <Row
-              label="Skills"
-              value={placement?.job?.skills?.join(', ') || 'N/A'}
-            />
+            <Row label="Skills" value={placement?.job?.skills?.join(', ') || 'N/A'} />
           </View>
 
           {/* Interview Details */}
           <View style={styles.card}>
-            <Text className="text-base font-semibold mb-2">Interview Details</Text>
+            <Text className="mb-2 text-base font-semibold">Interview Details</Text>
             <Row label="Interview Date" value={formatDate(placement?.schedule?.interviewDate)} />
             <Row label="Venue" value={placement?.schedule?.venue} />
             <Row label="Address" value={placement?.schedule?.address} />
@@ -109,6 +111,7 @@ const styles = StyleSheet.create({
     height: 160,
     borderRadius: 12,
     marginBottom: 15,
+    backgroundColor: '#e0e0e0',
   },
   card: {
     backgroundColor: '#fff',

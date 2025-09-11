@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createDrawerNavigator, DrawerContentScrollView } from '@react-navigation/drawer';
 import React, { useEffect, useState } from 'react';
 import {
@@ -11,7 +10,7 @@ import {
   StatusBar,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { COLORS, FONTS, icons, screens, sidebaricon, SIZES } from '../constants';
+import { FONTS, icons, screens, sidebaricon, SIZES } from '../constants';
 import MainLayout from '../layout';
 import { RootState } from '../store/store';
 import { setSelectedTab } from '../store/tab/tabSlice';
@@ -108,14 +107,11 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
   const selectedTab = useSelector((state: RootState) => state.tabReducer.selectedTab);
   const [error, setError] = useState(false);
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
-  const [student, setStudent] = useState<any>(null);
+  const profileDetails = useSelector(selectProfile)?.data;
 
   useEffect(() => {
-    (async () => {
-      const data = await getStudentData();
-      setStudent(data);
-    })();
-  }, []);
+    dispatch(getStudentProfileThunk({}));
+  }, [dispatch]);
 
   const confirmLogout = async () => {
     try {
@@ -174,8 +170,8 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
           onPress={() => navigation.navigate('Profile')}>
           <Image
             source={
-              student?.image
-                ? { uri: getImageUrl(student?.image) }
+              profileDetails?.image
+                ? { uri: getImageUrl(profileDetails?.image) }
                 : require('../assets/home/profile.png')
             }
             onError={() => setError(true)}
@@ -183,10 +179,10 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
           />
           <View style={{ marginLeft: 12, flex: 1 }}>
             <Text style={{ color: '#333', ...FONTS.h2_01, fontWeight: '600' }}>
-              {student?.full_name}
+              {profileDetails?.full_name}
             </Text>
             <Text style={{ color: '#777', ...FONTS.h5 }}>
-              ID : {student?.userDetail?.studentId}
+              ID : {profileDetails?.userDetail?.studentId}
             </Text>
           </View>
         </TouchableOpacity>

@@ -64,9 +64,7 @@ const Placement = ({ navigation }: any) => {
       {/* View Button */}
       <TouchableOpacity
         style={styles.viewBtn}
-        onPress={() =>
-          navigation.navigate('PlacementViewScreen', { placement: item })
-        }>
+        onPress={() => navigation.navigate('PlacementViewScreen', { placement: item })}>
         <Text style={styles.viewText}>View</Text>
       </TouchableOpacity>
     </View>
@@ -101,9 +99,9 @@ const Placement = ({ navigation }: any) => {
         <Text style={styles.header}>Placement Details</Text>
       </View>
 
-      {currentData.length === 0 ? (
+      {currentData?.length === 0 ? (
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading Placements...</Text>
+          <Text style={styles.loadingText}>No Placement Available</Text>
         </View>
       ) : (
         <FlatList
@@ -112,9 +110,7 @@ const Placement = ({ navigation }: any) => {
           renderItem={renderItem}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 80 }}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         />
       )}
 
@@ -138,9 +134,7 @@ const Placement = ({ navigation }: any) => {
         </Text>
 
         <LinearGradient
-          colors={
-            currentPage === totalPages ? ['#E0E0E0', '#E0E0E0'] : ['#7B00FF', '#B200FF']
-          }
+          colors={currentPage === totalPages ? ['#E0E0E0', '#E0E0E0'] : ['#7B00FF', '#B200FF']}
           start={{ x: 0.134, y: 0.021 }}
           end={{ x: 1, y: 1 }}
           style={styles.pageGradient}>
