@@ -40,9 +40,6 @@
       "permissions": ["android.permission.RECORD_AUDIO"]
     },
     "extra": {
-      "eas": {
-        "projectId": "a5e46db5-66e2-456d-8768-25ce44ee074c"
-      }
     }
   }
 }
