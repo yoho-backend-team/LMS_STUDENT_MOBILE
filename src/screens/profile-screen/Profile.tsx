@@ -31,6 +31,8 @@ import toast from '~/utils/toasts';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { getStudentData } from '~/utils/storage';
 import CertificateTemplate from '~/components/profile/CertificateTemplate';
+import * as Print from 'expo-print';
+import { shareAsync } from 'expo-sharing';
 
 const COLORS = {
   black: '#000000',
@@ -131,7 +133,6 @@ const Profile = () => {
     }
   };
 
-
   const fetchCertificate = async () => {
     try {
       const response = await getCertificate({ studentId: studentData?._id });
@@ -151,7 +152,6 @@ const Profile = () => {
     getStudent();
     dispatch(getStudentProfileThunk({}));
   }, [dispatch]);
-
 
   useEffect(() => {
     if (profileDetails && profileDetails?.data) {
@@ -173,7 +173,7 @@ const Profile = () => {
           pincode: data?.contact_info?.pincode?.toString() || '',
         },
         course: course?.course_name || '',
-        batch: 'Batch 2024-25',
+        batch: userDetail?.institute_id?.batch?.batch_name,
         rollNumber: data?.roll_no?.toString() || '',
         studentID: userDetail?.studentId || '',
       };
@@ -500,7 +500,7 @@ const Profile = () => {
           <TextInput
             style={[styles.input, { backgroundColor: '#e5e5e5' }]}
             value={profileData.batch}
-            placeholder="Batch"
+            placeholder="Batch name"
             editable={false}
           />
         </View>
@@ -556,6 +556,284 @@ const Profile = () => {
     </>
   );
 
+  const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate</title>
+    <link href="https://fonts.googleapis.com/css2?family=Italianno&family=Montserrat:wght@400;600;700&family=Pirata+One&family=Inter:ital@1&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .certificate-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .certificate-content {
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .certificate-title {
+            font-family: 'PirataOne-Regular', 'Pirata One', cursive;
+            font-size: 32px;
+            color: #716F6F;
+            margin-bottom: 10px;
+        }
+        
+        .completion-subtitle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        
+        .arrow {
+            width: 40px;
+            height: 10px;
+            background-color: #ddd; /* Placeholder for actual arrow image */
+            margin: 0 10px;
+        }
+        
+        .completion-text {
+            color: #716F6F;
+            font-weight: 400;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 2px;
+        }
+        
+        .certify-text {
+            color: #716F6F;
+            font-size: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .recipient-name-container {
+            margin: 15px 0;
+        }
+        
+        .recipient-name {
+            font-family: 'Italianno', cursive;
+            font-size: 32px;
+            color: #2A2A2A;
+        }
+        
+        .underline {
+            width: 200px;
+            height: 1px;
+            background-color: #716F6F;
+            margin: 5px auto 0;
+        }
+        
+        .completion-details {
+            margin: 15px 0;
+        }
+        
+        .completion-text-main {
+            color: #716F6F;
+            font-size: 8px;
+            margin-bottom: 5px;
+        }
+        
+        .course-badge {
+            position: relative;
+            margin: 10px 0;
+            display: inline-block;
+        }
+        
+        .course-bg {
+            width: 80px;
+            height: 40px;
+            background-color: #eee; /* Placeholder for actual background image */
+        }
+        
+        .course-title {
+            position: absolute;
+            left: 12px;
+            top: -1px;
+            color: #2A2A2A;
+            font-weight: 600;
+            font-size: 6px;
+            text-align: center;
+            width: calc(100% - 24px);
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .duration-text {
+            color: #716F6F;
+            font-size: 8px;
+            margin-top: 10px;
+        }
+        
+        .duration-text1 {
+            color: #2A2A2A;
+            font-weight: 700;
+        }
+        
+        .signature-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 300px;
+            margin: 20px auto 0;
+        }
+        
+        .signature-left, .signature-right {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .signature-name {
+            color: #FF3131;
+            font-style: italic;
+            font-size: 10px;
+            margin-bottom: 2px;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .signature-line {
+            width: 60px;
+            height: 1px;
+            background-color: #d1d5db;
+            margin: 4px auto;
+        }
+        
+        .signature-title, .instructor-title {
+            color: #2A2A2A;
+            font-weight: 700;
+            font-size: 8px;
+        }
+        
+        @media (max-width: 480px) {
+            .certificate-content {
+                padding: 20px;
+            }
+            
+            .certificate-title {
+                font-size: 28px;
+            }
+            
+            .recipient-name {
+                font-size: 28px;
+            }
+            
+            .signature-section {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="certificate-container">
+        <div class="certificate-content">
+            <h1 class="certificate-title">Certificate</h1>
+            
+            <div class="completion-subtitle">
+                <div class="arrow"></div>
+                <p class="completion-text">OF COMPLETION</p>
+                <div class="arrow"></div>
+            </div>
+            
+            <p class="certify-text">This is to Certify that</p>
+            
+            <div class="recipient-name-container">
+                <h2 class="recipient-name" id="student-name">${profileData?.first_name} ${profileData?.last_name}</h2>
+                <div class="underline"></div>
+            </div>
+            
+            <div class="completion-details">
+                <p class="completion-text-main">has Successfully Completed that</p>
+                <p class="completion-text-main">Course</p>
+                
+                <div class="course-badge">
+                    <div class="course-bg"></div>
+                    <p class="course-title" id="course-title">${selectedCertificate?.certificate_name}</p>
+                </div>
+                
+                <p class="duration-text">
+                    during the period of
+                    <span class="duration-text1">July 2025 - December 2025</span>
+                </p>
+            </div>
+            
+            <div class="signature-section">
+                <div class="signature-left">
+                    <p class="signature-name">Abdul Kalam</p>
+                    <div class="signature-line"></div>
+                    <p class="signature-title">Authorised Signatory</p>
+                </div>
+                
+                <div class="signature-right">
+                    <p class="signature-name">Albert Einstein</p>
+                    <div class="signature-line"></div>
+                    <p class="instructor-title">Course Instructor</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to populate certificate data
+        function populateCertificate(data) {
+            if (data.student) {
+                document.getElementById('student-name').textContent = data.student;
+            }
+            
+            if (data.title) {
+                document.getElementById('course-title').textContent = data.title.substring(0, 15);
+            }
+            
+            // You can add more data population as needed
+        }
+        
+        // Example usage:
+        // const certificateData = {
+        //     student: "John Doe",
+        //     title: "Advanced Web Development"
+        // };
+        // populateCertificate(certificateData);
+    </script>
+</body>
+</html>`;
+
+  const generatePDF = async () => {
+    try {
+      const { uri } = await Print.printToFileAsync({
+        html: htmlContent,
+        base64: false,
+      });
+      await shareAsync(uri);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    }
+  };
+
   const handleDownloadCertificate = async (certificate: any) => {
     try {
       // Set the selected certificate and show modal
@@ -585,7 +863,7 @@ const Profile = () => {
                 description: '',
                 branch: '',
                 batch: '',
-                student: `${profileData.first_name} ${profileData.last_name}`,
+                student: `${profileData?.first_name} ${profileData?.last_name}`,
                 email: profileData.email,
               }}
             />
@@ -595,7 +873,10 @@ const Profile = () => {
         {cerificates?.length > 0 ? (
           cerificates?.map((certificate: any, index: any) => (
             <View key={index} style={styles.card}>
-              <Image source={{ uri: getImageUrl(certificate?.image) }} style={styles.cardImage} />
+              <Image
+                source={{ uri: getImageUrl(certificate?.course?.image) }}
+                style={styles.cardImage}
+              />
               <View style={styles.contentRow}>
                 <View style={styles.textContainer}>
                   <Text style={styles.cardHeading}>Certificate Name</Text>
@@ -604,8 +885,8 @@ const Profile = () => {
                   <Text style={styles.cardHeading}>Course</Text>
                   <Text style={styles.cardValue}>{certificate?.course?.course_name || 'N/A'}</Text>
 
-                  <Text style={styles.cardHeading}>Status</Text>
-                  <Text style={styles.cardValue}>{certificate?.status || 'OnProgress'}</Text>
+                  <Text style={styles.cardHeading}>Duration</Text>
+                  <Text style={styles.cardValue}>{certificate?.duration || 'N/A'}</Text>
                 </View>
                 <TouchableOpacity onPress={() => handleDownloadCertificate(certificate)}>
                   <Image
@@ -660,7 +941,7 @@ const Profile = () => {
           </View>
           <View style={styles.idRow}>
             <Text style={styles.idHeading}>Batch:</Text>
-            <Text style={styles.idValue}>{profileData.batch}</Text>
+            <Text style={styles.idValue}>{profileData.batch || 'N/A'}</Text>
           </View>
         </View>
       </View>
@@ -801,19 +1082,9 @@ const Profile = () => {
                   <TouchableOpacity
                     style={styles.downloadButton}
                     onPress={() => {
-                      // Implement download functionality here
-                      Alert.alert('Info', 'Download functionality would be implemented here');
+                      generatePDF();
                     }}>
                     <Text style={styles.downloadButtonText}>Download Certificate</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.shareButton}
-                    onPress={() => {
-                      // Implement share functionality here
-                      Alert.alert('Info', 'Share functionality would be implemented here');
-                    }}>
-                    <Text style={styles.shareButtonText}>Share</Text>
                   </TouchableOpacity>
                 </View>
               </ScrollView>

@@ -82,7 +82,7 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
   useEffect(() => {
     dispatch(getStudentTask({ course: course?._id }));
   }, [dispatch]);
-  
+
   useEffect(() => {
     if (course?.coursemodules?.length) {
       const stepData = getSteps(course?.coursemodules);

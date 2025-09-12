@@ -113,13 +113,7 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
 
   const answerDetails = task?.answers?.find((ans: any) => ans?.student?._id === studentData?._id);
 
-  const isCompleted = answerDetails
-    ? answerDetails?.status !== 'pending'
-      ? true
-      : false
-    : task?.status === 'completed'
-      ? true
-      : false;
+  const isCompleted = answerDetails ? (answerDetails?.status !== 'pending' ? true : false) : false;
 
   // Determine file type for display
   useEffect(() => {
@@ -285,7 +279,7 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
                       isCompleted ? styles.completedStatus : styles.pendingStatus,
                     ]}>
                     <Text style={styles.statusTextInside}>
-                      {answerDetails?.status ? 'Completed' : 'Pending'}
+                      {answerDetails?.status === 'pending' ? 'Pending' : answerDetails?.status}
                     </Text>
                   </View>
                 </View>

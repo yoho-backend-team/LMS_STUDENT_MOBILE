@@ -23,8 +23,7 @@ type PaymentSlipProps = {
 
 const PaymentSlip = ({ onClose, paymentData, visible }: PaymentSlipProps) => {
   const currentPendingLength = paymentData?.payment_history?.length;
-  const currentPending =
-    paymentData?.payment_history?.[currentPendingLength - 1];
+  const currentPending = paymentData?.payment_history?.[currentPendingLength - 1];
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return 'N/A';
@@ -36,7 +35,7 @@ const PaymentSlip = ({ onClose, paymentData, visible }: PaymentSlipProps) => {
     });
   };
   // Full HTML content styled like your sample
- const htmlContent = `
+  const htmlContent = `
 <html>
 <head>
   <style>
@@ -98,7 +97,7 @@ const PaymentSlip = ({ onClose, paymentData, visible }: PaymentSlipProps) => {
     </tr>
     <tr class="">
     <td>Paid Amount</td>
-    <td>${currentPending?.paid_amount|| '0'}</td>
+    <td>${currentPending?.paid_amount || '0'}</td>
     </tr>
     <tr>
     <td>Payment Method</td>
@@ -106,7 +105,7 @@ const PaymentSlip = ({ onClose, paymentData, visible }: PaymentSlipProps) => {
     </tr>
     <tr>
       <td>Pending Amount</td>
-      <td>${currentPending?.balance|| '0'}</td>
+      <td>${currentPending?.balance || '0'}</td>
     </tr>
   </table>
 
@@ -157,29 +156,21 @@ const PaymentSlip = ({ onClose, paymentData, visible }: PaymentSlipProps) => {
               </View>
               <View style={styles.row}>
                 <Text style={styles.label}>Student ID:</Text>
-                <Text style={styles.value}>
-                  {paymentData?.fees?.[0]?.student?.id || 'N/A'}
-                </Text>
+                <Text style={styles.value}>{paymentData?.fees?.[0]?.student?.id || 'N/A'}</Text>
               </View>
               <View style={styles.row}>
                 <Text style={styles.label}>Payment Date:</Text>
                 <Text style={styles.value}>
-                  {currentPending?.payment_date
-                    ? formatDate(currentPending?.payment_date)
-                    : 'N/A'}
+                  {currentPending?.payment_date ? formatDate(currentPending?.payment_date) : 'N/A'}
                 </Text>
               </View>
               <View style={styles.row}>
                 <Text style={styles.label}>Paid Amount:</Text>
-                <Text style={styles.value}>
-                  ₹{currentPending?.paid_amount || '0'}
-                </Text>
+                <Text style={styles.value}>₹{currentPending?.paid_amount || '0'}</Text>
               </View>
               <View style={styles.row}>
                 <Text style={styles.label}>Pending Amount:</Text>
-                <Text style={styles.value}>
-                  ₹{currentPending?.balance || '0'}
-                </Text>
+                <Text style={styles.value}>₹{currentPending?.balance || '0'}</Text>
               </View>
             </View>
           ) : (
@@ -193,10 +184,7 @@ const PaymentSlip = ({ onClose, paymentData, visible }: PaymentSlipProps) => {
               <Text style={styles.backButtonText}>Close</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[
-                styles.downloadButton,
-                !paymentData && styles.disabledButton,
-              ]}
+              style={[styles.downloadButton, !paymentData && styles.disabledButton]}
               onPress={generatePDF}
               disabled={!paymentData}>
               <Text style={styles.downloadButtonText}>Download PDF</Text>
