@@ -97,7 +97,6 @@ const MainLayout: React.FC = () => {
   const { width } = useWindowDimensions();
   const pagerRef = useRef<PagerView>(null);
   const selectedTab = useSelector((state: any) => state.tabReducer.selectedTab);
-
   const [currentPage, setCurrentPage] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
 

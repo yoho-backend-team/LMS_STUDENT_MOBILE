@@ -4,7 +4,7 @@
     "slug": "LMS_Student_MobileApp",
     "version": "1.0.0",
     "web": {
-      "favicon": "./src/assets/splash.png"
+      "favicon": "./src/assets/ClassieUserLogo.png"
     },
     "experiments": {
       "tsconfigPaths": true
@@ -19,10 +19,10 @@
       ]
     ],
     "orientation": "portrait",
-    "icon": "./src/assets/adaptive-icon.png",
+    "icon": "./src/assets/ClassieUserLogo.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./src/assets/splash.png",
+      "image": "./src/assets/ClassieUserLogo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -33,13 +33,12 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./src/assets/adaptive-icon.png",
+        "foregroundImage": "./src/assets/ClassieUserLogo.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.suryas_1805.LMS_Student_MobileApp",
       "permissions": ["android.permission.RECORD_AUDIO"]
     },
-    "extra": {
-    }
+    "extra": {}
   }
 }

@@ -22,7 +22,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { getStudentLogoutClient } from '~/features/Authentication/services';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Platform } from 'react-native';
-import { clearStudentData, getStudentData } from '~/utils/storage';
+import { clearStudentData } from '~/utils/storage';
 
 type CustomDrawerItemProps = {
   label: string;
@@ -66,6 +66,7 @@ const CustomDrawerItem: React.FC<CustomDrawerItemProps> = ({ label, icon, isFocu
               marginLeft: 15,
               color: '#fff',
               ...FONTS.h4,
+              fontWeight: 500,
             }}>
             {label}
           </Text>
@@ -93,6 +94,7 @@ const CustomDrawerItem: React.FC<CustomDrawerItemProps> = ({ label, icon, isFocu
               marginLeft: 15,
               color: '#777',
               ...FONTS.h4,
+              fontWeight: 500,
             }}>
             {label}
           </Text>
@@ -108,10 +110,23 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
   const [error, setError] = useState(false);
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   const profileDetails = useSelector(selectProfile)?.data;
+  const [activeScreen, setActiveScreen] = useState(selectedTab);
 
   useEffect(() => {
     dispatch(getStudentProfileThunk({}));
   }, [dispatch]);
+
+  // Track the active screen when navigation state changes
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('state', () => {
+      const currentRoute = navigation.getState()?.routes[0]?.state?.routes[0]?.name;
+      if (currentRoute && Object.values(screens).includes(currentRoute)) {
+        setActiveScreen(currentRoute);
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   const confirmLogout = async () => {
     try {
@@ -127,6 +142,11 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
     } catch (error) {
       toast.error('Error', 'An error occurred during logout. Please try again later.');
     }
+  };
+
+  // Helper function to check if a screen is focused
+  const isScreenFocused = (screenName: string) => {
+    return activeScreen === screenName;
   };
 
   return (
@@ -167,7 +187,10 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
             paddingHorizontal: 15,
             paddingTop: 0,
           }}
-          onPress={() => navigation.navigate('Profile')}>
+          onPress={() => {
+            navigation.navigate('Profile');
+            setActiveScreen('Profile');
+          }}>
           <Image
             source={
               profileDetails?.image
@@ -195,90 +218,130 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
           showsVerticalScrollIndicator={false}
           automaticallyAdjustContentInsets={false}>
           <View>
+            {/* First five items that dispatch setSelectedTab */}
             <CustomDrawerItem
               label={screens.home}
               icon={sidebaricon.home}
-              isFocused={selectedTab === screens.home}
+              isFocused={isScreenFocused(screens.home)}
               onPress={() => {
                 dispatch(setSelectedTab(screens.home));
+                setActiveScreen(screens.home);
                 navigation.closeDrawer();
               }}
             />
             <CustomDrawerItem
               label={screens.course}
               icon={sidebaricon.course}
-              isFocused={selectedTab === screens.course}
+              isFocused={isScreenFocused(screens.course)}
               onPress={() => {
                 dispatch(setSelectedTab(screens.course));
+                setActiveScreen(screens.course);
                 navigation.closeDrawer();
               }}
             />
             <CustomDrawerItem
               label={screens.classes}
               icon={sidebaricon.classes}
-              isFocused={selectedTab === screens.classes}
+              isFocused={isScreenFocused(screens.classes)}
               onPress={() => {
                 dispatch(setSelectedTab(screens.classes));
+                setActiveScreen(screens.classes);
                 navigation.closeDrawer();
               }}
             />
             <CustomDrawerItem
               label={screens.attendance}
               icon={sidebaricon.attendance}
-              isFocused={selectedTab === screens.attendance}
+              isFocused={isScreenFocused(screens.attendance)}
               onPress={() => {
                 dispatch(setSelectedTab(screens.attendance));
+                setActiveScreen(screens.attendance);
                 navigation.closeDrawer();
               }}
             />
             <CustomDrawerItem
               label={screens.community}
               icon={sidebaricon.community}
-              isFocused={selectedTab === screens.community}
+              isFocused={isScreenFocused(screens.community)}
               onPress={() => {
                 dispatch(setSelectedTab(screens.community));
+                setActiveScreen(screens.community);
                 navigation.closeDrawer();
               }}
             />
+
+            {/* Remaining items that use normal navigation */}
             <CustomDrawerItem
               label="Tickets"
               icon={sidebaricon.ticket}
-              onPress={() => navigation.navigate('TicketsScreen')}
+              isFocused={isScreenFocused('TicketsScreen')}
+              onPress={() => {
+                navigation.navigate('TicketsScreen');
+                setActiveScreen('TicketsScreen');
+              }}
             />
             <CustomDrawerItem
               label="Payments"
               icon={sidebaricon.payment}
-              onPress={() => navigation.navigate('Payment')}
+              isFocused={isScreenFocused('Payment')}
+              onPress={() => {
+                navigation.navigate('Payment');
+                setActiveScreen('Payment');
+              }}
             />
             <CustomDrawerItem
               label="Notifications"
               icon={sidebaricon.notification}
-              onPress={() => navigation.navigate('Notification')}
+              isFocused={isScreenFocused('Notification')}
+              onPress={() => {
+                navigation.navigate('Notification');
+                setActiveScreen('Notification');
+              }}
             />
             <CustomDrawerItem
               label="Activity Logs"
               icon={sidebaricon.activity}
-              onPress={() => navigation.navigate('ActivityLog')}
+              isFocused={isScreenFocused('ActivityLog')}
+              onPress={() => {
+                navigation.navigate('ActivityLog');
+                setActiveScreen('ActivityLog');
+              }}
             />
             <CustomDrawerItem
               label="Placement"
               icon={sidebaricon.placement}
-              onPress={() => navigation.navigate('Placement')}
+              isFocused={isScreenFocused('Placement')}
+              onPress={() => {
+                navigation.navigate('Placement');
+                setActiveScreen('Placement');
+              }}
             />
             <CustomDrawerItem
               label="Spoken English"
               icon={sidebaricon.spokenenglish}
-              onPress={() => navigation.navigate('SpokenEnglish')}
+              isFocused={isScreenFocused('SpokenEnglish')}
+              onPress={() => {
+                navigation.navigate('SpokenEnglish');
+                setActiveScreen('SpokenEnglish');
+              }}
             />
             <CustomDrawerItem
               label="Help Center"
               icon={sidebaricon.helpcenter}
-              onPress={() => navigation.navigate('Helpcenter')}
+              isFocused={isScreenFocused('Helpcenter')}
+              onPress={() => {
+                navigation.navigate('Helpcenter');
+                setActiveScreen('Helpcenter');
+              }}
             />
             <CustomDrawerItem
               label="FAQs"
               icon={sidebaricon.fag}
-              onPress={() => navigation.navigate('FAQ')}
+              isFocused={isScreenFocused('FAQ')}
+              onPress={() => {
+                navigation.navigate('FAQ');
+                setActiveScreen('FAQ');
+              }}
             />
           </View>
         </DrawerContentScrollView>
@@ -346,7 +409,7 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
                     alignItems: 'center',
                   }}
                   onPress={() => setLogoutModalVisible(false)}>
-                  <Text style={{ ...FONTS.h4, color: '#333' }}>Cancel</Text>
+                  <Text style={{ ...FONTS.h4, color: '#333', fontWeight: 500 }}>Cancel</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -359,7 +422,7 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
                     alignItems: 'center',
                   }}
                   onPress={confirmLogout}>
-                  <Text style={{ ...FONTS.h4, color: '#fff' }}>Logout</Text>
+                  <Text style={{ ...FONTS.h4, color: '#fff', fontWeight: 500 }}>Logout</Text>
                 </TouchableOpacity>
               </View>
             </View>

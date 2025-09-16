@@ -18,6 +18,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllActivityData } from '~/features/reducer/activitylog/reducers/Thunks';
 import { ActivitySelector } from '~/features/reducer/activitylog/reducers/Selector';
+import { LinearGradient } from 'expo-linear-gradient';
 
 type Log = {
   id: string;
@@ -195,23 +196,34 @@ const ActivityLogs = () => {
 
           {/* Pagination controls */}
           <View style={styles.pagination}>
-            <TouchableOpacity
-              onPress={loadPrevPage}
-              disabled={currentPage === 1}
-              style={[styles.pageBtn, currentPage === 1 && styles.disabledBtn]}>
-              <Text style={styles.pageText}>Previous</Text>
-            </TouchableOpacity>
+            <LinearGradient
+              colors={currentPage === 1 ? ['#E0E0E0', '#E0E0E0'] : ['#7B00FF', '#B200FF']}
+              start={{ x: 0.134, y: 0.021 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.pageGradient}>
+              <TouchableOpacity
+                onPress={loadPrevPage}
+                disabled={currentPage === 1}
+                style={[styles.buttonInner]}>
+                <Text style={styles.buttonText}>Previous</Text>
+              </TouchableOpacity>
+            </LinearGradient>
 
             <Text style={styles.pageInfo}>
               Page {currentPage} of {totalPages}
             </Text>
-
-            <TouchableOpacity
-              onPress={loadNextPage}
-              disabled={currentPage === totalPages}
-              style={[styles.pageBtn, currentPage === totalPages && styles.disabledBtn]}>
-              <Text style={styles.pageText}>Next</Text>
-            </TouchableOpacity>
+            <LinearGradient
+              colors={currentPage === totalPages ? ['#E0E0E0', '#E0E0E0'] : ['#7B00FF', '#B200FF']}
+              start={{ x: 0.134, y: 0.021 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.pageGradient}>
+              <TouchableOpacity
+                onPress={loadNextPage}
+                disabled={currentPage === totalPages}
+                style={[styles.buttonInner]}>
+                <Text style={styles.buttonText}>Next</Text>
+              </TouchableOpacity>
+            </LinearGradient>
           </View>
 
           {/* Date Picker Modal */}
@@ -313,6 +325,12 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     width: '25%',
   },
+  buttonInner: {
+    paddingVertical: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 110,
+  },
   disabledBtn: {
     backgroundColor: COLORS.text_desc,
   },
@@ -320,6 +338,11 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     textAlign: 'center',
     fontWeight: 500,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
   pageInfo: {
     fontSize: 14,
@@ -334,5 +357,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.text_desc,
     textAlign: 'center',
+  },
+  pageGradient: {
+    borderRadius: 6,
+    overflow: 'hidden',
+    minWidth: 90,
+    marginHorizontal: 5,
   },
 });
