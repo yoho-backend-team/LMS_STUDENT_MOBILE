@@ -1,17 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  Linking,
-} from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, icons } from '~/constants';
+import { icons } from '~/constants';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { WebView } from 'react-native-webview';
 import { getFileUrl, getImageUrl } from '~/utils/imageUtils';
@@ -173,7 +164,7 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
                 <View style={styles.footerItem}>
                   <Image
                     source={require('../../assets/courses/modules.png')}
-                    style={{ width: 24, height: 24 }}
+                    style={{ width: 20, height: 20 }}
                   />
                   <Text style={styles.footerText}>
                     {course.coursemodules?.length ?? '0'} modules
@@ -182,7 +173,7 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
                 <View style={styles.footerItem}>
                   <Image
                     source={require('../../assets/courses/Alarm.png')}
-                    style={{ width: 24, height: 24 }}
+                    style={{ width: 20, height: 20 }}
                   />
                   <Text style={styles.footerText}> {course.duration ?? 'N/A'}</Text>
                 </View>
@@ -419,7 +410,7 @@ const styles = StyleSheet.create({
   },
   card1: {
     backgroundColor: '#fff',
-    borderRadius: 16,
+    borderRadius: 8,
     padding: 10,
   },
   image: { width: '100%', height: 140, borderRadius: 12, marginBottom: 12 },
@@ -432,7 +423,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   footerItem: { flexDirection: 'row', alignItems: 'center' },
-  footerText: { marginLeft: 4, fontSize: 12, color: '#716F6F' },
+  footerText: { marginLeft: 4, fontSize: 12, color: '#716F6F', fontWeight: 500 },
 
   infoCard: {
     backgroundColor: '#ebeff3',
@@ -440,7 +431,7 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   infoLabel: { fontSize: 16, fontWeight: 'bold', marginBottom: 8, color: '#2A2A2A' },
-  infoValue: { fontSize: 14, color: '#716F6F' },
+  infoValue: { fontSize: 14, color: '#716F6F', fontWeight: 500 },
 
   noteCard: {
     backgroundColor: '#fff',

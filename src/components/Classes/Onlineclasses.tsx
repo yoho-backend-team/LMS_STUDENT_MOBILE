@@ -18,6 +18,8 @@ import { formatDate, formatTime } from '~/utils/formatDate';
 import toast from '~/utils/toasts';
 import { LinearGradient } from 'expo-linear-gradient';
 import { getStudentData } from '~/utils/storage';
+import { selectProfile } from '~/features/Profile/reducer/selectors';
+import { getStudentProfileThunk } from '~/features/Profile/reducer/thunks';
 
 const Classcards = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -29,6 +31,7 @@ const Classcards = () => {
   const totalPages = classData?.last_page || 1;
   const [refreshing, setRefreshing] = useState(false);
   const [student, setStudent] = useState<any>(null);
+  const profileDetails = useSelector(selectProfile)?.data;
 
   const tabs = [
     { key: 'completed', label: 'Completed Class' },
@@ -39,6 +42,7 @@ const Classcards = () => {
   useEffect(() => {
     (async () => {
       const data = await getStudentData();
+      dispatch(getStudentProfileThunk({}));
       setStudent(data);
     })();
   }, []);
@@ -49,7 +53,9 @@ const Classcards = () => {
         userType: 'online',
         classType: type,
         page: page,
-        courseId: student?.userDetail?.course,
+        courseId: student?.userDetail?.course
+          ? student?.userDetail?.course
+          : profileDetails?.userDetail?.course?._id,
       })
     );
   };

@@ -76,8 +76,7 @@ const Communities = () => {
           <View style={styles.messageList}>
             <ScrollView
               showsVerticalScrollIndicator={false}
-              refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} // 👈 pull to refresh
-            >
+              refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
               {filteredCommunities?.map((community: any, index: number) => (
                 <TouchableOpacity
                   key={index}
@@ -118,6 +117,7 @@ const Communities = () => {
               )}
             </ScrollView>
           </View>
+          <View style={{ marginTop: 80 }}></View>
         </View>
       </SafeAreaView>
     </>

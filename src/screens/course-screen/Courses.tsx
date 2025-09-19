@@ -20,6 +20,8 @@ import { selectCourse } from '~/features/Courses/Reducers/selectors';
 import { getImageUrl } from '~/utils/imageUtils';
 import { Ionicons } from '@expo/vector-icons';
 import { getStudentData } from '~/utils/storage';
+import { getStudentProfileThunk } from '~/features/Profile/reducer/thunks';
+import { selectProfile } from '~/features/Profile/reducer/selectors';
 
 const Courses = () => {
   const navigation = useNavigation<any>();
@@ -28,10 +30,12 @@ const Courses = () => {
   const course = coursedata?.data;
   const [refreshing, setRefreshing] = useState(false);
   const [student, setStudent] = useState<any>(null);
+  const profileDetails = useSelector(selectProfile)?.data;
 
   useEffect(() => {
     (async () => {
       const data = await getStudentData();
+      dispatch(getStudentProfileThunk({}));
       setStudent(data);
     })();
   }, []);
@@ -41,7 +45,9 @@ const Courses = () => {
       try {
         const params = {
           instituteId: student?.institute_id?._id,
-          courseId: student?.userDetail?.course,
+          courseId: student?.userDetail?.course
+            ? student?.userDetail?.course
+            : profileDetails?.userDetail?.course?._id,
           branchId: student?.branch_id?._id,
         };
         await dispatch(getStudentcourse(params));
