@@ -55,7 +55,7 @@ const Courses = () => {
         console.error('Course fetch error:', error);
       }
     }
-  }, [dispatch, student]);
+  }, [dispatch, student, profileDetails]);
 
   useEffect(() => {
     if (student) {

@@ -26,7 +26,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "jsEngine": "jsc"
@@ -37,8 +39,14 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.suryas_1805.LMS_Student_MobileApp",
-      "permissions": ["android.permission.RECORD_AUDIO"]
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
-    "extra": {}
+    "extra": {
+      "eas": {
+        "projectId": "a5e46db5-66e2-456d-8768-25ce44ee074c"
+      }
+    }
   }
 }
