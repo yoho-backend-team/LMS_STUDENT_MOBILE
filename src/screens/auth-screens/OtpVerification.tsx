@@ -115,7 +115,10 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ route }) => {
     const otpString = otp.join('');
     if (otpString.length === 6) {
       try {
-        const response = await updateVerifyOtpClient({ email, token: data?.token, otp: otpString });
+        const params_data = { email, token: data?.token, otp: otpString };
+        console.log(params_data, 'params');
+        const response = await updateVerifyOtpClient(params_data);
+        console.log(response, 'otp verify res');
         if (response) {
           toast.success('Success', `OTP Verified successfully!`);
           if (data?.step === 'otp') {
