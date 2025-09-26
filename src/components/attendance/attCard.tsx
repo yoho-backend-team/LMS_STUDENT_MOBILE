@@ -96,7 +96,6 @@ type AttendanceCardsProps = {
 };
 
 const AttendanceCards = ({ attendance, onScrollIndexChange }: AttendanceCardsProps) => {
-  console.log('``first``', attendance);
   const scrollRef = useRef<ScrollView>(null);
 
   const cards = [

@@ -60,9 +60,6 @@ const Attendance = () => {
   });
   const [student, setStudent] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
-  console.log("``attendanceByDate``", attendance);
-
-
   useEffect(() => {
   if (selectedDate) { 
     const formattedDate = selectedDate.toISOString().split('T')[0];
@@ -90,7 +87,6 @@ const fetchAttendance = async () => {
     year: selectedYear,
     instituteId: student?.institute_id?.uuid,
   };
-  console.log("first>>>", payload);
   await dispatch(getStudentattendance(payload));
 };
 

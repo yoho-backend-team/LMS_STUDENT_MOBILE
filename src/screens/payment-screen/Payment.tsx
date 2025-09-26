@@ -28,8 +28,6 @@ const Payment = () => {
   const currentPendingLength = paymentData?.payment_history?.length;
   const currentPending = paymentData?.payment_history?.[currentPendingLength - 1];
   const [refreshing, setRefreshing] = useState(false);
-  // console.log('first', paymentData);
-
   useEffect(() => {
     (async () => {
       const data = await getStudentData();

@@ -26,8 +26,6 @@ const ClassById = () => {
       );
     }
   }, [classData, dispatch]);
-  
-  console.log ("``classIdData``", classIdData);
   return (
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />

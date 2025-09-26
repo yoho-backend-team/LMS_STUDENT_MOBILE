@@ -6,6 +6,7 @@ import { COLORS, screens } from '~/constants';
 import { formatDate, formatTime } from '~/utils/formatDate';
 import { setSelectedTab } from '~/store/tab/tabSlice';
 import { useDispatch } from 'react-redux';
+import { Download } from 'lucide-react-native';
 
 interface ClassDataProps {
   classData: any;
@@ -14,7 +15,7 @@ interface ClassDataProps {
 const CompleteClassDetails: React.FC<ClassDataProps> = ({ classData }) => {
   const navigation = useNavigation<any>();
   const dispatch = useDispatch<any>();
- console.log("first/...", classData);
+
   const classInfoData = [
     { label: 'Date', value: formatDate(classData?.start_date) },
     { label: 'Start At', value: formatTime(classData?.start_time, false) },
@@ -22,75 +23,110 @@ const CompleteClassDetails: React.FC<ClassDataProps> = ({ classData }) => {
     { label: 'Duration', value: classData?.duration },
   ];
 
+  const sessionNotes: string[] = classData?.notes || [];
+  const studyMaterials: string[] = classData?.study_materials || [];
+
+  const handleDownload = (url: string) => {
+    if (url) {
+      Linking.openURL(url);
+    }
+  };
+
+  const getFileName = (url: string) => {
+    try {
+      return url.split('/').pop() || 'File';
+    } catch {
+      return 'File';
+    }
+  };
+
   return (
-    <>
-      <ScrollView contentContainerStyle={styles.screen}>
-        <View style={styles.container}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Image source={require('../../assets/profile/back.png')} style={styles.backbutton} />
+    <ScrollView contentContainerStyle={styles.screen}>
+      <View style={styles.container}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Image source={require('../../assets/profile/back.png')} style={styles.backbutton} />
+        </TouchableOpacity>
+        <Text style={styles.title}>{classData?.class_name}</Text>
+      </View>
+
+      <View style={styles.container1}>
+        <Text style={styles.batchTitle}>Batch No : #{classData?.batch?.id}</Text>
+
+        <LinearGradient
+          colors={['#7B00FF', '#B200FF']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.card}>
+          {classInfoData?.map((item, index) => (
+            <View key={index} style={styles.column}>
+              <Text style={styles.label}>{item.label}</Text>
+              <Text style={styles.value}>{item.value}</Text>
+            </View>
+          ))}
+        </LinearGradient>
+
+        <Text style={styles.notesubTitle}>
+          Make sure your presence in this class & if you are unable to attend, please inform the
+          Coordinator.
+        </Text>
+
+        <TouchableOpacity
+          style={styles.notesCard}
+          onPress={() => {
+            navigation.goBack();
+            dispatch(setSelectedTab(screens.attendance));
+          }}>
+          <Text style={styles.noteText1}>Check Attendance</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.notesubTitle}>If any issue in attendance please raise a ticket</Text>
+
+        {/* Session Notes */}
+        <Text style={styles.noteTitle}>Session Notes</Text>
+        {sessionNotes.length > 0 ? (
+          sessionNotes.map((url, idx) => (
+            <TouchableOpacity
+              key={idx}
+              style={styles.notesCard1}
+              onPress={() => handleDownload(url)}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text style={styles.noteText}>{getFileName(url)}</Text>
+                <Download size={18} color={COLORS.text_title} />
+              </View>
+            </TouchableOpacity>
+          ))
+        ) : (
+          <TouchableOpacity style={styles.notesCard1}>
+            <Text style={styles.noteText}>No session notes available</Text>
           </TouchableOpacity>
-          <Text style={styles.title}>{classData?.class_name}</Text>
-        </View>
+        )}
+      </View>
 
-        <View style={styles.container1}>
-          <Text style={styles.batchTitle}>Batch No : #{classData?.batch?.id}</Text>
-
-          <View style={{}}>
-            <LinearGradient
-              colors={['#7B00FF', '#B200FF']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.card}>
-              {classInfoData?.map((item, index) => (
-                <View key={index} style={styles.column}>
-                  <Text style={styles.label}>{item.label}</Text>
-                  <Text style={styles.value}>{item.value}</Text>
-                </View>
-              ))}
-            </LinearGradient>
-          </View>
-
-          <Text style={styles.notesubTitle}>
-            Make sure your presence in this class & if you are unable to attend, please inform the
-            Coordinator.
-          </Text>
-
-          <TouchableOpacity
-            style={styles.notesCard}
-            onPress={() => {
-              navigation.goBack();
-              dispatch(setSelectedTab(screens.attendance));
-            }}>
-            <Text style={styles.noteText1}>Check Attendance</Text>
+      {/* Study Materials */}
+      <View style={styles.container2}>
+        <Text style={styles.noteTitle}>Study Materials</Text>
+        {studyMaterials.length > 0 ? (
+          studyMaterials.map((url, idx) => (
+            <TouchableOpacity
+              key={idx}
+              style={styles.notesCard1}
+              onPress={() => handleDownload(url)}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text style={styles.noteText}>{getFileName(url)}</Text>
+                <Download size={18} color={COLORS.text_title} />
+              </View>
+            </TouchableOpacity>
+          ))
+        ) : (
+          <TouchableOpacity style={styles.notesCard1}>
+            <Text style={styles.noteText}>No study materials available</Text>
           </TouchableOpacity>
-          <Text style={styles.notesubTitle}>If any issue in attendance please raise a ticket</Text>
-          <View style={{ marginTop: 5 }}></View>
-          <Text style={styles.noteTitle}>Session Notes</Text>
-          <TouchableOpacity
-            style={styles.notesCard1}
-            onPress={() => {
-              Linking.openURL('https://your-notes-link.com');
-            }}>
-            <Text style={styles.noteText}>Once Class Finished Videos will be Uploaded</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.container2}>
-          <Text style={styles.noteTitle}>Study Materials</Text>
-          <TouchableOpacity
-            style={styles.notesCard1}
-            onPress={() => {
-              Linking.openURL('https://your-materials-link.com');
-            }}>
-            <Text style={styles.noteText}>
-              Once Class Finished Study Materials Videos will be Uploaded
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </>
+        )}
+      </View>
+    </ScrollView>
   );
 };
+
 
 const styles = StyleSheet.create({
   screen: {

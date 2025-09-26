@@ -42,7 +42,7 @@ const CreateTicketComponent = () => {
       return;
     }
 
-    console.log({ subject, description, category, attachment, priority });
+    // console.log({ subject, description, category, attachment, priority });
     alert('Ticket created successfully!');
     navigation.goBack();
   };

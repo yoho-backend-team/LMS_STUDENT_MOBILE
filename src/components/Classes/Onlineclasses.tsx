@@ -92,8 +92,6 @@ const Classcards = () => {
       toast.error('Error', 'Unable to open the link.');
     });
   };
-  console.log("first", classData);
-
   const ClassCard = ({ item }: { item: any }) => (
     <View style={styles.card}>
       <View style={styles.row}>
