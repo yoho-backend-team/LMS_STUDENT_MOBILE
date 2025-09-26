@@ -24,6 +24,7 @@ import { getStudentProfileThunk } from '~/features/Profile/reducer/thunks';
 const Classcards = () => {
   const dispatch = useDispatch<AppDispatch>();
   const classData = useSelector(selectClass) || { data: [] };
+  
   const navigation = useNavigation<any>();
   const [activeTab, setActiveTab] = useState<'live' | 'upcoming' | 'completed'>('completed');
   const scrollRef = useRef<ScrollView>(null);
@@ -32,6 +33,7 @@ const Classcards = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [student, setStudent] = useState<any>(null);
   const profileDetails = useSelector(selectProfile)?.data;
+  
 
   const tabs = [
     { key: 'completed', label: 'Completed Class' },
@@ -42,6 +44,7 @@ const Classcards = () => {
   useEffect(() => {
     (async () => {
       const data = await getStudentData();
+
       dispatch(getStudentProfileThunk({}));
       setStudent(data);
     })();
@@ -60,6 +63,7 @@ const Classcards = () => {
     );
   };
 
+  
   useEffect(() => {
     if (student) {
       fetchClassData(activeTab);
@@ -88,6 +92,7 @@ const Classcards = () => {
       toast.error('Error', 'Unable to open the link.');
     });
   };
+  console.log("first", classData);
 
   const ClassCard = ({ item }: { item: any }) => (
     <View style={styles.card}>

@@ -14,7 +14,7 @@ interface ClassDataProps {
 const CompleteClassDetails: React.FC<ClassDataProps> = ({ classData }) => {
   const navigation = useNavigation<any>();
   const dispatch = useDispatch<any>();
-
+ console.log("first/...", classData);
   const classInfoData = [
     { label: 'Date', value: formatDate(classData?.start_date) },
     { label: 'Start At', value: formatTime(classData?.start_time, false) },

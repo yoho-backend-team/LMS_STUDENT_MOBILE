@@ -14,7 +14,7 @@ const ClassById = () => {
   const { classData } = route?.params;
   const dispatch = useDispatch<AppDispatch>();
   const classIdData = useSelector(selectIdClass);
-
+  
   useEffect(() => {
     if (classData) {
       dispatch(
@@ -26,7 +26,8 @@ const ClassById = () => {
       );
     }
   }, [classData, dispatch]);
-
+  
+  console.log ("``classIdData``", classIdData);
   return (
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
