@@ -16,16 +16,16 @@ import { getStudentData } from '~/utils/storage';
 import dayjs from 'dayjs';
 import { LinearGradient } from 'expo-linear-gradient';
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 10;
 
 const Placement = ({ navigation }: any) => {
   const [student, setStudent] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [refreshing, setRefreshing] = useState(false); // ✅ for pull-to-refresh
+  const [refreshing, setRefreshing] = useState(false);
   const dispatch = useDispatch();
   const placementData: any = useSelector<any>(selectPlacementData);
 
-  // ✅ fetch logged student
+  // fetch logged student
   useEffect(() => {
     (async () => {
       const data = await getStudentData();
@@ -33,7 +33,7 @@ const Placement = ({ navigation }: any) => {
     })();
   }, []);
 
-  // ✅ fetch placements once student available
+  // fetch placements once student available
   const fetchPlacements = useCallback(() => {
     if (student) {
       dispatch(getPlacementthunks({ studentId: student?._id }) as any);
@@ -44,33 +44,45 @@ const Placement = ({ navigation }: any) => {
     fetchPlacements();
   }, [fetchPlacements]);
 
-  // ✅ pagination logic
+  // pagination logic
   const totalPages = Math.ceil((placementData?.length || 0) / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const currentData = placementData?.slice(startIndex, endIndex) || [];
 
-  const renderItem = ({ item }: any) => (
-    <View style={styles.card}>
-      <Row label="Job Name" value={item?.job?.name} />
-      <Row label="Job Description" value={item?.job?.description} />
-      <Row
-        label="Interview Date"
-        value={dayjs(item?.schedule?.interviewDate).format('DD-MM-YYYY')}
-      />
-      <Row label="Company Name" value={item?.company?.name} />
-      <Row label="Venue" value={item?.schedule?.venue} />
+  const renderItem = ({ item }: any) => {
+    const interviewDate = dayjs(item?.schedule?.interviewDate);
+    const today = dayjs();
+    const isExpired = interviewDate.isBefore(today, 'day'); // check only by day
 
-      {/* View Button */}
-      <TouchableOpacity
-        style={styles.viewBtn}
-        onPress={() => navigation.navigate('PlacementViewScreen', { placement: item })}>
-        <Text style={styles.viewText}>View</Text>
-      </TouchableOpacity>
-    </View>
-  );
+    return (
+      <View style={styles.card}>
+        <Row label="Job Name" value={item?.job?.name} />
+        <Row label="Job Description" value={item?.job?.description} />
+        <Row label="Interview Date" value={interviewDate.format('DD-MM-YYYY')} />
+        <Row label="Company Name" value={item?.company?.name} />
+        <Row label="Venue" value={item?.schedule?.venue} />
 
-  // ✅ load next / prev
+        {/* Conditional Button */}
+        {isExpired ? (
+          <View style={[styles.viewBtn, { backgroundColor: '#ccc' }]}>
+            <Text style={styles.viewText}>Expired</Text>
+          </View>
+        ) : (
+          <TouchableOpacity
+            style={styles.viewBtn}
+            onPress={() =>
+              navigation.navigate('PlacementViewScreen', { placement: item })
+            }
+          >
+            <Text style={styles.viewText}>View</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  };
+
+  // load next / prev
   const loadNextPage = () => {
     if (currentPage < totalPages) setCurrentPage((p) => p + 1);
   };
@@ -78,7 +90,7 @@ const Placement = ({ navigation }: any) => {
     if (currentPage > 1) setCurrentPage((p) => p - 1);
   };
 
-  // ✅ handle refresh
+  // handle refresh
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchPlacements();
@@ -114,17 +126,19 @@ const Placement = ({ navigation }: any) => {
         />
       )}
 
-      {/* ✅ Fixed Pagination at Bottom */}
+      {/* Pagination at Bottom */}
       <View style={styles.pagination}>
         <LinearGradient
           colors={currentPage === 1 ? ['#E0E0E0', '#E0E0E0'] : ['#7B00FF', '#B200FF']}
           start={{ x: 0.134, y: 0.021 }}
           end={{ x: 1, y: 1 }}
-          style={styles.pageGradient}>
+          style={styles.pageGradient}
+        >
           <TouchableOpacity
             onPress={loadPrevPage}
             disabled={currentPage === 1}
-            style={styles.buttonInner}>
+            style={styles.buttonInner}
+          >
             <Text style={styles.buttonText}>Previous</Text>
           </TouchableOpacity>
         </LinearGradient>
@@ -137,11 +151,13 @@ const Placement = ({ navigation }: any) => {
           colors={currentPage === totalPages ? ['#E0E0E0', '#E0E0E0'] : ['#7B00FF', '#B200FF']}
           start={{ x: 0.134, y: 0.021 }}
           end={{ x: 1, y: 1 }}
-          style={styles.pageGradient}>
+          style={styles.pageGradient}
+        >
           <TouchableOpacity
             onPress={loadNextPage}
             disabled={currentPage === totalPages}
-            style={styles.buttonInner}>
+            style={styles.buttonInner}
+          >
             <Text style={styles.buttonText}>Next</Text>
           </TouchableOpacity>
         </LinearGradient>
@@ -226,7 +242,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingTop: 10,
   },
-  // ✅ Pagination Styles (fixed bottom like tickets)
   pagination: {
     flexDirection: 'row',
     justifyContent: 'space-between',

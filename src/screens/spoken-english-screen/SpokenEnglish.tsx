@@ -15,11 +15,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '~/constants';
 import Svg, { Circle } from 'react-native-svg';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import LearningPathSteps from './LearningPathSteps';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Progress from 'react-native-progress';
 import { MaterialIcons } from '@expo/vector-icons';
+import { StorageService } from '~/utils/storage';
 
 const UI = {
   bg: '#EAEFF5',
@@ -246,7 +247,56 @@ const SpokenEnglish = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [isFilterOpen, setFilterOpen] = useState(false);
   const [isSessionRecapModalOpen, setSessionRecapModalOpen] = useState(false);
+  const [quizScores, setQuizScores] = useState<{ [key: string]: number }>({});
+  const [isLoading, setIsLoading] = useState(true);
   const itemsPerPage = 10;
+
+  const handleScoreUpdate = (scores: { [key: string]: number }) => {
+    setQuizScores(scores);
+  };
+
+  useEffect(() => {
+    loadStoredScores();
+  }, []);
+
+  const loadStoredScores = async () => {
+    try {
+      const storedScores = await StorageService.getQuizScores();
+      setQuizScores(storedScores);
+    } catch (error) {
+      console.error('Error loading stored scores:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const calculateCompletedSections = () => {
+    return Object.values(quizScores).filter(score => score >= 80).length;
+  };
+
+  // Calculate overall progress based on quiz scores
+  const calculateOverallProgress = () => {
+    const stepTitles = ['Beginner', 'Intermediate', 'Advanced', 'Professional'];
+    const completedSteps = stepTitles.filter(title => quizScores[title] >= 80).length;
+    return Math.round((completedSteps / stepTitles.length) * 100);
+  };
+
+  // FIXED: Calculate achievement percentage based on actual scores
+  const calculateAchievementPercentage = () => {
+    const scores = Object.values(quizScores);
+    
+    // If no scores available, return 0
+    if (scores.length === 0) {
+      return 0;
+    }
+    
+    // Calculate average of all available scores
+    const totalScore = scores.reduce((sum, score) => sum + score, 0);
+    const averageScore = totalScore / scores.length;
+    
+    // Return the average score as percentage (already in percentage format)
+    return Math.round(averageScore);
+  };
 
   const toggleExpand = (index: number) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -272,36 +322,41 @@ const SpokenEnglish = () => {
     }
   };
 
+  const calculateCompletionPercentage = () => {
+    const totalSections = 4; 
+    const completedSections = Object.values(quizScores).filter(score => score >= 80).length;
+    return Math.round((completedSections / totalSections) * 100);
+  };
+
   const statsCards = [
     {
-      title: 'Day Streak',
-      value: '0',
-      icon: require('../../assets/home/card1icon.png'),
-      color: '#22D3EE',
-      bgColor: COLORS.white,
-    },
-    {
-      title: 'Total XP',
-      value: '0',
-      icon: require('../../assets/home/card6img.png'),
-      color: '#6366F1',
-      bgColor: COLORS.white,
-    },
-    {
-      title: 'Completed ',
-      value: '0',
+      title: 'Completed',
+      value: calculateCompletedSections().toString(),
+      displayValue: `${calculateCompletedSections()}/4 Sections`,
+      percentage: Math.round((calculateCompletedSections() / 4) * 100),
       icon: require('../../assets/home/card2icon.png'),
       color: '#10B981',
       bgColor: COLORS.white,
+      type: 'count' as const,
     },
     {
       title: 'Achievement',
-      value: '0',
+      value: calculateAchievementPercentage().toString(),
+      percentage: calculateAchievementPercentage(),
       icon: require('../../assets/home/card4img.png'),
       color: '#EC4899',
       bgColor: COLORS.white,
+      type: 'percentage' as const,
     },
   ];
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text>Loading your progress...</Text>
+      </View>
+    );
+  }
 
   return (
     <>
@@ -328,6 +383,17 @@ const SpokenEnglish = () => {
           <View style={styles.card}>
             <Text style={styles.cardTitle}>English Mastery Challenge</Text>
             <Text style={styles.cardSubtitle}>Classic Style Grammar And Speaking Practice</Text>
+            <View style={{ marginTop: 10, alignItems: 'center' }}>
+              <Text style={styles.cardSubtitle}>
+                Overall Progress: {calculateOverallProgress()}%
+              </Text>
+              <Progress.Bar 
+                progress={calculateOverallProgress() / 100} 
+                width={200} 
+                color="#7209b7"
+                style={{ marginTop: 5 }}
+              />
+            </View>
           </View>
 
           <View style={styles.statsGrid}>
@@ -335,6 +401,7 @@ const SpokenEnglish = () => {
               <View key={index} style={[styles.statsCard, { backgroundColor: item.bgColor }]}>
                 <View style={styles.statsHeader}>
                   <Text style={styles.statsTitle}>{item.title}</Text>
+                  <Text style={styles.statsCount}>{item.displayValue}</Text>
                 </View>
                 <View style={styles.iconcontent}>
                   <View style={[styles.iconContainer, { backgroundColor: item.color }]}>
@@ -343,7 +410,7 @@ const SpokenEnglish = () => {
                 </View>
                 <View style={styles.progress}>
                   <ProgressCircle
-                    percentage={parseInt(item.value)}
+                    percentage={item.percentage}
                     size={60}
                     strokeWidth={8}
                     color={item.color}
@@ -413,7 +480,10 @@ const SpokenEnglish = () => {
           onRequestClose={() => setFilterOpen(false)}>
           <View style={styles.modal}>
             <View style={styles.modalContent}>
-              <LearningPathSteps onClose={() => setFilterOpen(false)} />
+              <LearningPathSteps 
+                onClose={() => setFilterOpen(false)} 
+                onScoreUpdate={handleScoreUpdate}
+              />
             </View>
           </View>
         </Modal>
@@ -517,6 +587,8 @@ const SpokenEnglish = () => {
 
 export default SpokenEnglish;
 
+
+
 const commonRaisedShadow = {
   shadowColor: UI.dark,
   shadowOffset: { width: 8, height: 8 },
@@ -530,6 +602,7 @@ const commonLightRim = {
 };
 
 const styles = StyleSheet.create({
+  
   container: { flex: 1, paddingTop: 10, backgroundColor: COLORS.white },
   scrollContainer: {
     flex: 1,
@@ -701,14 +774,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
-  // Progress Section Styles
   progressText: {
     position: 'absolute',
     justifyContent: 'center',
     alignItems: 'center',
   },
   percentageText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
   },
   insetBox: {
@@ -920,5 +992,10 @@ const styles = StyleSheet.create({
   modalScrollContainer: {
     paddingHorizontal: 20,
     paddingVertical: 10,
+  },
+  statsCount: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#1F2937',
   },
 });

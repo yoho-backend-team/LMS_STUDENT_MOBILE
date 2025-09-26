@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Image } from 'react-native';
 import QuizModal from './QuizModal';
 import { COLORS } from '~/constants';
+import { StorageService } from '~/utils/storage';
 
 type Question = {
   title: string;
@@ -561,9 +562,10 @@ const steps: Step[] = [
 
 type LearningPathStepsProps = {
   onClose: () => void;
+  onScoreUpdate?: (scores: { [key: string]: number }) => void;
 };
 
-const LearningPathSteps: React.FC<LearningPathStepsProps> = ({ onClose }) => {
+const LearningPathSteps: React.FC<LearningPathStepsProps> = ({ onClose,onScoreUpdate }) => {
   const [expandedParent, setExpandedParent] = useState<number | null>(0);
   const [quizVisible, setQuizVisible] = useState(false);
   const [selectedQuestions, setSelectedQuestions] = useState<any[]>([]);
@@ -580,6 +582,50 @@ const LearningPathSteps: React.FC<LearningPathStepsProps> = ({ onClose }) => {
     0: [0], // only first child of first parent unlocked
   });
   const [scores, setScores] = useState<{ [key: string]: number }>({}); // { "Beginner": 85 }
+ const [isLoading, setIsLoading] = useState(true);
+
+ useEffect(() => {
+    loadStoredData();
+  }, []);
+
+  const loadStoredData = async () => {
+    try {
+      setIsLoading(true);
+      const [storedScores, storedSections, storedChildren] = await Promise.all([
+        StorageService.getQuizScores(),
+        StorageService.getUnlockedSections(),
+        StorageService.getUnlockedChildren(),
+      ]);
+
+      setScores(storedScores);
+      setUnlockedSections(storedSections);
+      setUnlockedChildren(storedChildren);
+      
+      // Notify parent component of loaded scores
+      if (onScoreUpdate) {
+        onScoreUpdate(storedScores);
+      }
+    } catch (error) {
+      console.error('Error loading stored data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Save data to storage whenever it changes
+  useEffect(() => {
+    if (!isLoading) {
+      saveAllData();
+    }
+  }, [scores, unlockedSections, unlockedChildren, isLoading]);
+
+  const saveAllData = async () => {
+    await Promise.all([
+      StorageService.saveQuizScores(scores),
+      StorageService.saveUnlockedSections(unlockedSections),
+      StorageService.saveUnlockedChildren(unlockedChildren),
+    ]);
+  };
 
   // Handle child click
   const handleChildPress = (
@@ -599,12 +645,19 @@ const LearningPathSteps: React.FC<LearningPathStepsProps> = ({ onClose }) => {
     setQuizVisible(true);
   };
 
-  // Handle quiz complete
-  // Handle quiz complete
+  
   const handleQuizComplete = (scorePercent: number) => {
     if (activeChild) {
       const { stepIndex, childIndex, stepTitle } = activeChild;
-      setScores((prev) => ({ ...prev, [stepTitle]: scorePercent }));
+      
+      // Update local scores
+      const newScores = { ...scores, [stepTitle]: scorePercent };
+      setScores(newScores);
+      
+      // Pass scores back to parent component
+      if (onScoreUpdate) {
+        onScoreUpdate(newScores);
+      }
 
       if (scorePercent >= 80) {
         setUnlockedChildren((prev) => {
@@ -650,7 +703,9 @@ const LearningPathSteps: React.FC<LearningPathStepsProps> = ({ onClose }) => {
         {steps?.map((step, index) => {
           const isActive = index === expandedParent;
           const isUnlocked = unlockedSections.includes(index);
-
+          const stepScore = scores[step.steptitle] || 0;
+          
+          
           return (
             <View key={index} style={{ marginBottom: 8, paddingHorizontal: 8 }}>
               {/* Parent */}
@@ -664,6 +719,11 @@ const LearningPathSteps: React.FC<LearningPathStepsProps> = ({ onClose }) => {
                       <Image source={step.icon} style={[styles.icon, { tintColor: '#fff' }]} />
                     )}
                     <Text style={styles.activeText}>{step?.steptitle}</Text>
+                  
+                  {stepScore > 0 && (
+                      <Text style={styles.scoreBadge}>{stepScore}%</Text>
+                    )}
+                  
                   </LinearGradient>
                 ) : (
                   <View style={[styles.inactiveStep, { opacity: 0.3 }]}>
@@ -694,7 +754,7 @@ const LearningPathSteps: React.FC<LearningPathStepsProps> = ({ onClose }) => {
                         <Image
                           source={require('../../assets/icons/milestones.png')}
                           style={{ width: 10, height: 10 }}
-                        />{' '}
+                        />
                         {child?.childtitle} {childUnlocked ? '' : '🔒'}
                       </Text>
                     </TouchableOpacity>
@@ -801,6 +861,40 @@ const styles = StyleSheet.create({
     marginRight: 10,
     resizeMode: 'contain',
   },
+    scoreBadge: {
+    position: 'absolute',
+    right: 20,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
 });
 
 export default LearningPathSteps;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
