@@ -69,7 +69,6 @@ const Payment = () => {
   //         : '-';
   const status = totalPending === 0 ? 'Paid' : 'Pending';
 
-
   const statsCards = [
     {
       title: 'Courses Fees',
@@ -114,9 +113,8 @@ const Payment = () => {
       <SafeAreaView edges={['top']} style={styles.container}>
         {/* Header */}
         <ScrollView
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} 
-          showsVerticalScrollIndicator={false}
-          >
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          showsVerticalScrollIndicator={false}>
           <View style={styles.headerRow}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <Image source={require('../../assets/profile/back.png')} style={styles.backbutton} />

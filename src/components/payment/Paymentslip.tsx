@@ -19,11 +19,12 @@ type PaymentSlipProps = {
   onClose: () => void;
   paymentData: any;
   visible: boolean;
-  currentPending?: any;
+  currentPending?: any; 
 };
 
 const PaymentSlip = ({ onClose, paymentData, visible, currentPending }: PaymentSlipProps) => {
   const pending = currentPending || null;
+
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return 'N/A';
@@ -34,7 +35,6 @@ const PaymentSlip = ({ onClose, paymentData, visible, currentPending }: PaymentS
       year: 'numeric',
     });
   };
-
   const htmlContent = `
 <html>
 <head>
