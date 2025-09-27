@@ -60,9 +60,8 @@ const Attendance = () => {
   });
   const [student, setStudent] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
-
   useEffect(() => {
-  if (selectedDate) {
+  if (selectedDate) { 
     const formattedDate = selectedDate.toISOString().split('T')[0];
     dispatch(getattendanceByDate({ date: formattedDate }));
   }
@@ -81,7 +80,6 @@ useEffect(() => {
   }
 }, [selectedMonth, selectedYear, student]);
 
-// 🔄 Extract fetch logic into a reusable function
 const fetchAttendance = async () => {
   const payload = {
     userId: student?.uuid,

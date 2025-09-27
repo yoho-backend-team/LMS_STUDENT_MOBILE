@@ -103,7 +103,7 @@ const AttendanceCards = ({ attendance, onScrollIndexChange }: AttendanceCardsPro
       id: 1,
       title: 'Total Classes',
       attended: attendance?.data?.attendedClassCount,
-      total: (attendance?.data?.onlineClassCount || 0) + (attendance?.data?.offlineClassCount || 0),
+      total: attendance?.data?.totalWorkingDays || 0,
       color: '#6366F1',
       bgColor: '#EEF2FF',
     },
@@ -161,7 +161,10 @@ const AttendanceCards = ({ attendance, onScrollIndexChange }: AttendanceCardsPro
         style={{ paddingHorizontal: 5 }}
         contentContainerStyle={{ paddingRight: 20 }}>
         {cards.map((card?: any) => {
-          const percentage = card.total && card.total > 0 ? (card.attended / card.total) * 100 : 0;
+          let percentage = card.total && card.total > 0 ? (card.attended / card.total) * 100 : 0;
+          if (card.title === 'Absent Days') {
+            percentage = 100 - percentage; 
+          }
 
           return (
             <View key={card.id} style={[cardStyle, { backgroundColor: card.bgColor }]}>

@@ -28,27 +28,44 @@ const Payment = () => {
   const currentPendingLength = paymentData?.payment_history?.length;
   const currentPending = paymentData?.payment_history?.[currentPendingLength - 1];
   const [refreshing, setRefreshing] = useState(false);
+  useEffect(() => {
+    (async () => {
+      const data = await getStudentData();
+      setStudent(data);
+    })();
+  }, []);
 
- useEffect(() => {
-  (async () => {
-    const data = await getStudentData();
-    setStudent(data);
-  })();
-}, []);
+  useEffect(() => {
+    if (student) {
+      dispatch(getPaymentthunks({ paymentId: student?.uuid }) as any);
+    }
+  }, [dispatch, student]);
 
-useEffect(() => {
-  if (student) {
-    dispatch(getPaymentthunks({ paymentId: student?.uuid }) as any);
-  }
-}, [dispatch, student]);
+  const onRefresh = async () => {
+    setRefreshing(true);
+    if (student) {
+      await dispatch(getPaymentthunks({ paymentId: student?.uuid }) as any);
+    }
+    setRefreshing(false);
+  };
 
-const onRefresh = async () => {
-  setRefreshing(true);
-  if (student) {
-    await dispatch(getPaymentthunks({ paymentId: student?.uuid }) as any);
-  }
-  setRefreshing(false);
-};
+  const parseAmount = (amount: string | number) => {
+    if (!amount) return 0;
+    const num = typeof amount === 'string' ? parseInt(amount.replace(/[^\d-]/g, ''), 10) : amount;
+    return Math.abs(num);
+  };
+  const totalPaid = parseAmount(paymentData?.totalAmount);
+  const totalPending = parseAmount(paymentData?.pending_payment);
+
+  // const status =
+  //   totalPending > 0 && totalPaid === 0
+  //     ? 'Pending'
+  //     : totalPending > 0 && totalPaid > 0
+  //       ? 'Partially Paid'
+  //       : totalPending === 0 && totalPaid > 0
+  //         ? 'Paid'
+  //         : '-';
+  const status = totalPending === 0 ? 'Paid' : 'Pending';
 
   const statsCards = [
     {
@@ -60,28 +77,21 @@ const onRefresh = async () => {
     },
     {
       title: 'Amount Paid',
-      value: `₹${currentPending?.paid_amount}` || '₹0',
+      value: `₹${totalPaid}` || '₹0',
       icon: require('../../assets/home/card1icon.png'),
       color: '#6366F1',
       bgColor: COLORS.white,
     },
     {
       title: 'Pending Payment',
-      value: `₹${currentPending?.balance}` || '₹0',
+      value: `₹${totalPending}` || '₹0',
       icon: require('../../assets/home/card1icon.png'),
       color: '#10B981',
       bgColor: COLORS.white,
     },
     {
       title: 'Status',
-      value:
-        currentPending?.balance > 0 && currentPending?.paid_amount === 0
-          ? 'Pending'
-          : currentPending?.balance > 0 && currentPending?.paid_amount > 0
-            ? 'Partially Paid'
-            : currentPending?.balance === 0 && currentPending?.paid_amount > 0
-              ? 'Paid'
-              : '-',
+      value: status,
       icon: require('../../assets/home/card1icon.png'),
       color: '#EC4899',
       bgColor: COLORS.white,
@@ -101,17 +111,14 @@ const onRefresh = async () => {
       <SafeAreaView edges={['top']} style={styles.container}>
         {/* Header */}
         <ScrollView
-         refreshControl={
-      <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-    }>
-          
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          showsVerticalScrollIndicator={false}>
           <View style={styles.headerRow}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <Image source={require('../../assets/profile/back.png')} style={styles.backbutton} />
             </TouchableOpacity>
             <Text style={styles.header}>Payment</Text>
           </View>
-          
 
           <View style={styles.cardsbg}>
             {/* Stats Cards */}

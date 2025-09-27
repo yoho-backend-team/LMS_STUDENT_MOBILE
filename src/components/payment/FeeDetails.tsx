@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import PaymentSlip from '../../components/payment/Paymentslip';
 import { formatDate } from '../../utils/formatDate';
 import { COLORS } from '~/constants';
@@ -9,11 +9,11 @@ interface PaymentDataProps {
 }
 
 const FeesDetails: React.FC<PaymentDataProps> = ({ paymentData }) => {
-  const [showPaymentSlip, setShowPaymentSlip] = useState<any>(false);
-  const currentPendingLength = paymentData?.payment_history?.length;
-  const currentPending = paymentData?.payment_history[currentPendingLength - 1];
+  const [showPaymentSlip, setShowPaymentSlip] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState<any>(null);
 
-  const handleViewPDF = () => {
+  const handleViewPDF = (paymentItem: any) => {
+    setSelectedPayment(paymentItem);
     setShowPaymentSlip(true);
   };
 
@@ -22,17 +22,30 @@ const FeesDetails: React.FC<PaymentDataProps> = ({ paymentData }) => {
   };
 
   if (showPaymentSlip) {
-    return <PaymentSlip paymentData={paymentData} onClose={handleCloseModal} visible={true} />;
+    return (
+      <PaymentSlip
+        paymentData={paymentData}
+        currentPending={selectedPayment}
+        onClose={handleCloseModal}
+        visible={true}
+      />
+    );
   }
 
+  const parseAmount = (amount: string | number) => {
+    if (!amount) return 0;
+    const num = typeof amount === 'string' ? parseInt(amount.replace(/[^\d-]/g, ''), 10) : amount;
+    return Math.abs(num);
+  };
+
+  // reverse history array
+  const paymentHistory = [...(paymentData?.payment_history || [])].reverse();
+
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       {/* Header */}
       <View style={styles.headerRow}>
         <Text style={styles.title}>Fees Details</Text>
-        {/* <TouchableOpacity style={styles.downloadBtn}>
-          <Text style={styles.downloadText}>Download Receipt</Text>
-        </TouchableOpacity> */}
       </View>
 
       {/* Student Info */}
@@ -77,34 +90,35 @@ const FeesDetails: React.FC<PaymentDataProps> = ({ paymentData }) => {
         </View>
         <View style={styles.tableRow}>
           <Text style={styles.desc}>Paid Amount</Text>
-          <Text style={styles.amount}>{`₹${currentPending?.paid_amount}` || '₹0'}</Text>
+          <Text style={styles.amount}>{`${paymentData?.totalAmount}` || '₹0'}</Text>
         </View>
         <View style={styles.tableRow}>
           <Text style={styles.pending}>Pending</Text>
-          <Text style={styles.pendingAmount}>{`₹${currentPending?.balance}` || '₹0'}</Text>
+          <Text style={styles.pendingAmount}>₹{parseAmount(paymentData?.pending_payment)}</Text>
         </View>
       </View>
 
       {/* Payment History */}
       <Text style={[styles.title, { marginTop: 12 }]}>Payment History</Text>
 
-      <View style={styles.historyCard}>
-        <View style={styles.historyRow}>
-          <Text style={styles.historyDate}>{currentPending?.duepaymentdate} (paid)</Text>
-          <TouchableOpacity style={styles.pdfBtn} onPress={() => handleViewPDF()}>
-            <Text style={styles.pdfText}>View PDF</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      {paymentHistory.map((item, index) => (
+        <View style={styles.historyCard} key={index}>
+          <View style={styles.historyRow}>
+            <Text style={styles.historyDate}>
+              {item?.duepaymentdate ? formatDate(item?.duepaymentdate) : 'N/A'}
+            </Text>
+            <TouchableOpacity style={styles.pdfBtn} onPress={() => handleViewPDF(item)}>
+              <Text style={styles.pdfText}>View PDF</Text>
+            </TouchableOpacity>
+          </View>
 
-      {/* Pay Due */}
-      <View style={styles.historyCard}>
-        <View style={styles.historyRow}>
-          <Text style={styles.historyDate}>{currentPending?.duepaymentdate} (pay due)</Text>
-          <Text style={styles.noDue}>{`₹${currentPending?.balance}` || '₹0'}</Text>
+          <View style={styles.historyRow}>
+            <Text style={styles.dueText}>Paid: ₹{item?.paid_amount || 0}</Text>
+            {/* <Text style={styles.noDue}>Balance: ₹{item?.balance || 0}</Text> */}
+          </View>
         </View>
-      </View>
-    </View>
+      ))}
+    </ScrollView>
   );
 };
 
@@ -125,18 +139,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     color: '#000',
-  },
-  downloadBtn: {
-    backgroundColor: '#fff',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-    elevation: 3,
-  },
-  downloadText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#555',
   },
   feesbg: {
     backgroundColor: '#fff',
@@ -233,10 +235,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: COLORS.purple_01,
-    textAlign: 'center'
+    textAlign: 'center',
   },
   dueText: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '600',
     color: '#716F6F',
   },

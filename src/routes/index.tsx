@@ -121,7 +121,7 @@ const Routes = () => {
     );
   };
 
-  const StudentStack = () => {
+  const StudentStack = () => { 
     return (
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="StudentDrawer" component={StudentDrawer} />
