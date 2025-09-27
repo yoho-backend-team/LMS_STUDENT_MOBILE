@@ -38,6 +38,9 @@ const FeesDetails: React.FC<PaymentDataProps> = ({ paymentData }) => {
     return Math.abs(num);
   };
 
+  const totalAmount = parseAmount(paymentData?.totalAmount);
+  const pendingAmount = parseAmount(paymentData?.pending_payment);
+  const paidAmount = totalAmount - pendingAmount;
   // reverse history array
   const paymentHistory = [...(paymentData?.payment_history || [])].reverse();
 
@@ -89,10 +92,14 @@ const FeesDetails: React.FC<PaymentDataProps> = ({ paymentData }) => {
           <Text style={styles.amount}>{`₹${paymentData?.fees?.[0]?.other_taxes}` || '₹0'}</Text>
         </View>
         <View style={styles.tableRow}>
-          <Text style={styles.desc}>Paid Amount</Text>
-          <Text style={styles.amount}>{`${paymentData?.totalAmount}` || '₹0'}</Text>
+          <Text style={styles.desc}>Total Amount</Text>
+          <Text style={styles.amount}>₹{totalAmount}</Text>
         </View>
         <View style={styles.tableRow}>
+          <Text style={styles.desc}>Paid Amount</Text>
+          <Text style={styles.amount}>₹{paidAmount}</Text>
+        </View>
+        <View style={[styles.tableRow, styles.dashedRow]}>
           <Text style={styles.pending}>Pending</Text>
           <Text style={styles.pendingAmount}>₹{parseAmount(paymentData?.pending_payment)}</Text>
         </View>
@@ -185,6 +192,14 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 4,
   },
+  dashedRow: {
+    borderTopWidth: 1,
+    borderTopColor: '#555', 
+    borderStyle: 'dashed',
+    paddingVertical: 10,
+    paddingHorizontal: 4,
+  },
+
   desc: {
     fontSize: 14,
     color: '#555',
