@@ -34,7 +34,6 @@ import { getStudentData } from '~/utils/storage';
 import CertificateTemplate from '~/components/profile/CertificateTemplate';
 import * as Print from 'expo-print';
 import { shareAsync } from 'expo-sharing';
-import { COLORS } from '~/constants';
 
 const COLORS1 = {
   black: '#000000',
@@ -84,7 +83,6 @@ const Profile = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showCertificateModal, setShowCertificateModal] = useState(false);
   const [selectedCertificate, setSelectedCertificate] = useState<any>(null);
-  
 
   const [profileData, setProfileData] = useState({
     first_name: '',
@@ -315,12 +313,11 @@ const Profile = () => {
       dob: dobTimestamp,
     };
 
-    console.log(transformedData,"td")
+    
 
     const response = await updateStudentProfile(transformedData);
 
-    console.log(response,"res")
-
+  
     if (response) {
       // ✅ update redux again
       dispatch(getStudentProfileThunk({}));
@@ -1206,7 +1203,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: '#ebeff3',
     borderRadius: 16,
     padding: 16,
     shadowOffset: { width: 0, height: 2 },
@@ -1252,7 +1249,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderRadius: 50,
     resizeMode: 'cover',
-    backgroundColor: COLORS.bg_Colour
+    backgroundColor: COLORS1.background
+
   },
   avatarContainer: {
     position: 'relative',
@@ -1360,7 +1358,7 @@ const styles = StyleSheet.create({
     color: COLORS1.white,
   },
   certificateContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: '#ebeff3',
     borderRadius: 16,
     padding: 15,
     marginTop: 10,
@@ -1375,7 +1373,7 @@ const styles = StyleSheet.create({
     height: 180,
     borderRadius: 8,
     resizeMode: 'cover',
-    backgroundColor: COLORS.bg_Colour,
+    backgroundColor: '#d1d5db',
   },
   cardText: {
     marginTop: 6,
@@ -1414,7 +1412,6 @@ const styles = StyleSheet.create({
     borderRadius: 60,
     marginBottom: 20,
     resizeMode: 'cover',
-    backgroundColor: COLORS.bg_Colour
   },
   idCardInfo: {
     alignItems: 'center',
