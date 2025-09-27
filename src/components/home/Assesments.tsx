@@ -37,8 +37,6 @@ type AssessmentTrack = {
 const AssessmentsChart: React.FC = () => {
   const dispatch = useDispatch();
   const assessmentData = useSelector(selectAssessmentData) as AssessmentTrack | null;
-  const [studentID, setStudentID] = useState<string | null>(null);
-  const [courseID, setCourseID] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'Total' | 'Pending' | 'Completed'>('Total');
 
   useEffect(() => {
@@ -50,8 +48,6 @@ const AssessmentsChart: React.FC = () => {
           const id = parsedStudent?._id;
           const courseId = parsedStudent?.userDetail?.course;
 
-          setStudentID(id);
-          setCourseID(courseId);
           dispatch(getdashboardassementthunk({ studentId: id, courseId: courseId }) as any);
         }
       } catch (error) {
@@ -194,12 +190,12 @@ const AssessmentsChart: React.FC = () => {
             <Text style={styles.dataLabel}>Total</Text>
           </View>
           <View style={styles.dataPoint}>
-            <Text style={[styles.dataValue, { color: CHART_COLORS.blue }]}>{pending}</Text>
-            <Text style={styles.dataLabel}>Pending</Text>
+            <Text style={[styles.dataValue, { color: CHART_COLORS.blue }]}>{completed}</Text>
+            <Text style={styles.dataLabel}>Completed</Text>
           </View>
           <View style={styles.dataPoint}>
-            <Text style={[styles.dataValue, { color: CHART_COLORS.primary }]}>{completed}</Text>
-            <Text style={styles.dataLabel}>Completed</Text>
+            <Text style={[styles.dataValue, { color: CHART_COLORS.secondary }]}>{pending}</Text>
+            <Text style={styles.dataLabel}>Pending</Text>
           </View>
         </View>
       </View>
@@ -222,21 +218,6 @@ const AssessmentsChart: React.FC = () => {
           </LinearGradient>
         </TouchableOpacity>
 
-        {/* Pending */}
-        <TouchableOpacity style={styles.categoryWrapper} onPress={() => setActiveTab('Pending')}>
-          <LinearGradient
-            colors={activeTab === 'Pending' ? ['#40E0D0', '#2196F3'] : ['#BBDEFB', '#E3F2FD']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.categoryButton}>
-            <Image
-              source={require('../../assets/home/clipboard-text.png')}
-              style={styles.profileicon}
-            />
-            <Text style={styles.categoryText}>Pending ({pending})</Text>
-          </LinearGradient>
-        </TouchableOpacity>
-
         {/* Completed */}
         <TouchableOpacity style={styles.categoryWrapper} onPress={() => setActiveTab('Completed')}>
           <LinearGradient
@@ -249,6 +230,21 @@ const AssessmentsChart: React.FC = () => {
               style={styles.profileicon}
             />
             <Text style={styles.categoryText}>Completed ({completed})</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+
+        {/* Pending */}
+        <TouchableOpacity style={styles.categoryWrapper} onPress={() => setActiveTab('Pending')}>
+          <LinearGradient
+            colors={activeTab === 'Pending' ? ['#40E0D0', '#2196F3'] : ['#BBDEFB', '#E3F2FD']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.categoryButton}>
+            <Image
+              source={require('../../assets/home/clipboard-text.png')}
+              style={styles.profileicon}
+            />
+            <Text style={styles.categoryText}>Pending ({pending})</Text>
           </LinearGradient>
         </TouchableOpacity>
       </ScrollView>
@@ -301,8 +297,8 @@ const styles = StyleSheet.create({
     left: 20,
   },
   percentageCircle: {
-    width: 60,
-    height: 60,
+    width: 50,
+    height: 50,
     borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
@@ -314,7 +310,7 @@ const styles = StyleSheet.create({
   },
   percentageText: {
     color: CHART_COLORS.white,
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: 'bold',
   },
   percentageLabel: {
@@ -324,24 +320,27 @@ const styles = StyleSheet.create({
     marginTop: -2,
   },
   dataOverlay: {
-    position: 'absolute',
-    top: 20,
-    right: 20,
-    flexDirection: 'column',
-    gap: 8,
+    // position: 'absolute',
+    // top: 20,
+    // right: 20,
+    // flexDirection: 'column',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   dataPoint: {
-    alignItems: 'flex-end',
+    alignItems: 'center',
   },
   dataValue: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: CHART_COLORS.text,
+    color: CHART_COLORS.primary,
   },
   dataLabel: {
     fontSize: 10,
     color: CHART_COLORS.lightText,
     marginTop: -2,
+    fontWeight: 500
   },
   categoriesContainer: {
     flexDirection: 'row',

@@ -1,12 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Linking, ScrollView, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
-import { COLORS, screens } from '~/constants';
+import { COLORS, icons, screens } from '~/constants';
 import { formatDate, formatTime } from '~/utils/formatDate';
 import { setSelectedTab } from '~/store/tab/tabSlice';
 import { useDispatch } from 'react-redux';
 import { Download } from 'lucide-react-native';
+import WebView from 'react-native-webview';
+import { getFileUrl } from '~/utils/imageUtils';
+import { Ionicons } from '@expo/vector-icons';
 
 interface ClassDataProps {
   classData: any;
@@ -15,6 +18,7 @@ interface ClassDataProps {
 const CompleteClassDetails: React.FC<ClassDataProps> = ({ classData }) => {
   const navigation = useNavigation<any>();
   const dispatch = useDispatch<any>();
+  const [showVideo, setShowVideo] = useState(false);
 
   const classInfoData = [
     { label: 'Date', value: formatDate(classData?.start_date) },
@@ -28,16 +32,16 @@ const CompleteClassDetails: React.FC<ClassDataProps> = ({ classData }) => {
 
   const handleDownload = (url: string) => {
     if (url) {
-      Linking.openURL(url);
+      const fullURL = getFileUrl(url);
+      Linking.openURL(fullURL);
     }
   };
 
-  const getFileName = (url: string) => {
-    try {
-      return url.split('/').pop() || 'File';
-    } catch {
-      return 'File';
-    }
+  const extractVideoId = (url: string) => {
+    if (!url) return '';
+    const regex = /(?:embed\/|v=)([^&?]+)/;
+    const match = url.match(regex);
+    return match ? match[1] : '';
   };
 
   return (
@@ -50,7 +54,7 @@ const CompleteClassDetails: React.FC<ClassDataProps> = ({ classData }) => {
       </View>
 
       <View style={styles.container1}>
-        <Text style={styles.batchTitle}>Batch No : #{classData?.batch?.id}</Text>
+        <Text style={styles.batchTitle}>Batch No : #{classData?.batch?.id || '1'}</Text>
 
         <LinearGradient
           colors={['#7B00FF', '#B200FF']}
@@ -80,20 +84,64 @@ const CompleteClassDetails: React.FC<ClassDataProps> = ({ classData }) => {
         </TouchableOpacity>
 
         <Text style={styles.notesubTitle}>If any issue in attendance please raise a ticket</Text>
+      </View>
 
-        {/* Session Notes */}
+      {/* uploaded video */}
+      <View style={styles.videoCard}>
+        <Text style={styles.sectionTitle}>Class Video</Text>
+        {showVideo && classData?.video_url ? (
+          <WebView
+            style={{ flex: 1 }}
+            javaScriptEnabled={true}
+            domStorageEnabled={true}
+            allowsFullscreenVideo={true}
+            allowsInlineMediaPlayback={true}
+            mediaPlaybackRequiresUserAction={false}
+            source={{
+              uri: classData?.video_url,
+            }}
+          />
+        ) : (
+          <>
+            <Image
+              source={{
+                uri: classData?.video_url
+                  ? `https://i.ytimg.com/vi/${extractVideoId(classData?.video_url)}/hqdefault.jpg`
+                  : 'https://via.placeholder.com/300x200?text=No+Video',
+              }}
+              style={styles.videoImage}
+            />
+            <TouchableOpacity style={styles.playBtn} onPress={() => setShowVideo(true)}>
+              <Ionicons name="play" size={24} color="#fff" />
+            </TouchableOpacity>
+          </>
+        )}
+      </View>
+
+      {/* Session Notes */}
+      <View style={{ marginTop: 15 }}>
         <Text style={styles.noteTitle}>Session Notes</Text>
         {sessionNotes.length > 0 ? (
-          sessionNotes.map((url, idx) => (
-            <TouchableOpacity
-              key={idx}
-              style={styles.notesCard1}
-              onPress={() => handleDownload(url)}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text style={styles.noteText}>{getFileName(url)}</Text>
-                <Download size={18} color={COLORS.text_title} />
+          sessionNotes.map((url: any, idx) => (
+            <View key={idx} style={styles.notesCard1}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 8,
+                }}>
+                <Image source={icons.pdf} style={{ width: 20, height: 25 }} />
+                <View>
+                  <Text style={styles.noteText}>{url?.title}</Text>
+                  <Text style={styles.noteText2}>{url?.description}</Text>
+                </View>
+                <TouchableOpacity
+                  style={{ flex: 1, alignItems: 'flex-end' }}
+                  onPress={() => handleDownload(url?.file)}>
+                  <Download size={18} color={COLORS.text_title} />
+                </TouchableOpacity>
               </View>
-            </TouchableOpacity>
+            </View>
           ))
         ) : (
           <TouchableOpacity style={styles.notesCard1}>
@@ -106,16 +154,26 @@ const CompleteClassDetails: React.FC<ClassDataProps> = ({ classData }) => {
       <View style={styles.container2}>
         <Text style={styles.noteTitle}>Study Materials</Text>
         {studyMaterials.length > 0 ? (
-          studyMaterials.map((url, idx) => (
-            <TouchableOpacity
-              key={idx}
-              style={styles.notesCard1}
-              onPress={() => handleDownload(url)}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text style={styles.noteText}>{getFileName(url)}</Text>
-                <Download size={18} color={COLORS.text_title} />
+          studyMaterials.map((url: any, idx) => (
+            <View key={idx} style={styles.notesCard1}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 8,
+                }}>
+                <Image source={icons.pdf} style={{ width: 20, height: 25 }} />
+                <View>
+                  <Text style={styles.noteText}>{url?.title}</Text>
+                  <Text style={styles.noteText2}>{url?.description}</Text>
+                </View>
+                <TouchableOpacity
+                  style={{ flex: 1, alignItems: 'flex-end' }}
+                  onPress={() => handleDownload(url)}>
+                  <Download size={18} color={COLORS.text_title} />
+                </TouchableOpacity>
               </View>
-            </TouchableOpacity>
+            </View>
           ))
         ) : (
           <TouchableOpacity style={styles.notesCard1}>
@@ -126,7 +184,6 @@ const CompleteClassDetails: React.FC<ClassDataProps> = ({ classData }) => {
     </ScrollView>
   );
 };
-
 
 const styles = StyleSheet.create({
   screen: {
@@ -160,7 +217,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     marginBottom: 24,
-
     shadowColor: '#FFFFFF',
     shadowOffset: { width: -6, height: -6 },
     shadowOpacity: 1,
@@ -225,12 +281,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   notesCard1: {
-    alignSelf: 'flex-start',
     paddingVertical: 12,
     paddingHorizontal: 16,
     marginBottom: 20,
-
-    backgroundColor: '#EBF0F5',
+    backgroundColor: COLORS.bg_Colour,
     borderRadius: 14,
     padding: 16,
     // Inset shadow to mimic “inner” effect
@@ -253,8 +307,14 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   noteText: {
-    fontSize: 14,
+    fontSize: 12,
     color: COLORS.text_title,
+    fontWeight: 500,
+    textAlign: 'center',
+  },
+  noteText2: {
+    fontSize: 12,
+    color: COLORS.text_desc,
   },
   noteText1: {
     fontSize: 14,
@@ -263,7 +323,7 @@ const styles = StyleSheet.create({
   },
   container1: {
     flex: 1,
-    backgroundColor: '#d9e8f5ff',
+    backgroundColor: '#fff',
     padding: 16,
     borderRadius: 20,
     shadowColor: '#3b3030ff',
@@ -274,21 +334,19 @@ const styles = StyleSheet.create({
   },
   container2: {
     flex: 1,
-    backgroundColor: '#d9e8f5ff',
-    padding: 16,
     borderRadius: 20,
-    marginTop: 10,
-    shadowColor: '#3b3030ff',
-    shadowOffset: { width: 6, height: 6 },
-    shadowOpacity: 1,
-    shadowRadius: 6,
-    elevation: 6,
   },
   container: {
     flexDirection: 'row',
     alignItems: 'center',
     marginVertical: 5,
     backgroundColor: COLORS.white,
+  },
+  videoImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 12,
+    backgroundColor: COLORS.bg_Colour,
   },
   backButton: {
     width: 36,
@@ -299,6 +357,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 10,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: 500,
+    marginVertical: 12,
+  },
+  videoCard: {
+    height: 280,
+    width: '100%',
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 16,
+  },
+  playBtn: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -25 }, { translateY: -25 }],
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    padding: 15,
+    borderRadius: 40,
   },
   column: {
     flex: 1,
@@ -312,7 +391,7 @@ const styles = StyleSheet.create({
   },
   value: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '400',
   },
   card: {
