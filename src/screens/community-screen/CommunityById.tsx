@@ -174,33 +174,31 @@ const CommunityById: React.FC = () => {
   useEffect(() => {
     if (messagelist) {
       const list = Array.isArray(messagelist) ? messagelist : messagelist.messages || [];
-      console.log(list, 'msg ')
-     const formatted = list
-  .map((msg: any) => {
-    const status = msg.status || [];
-    const allRead = status.length > 0 && status.every((s: any) => s.read);
-    const anyDelivered = status.length > 0 && status.some((s: any) => s.delivered);
 
-    return {
-      id: msg.uuid || msg._id || Date.now().toString(),
-      text: msg.message || msg.content,
-      isOutgoing: msg.sender === userId,
-      senderName: msg.sender_name || 'Unknown',
-      createdAt: msg.createdAt || msg.timestamp || new Date().toISOString(),
-      sender: msg.sender,
-      _id: msg._id,
+      const formatted = list
+        .map((msg: any) => {
+          const status = msg.status || [];
+          const allRead = status.length > 0 && status.every((s: any) => s.read);
+          const anyDelivered = status.length > 0 && status.some((s: any) => s.delivered);
 
-      // ✅ frontend-only
-      status,
-      allRead,
-      anyDelivered,
-    };
-  })
-  .sort(
-    (a: Message, b: Message) =>
-      new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime()
-  );
+          return {
+            id: msg.uuid || msg._id || Date.now().toString(),
+            text: msg.message || msg.content,
+            isOutgoing: msg.sender === userId,
+            senderName: msg.sender_name || 'Unknown',
+            createdAt: msg.createdAt || msg.timestamp || new Date().toISOString(),
+            sender: msg.sender,
+            _id: msg._id,
 
+            status,
+            allRead,
+            anyDelivered,
+          };
+        })
+        .sort(
+          (a: Message, b: Message) =>
+            new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime()
+        );
 
       if (page === 1) {
         setMessages(formatted);
@@ -246,21 +244,20 @@ const CommunityById: React.FC = () => {
     socket.on('receiveMessage', handleIncomingMessage);
     socket.on('newMessage', handleIncomingMessage);
     socket.on('messageDelivered', (messageId) => {
-  setMessages((prevMessages) =>
-    prevMessages.map((msg) =>
-      msg._id === messageId || msg.id === messageId ? { ...msg, delivered: true } : msg
-    )
-  );
-});
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg._id === messageId || msg.id === messageId ? { ...msg, delivered: true } : msg
+        )
+      );
+    });
 
-socket.on('messageRead', (messageId) => {
-  setMessages((prevMessages) =>
-    prevMessages.map((msg) =>
-      msg._id === messageId || msg.id === messageId ? { ...msg, read: true } : msg
-    )
-  );
-});
-
+    socket.on('messageRead', (messageId) => {
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg._id === messageId || msg.id === messageId ? { ...msg, read: true } : msg
+        )
+      );
+    });
 
     return () => {
       socket.off('receiveMessage', handleIncomingMessage);
@@ -269,9 +266,6 @@ socket.on('messageRead', (messageId) => {
       socket.off('messageRead');
     };
   }, [userId]);
-
-
-  console.log("message:",messages)
 
   useEffect(() => {
     if (messages?.length > 0 && userId) {
@@ -292,7 +286,7 @@ socket.on('messageRead', (messageId) => {
       content: messageToSend,
       groupId: community._id,
       senderId: userId,
-      name: student?.full_name || student?.first_name || 'You',
+      name: student?.full_name || student?.first_name,
       message: messageToSend,
     };
 
@@ -390,61 +384,55 @@ socket.on('messageRead', (messageId) => {
           </View>
         )}
 
-       <View
-  style={[
-    styles.messageContainer,
-    msg.isOutgoing ? styles.outgoingMessage : styles.incomingMessage,
-  ]}>
-  <View
-    style={[
-      styles.messageBubble,
-      msg.isOutgoing ? styles.outgoingBubble : styles.incomingBubble,
-    ]}>
-    {!msg.isOutgoing && (
-      <Text style={[styles.senderName, { color: senderColor }]}>{msg.senderName}</Text>
-    )}
-    <Text
-      style={[
-        styles.messageText,
-        msg.isOutgoing ? styles.outgoingText : styles.incomingText,
-      ]}>
-      {msg.text}
-    </Text>
+        <View
+          style={[
+            styles.messageContainer,
+            msg.isOutgoing ? styles.outgoingMessage : styles.incomingMessage,
+          ]}>
+          <View
+            style={[
+              styles.messageBubble,
+              msg.isOutgoing ? styles.outgoingBubble : styles.incomingBubble,
+            ]}>
+            {!msg.isOutgoing && (
+              <Text style={[styles.senderName, { color: senderColor }]}>{msg.senderName}</Text>
+            )}
+            <Text
+              style={[
+                styles.messageText,
+                msg.isOutgoing ? styles.outgoingText : styles.incomingText,
+              ]}>
+              {msg.text}
+            </Text>
 
-    {/* ✅ Time + double tick */}
-    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }}>
-      <Text style={styles.timeText}>{formatTime(msg?.createdAt)}</Text>
-     {msg.isOutgoing && (
-  <>
-    {msg.allRead ? (
-      <Ionicons
-        name="checkmark-done"
-        size={14}
-        color="#009af9ff" 
-        style={{ marginLeft: 4 }}
-      />
-    ) : msg.anyDelivered ? (
-      <Ionicons
-        name="checkmark-done"
-        size={14}
-        color="#555" 
-        style={{ marginLeft: 4 }}
-      />
-    ) : (
-      <Ionicons
-        name="checkmark"
-        size={14}
-        color="#555" 
-        style={{ marginLeft: 4 }}
-      />
-    )}
-  </>
-)}
-
-    </View>
-  </View>
-</View>
-
+            {/* ✅ Time + double tick */}
+            <View
+              style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }}>
+              <Text style={styles.timeText}>{formatTime(msg?.createdAt)}</Text>
+              {msg.isOutgoing && (
+                <>
+                  {msg.allRead ? (
+                    <Ionicons
+                      name="checkmark-done"
+                      size={14}
+                      color="#009af9ff"
+                      style={{ marginLeft: 4 }}
+                    />
+                  ) : msg.anyDelivered ? (
+                    <Ionicons
+                      name="checkmark-done"
+                      size={14}
+                      color="#555"
+                      style={{ marginLeft: 4 }}
+                    />
+                  ) : (
+                    <Ionicons name="checkmark" size={14} color="#555" style={{ marginLeft: 4 }} />
+                  )}
+                </>
+              )}
+            </View>
+          </View>
+        </View>
       </View>
     );
   };
