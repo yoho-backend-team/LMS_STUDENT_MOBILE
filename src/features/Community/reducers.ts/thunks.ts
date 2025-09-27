@@ -1,7 +1,7 @@
 import { GetAllCommunity, GetAllMessage } from '../services';
 import { getCommunity, getMessage } from './ModuleSlice';
 
-export const GetallCommunityThunks = (params: any) => async (dispatch: any) => {
+export const GetallCommunityThunks = (params?: any) => async (dispatch: any) => {
   try {
     const result = await GetAllCommunity(params);
     dispatch(getCommunity(result));

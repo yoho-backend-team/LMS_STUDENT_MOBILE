@@ -422,11 +422,11 @@ const CommunityById: React.FC = () => {
                     <Ionicons
                       name="checkmark-done"
                       size={14}
-                      color="#555"
+                      color="#fff"
                       style={{ marginLeft: 4 }}
                     />
                   ) : (
-                    <Ionicons name="checkmark" size={14} color="#555" style={{ marginLeft: 4 }} />
+                    <Ionicons name="checkmark" size={14} color="#fff" style={{ marginLeft: 4 }} />
                   )}
                 </>
               )}
@@ -528,7 +528,13 @@ export default CommunityById;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f5' },
-  avatar: { width: 40, height: 40, backgroundColor: '#000', borderRadius: 20, marginRight: 12 },
+  avatar: {
+    width: 50,
+    height: 50,
+    backgroundColor: COLORS.bg_Colour,
+    borderRadius: 8,
+    marginRight: 12,
+  },
   backbutton: {
     width: 45,
     height: 45,
@@ -554,13 +560,13 @@ const styles = StyleSheet.create({
   outgoingMessage: { alignItems: 'flex-end' },
   incomingMessage: { alignItems: 'flex-start' },
   messageBubble: { maxWidth: '80%', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 16 },
-  outgoingBubble: { backgroundColor: '#7ed321', borderBottomRightRadius: 4 },
+  outgoingBubble: { backgroundColor: 'green', borderBottomRightRadius: 4 },
   incomingBubble: { backgroundColor: '#ffffff', borderBottomLeftRadius: 4 },
   messageText: { fontSize: 14, lineHeight: 18 },
-  outgoingText: { color: '#000' },
+  outgoingText: { color: '#fff' },
   incomingText: { color: '#333' },
   senderName: { fontSize: 12, fontWeight: '600', marginBottom: 2 },
-  timeText: { fontSize: 10, color: '#666', marginTop: 4, textAlign: 'right' },
+  timeText: { fontSize: 10, color: '#fff', marginTop: 4, textAlign: 'right' },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',

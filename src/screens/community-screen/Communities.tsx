@@ -28,17 +28,17 @@ const Communities = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchCommunities = (page = 1) => {
-    return dispatch(GetallCommunityThunks({ page }));
+  const fetchCommunities = () => {
+    return dispatch(GetallCommunityThunks());
   };
 
   useEffect(() => {
-    fetchCommunities(1);
-  }, []);
+    fetchCommunities();
+  }, [dispatch]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await fetchCommunities(1);
+    await fetchCommunities();
     setRefreshing(false);
   }, []);
 
@@ -189,10 +189,10 @@ const styles = StyleSheet.create({
     borderBottomColor: '#F3F4F6',
   },
   avatar: {
-    width: 40,
-    height: 40,
-    backgroundColor: '#000',
-    borderRadius: 20,
+    width: 50,
+    height: 50,
+    backgroundColor: COLORS.bg_Colour,
+    borderRadius: 8,
     marginRight: 12,
   },
   messageContent: {

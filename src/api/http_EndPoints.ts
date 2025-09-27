@@ -53,7 +53,7 @@ const getEndpoints = (): Endpoints => {
       getassement: '/task-project/:courseid/report/:studentid',
     },
     community: {
-      get: `/institutes/community/course/:courseId`,
+      get: `/institutes/community/course/`,
       get_messages: `/institutes/community/messages/all/`,
     },
     profile: {
