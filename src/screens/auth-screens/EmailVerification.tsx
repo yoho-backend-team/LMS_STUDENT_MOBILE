@@ -52,7 +52,6 @@ const EmailVerification = () => {
     if (validateForm()) {
       try {
         const response = await forgotPasswordClient({ email }, {});
-        console.log(response, 'email verify res');
         if (response) {
           toast.success('Success', 'Email verified successful!');
           navigation.navigate('OtpVerification' as never, { email, data: response?.data?.data });

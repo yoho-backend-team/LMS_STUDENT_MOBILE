@@ -18,6 +18,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
+import { COLORS, FONTS } from '~/constants';
 import { selectFaq } from '~/features/faq/reducers/selectors';
 import { getFaqThunk } from '~/features/faq/reducers/thunks';
 import { getStudentData } from '~/utils/storage';
@@ -75,38 +76,42 @@ const FAQ = () => {
   const [student, setStudent] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
 
-useEffect(() => {
-  (async () => {
-    const data = await getStudentData();
-    setStudent(data);
-  })();
-}, []);
+  useEffect(() => {
+    (async () => {
+      const data = await getStudentData();
+      setStudent(data);
+    })();
+  }, []);
 
-const getFaqData = async () => {
-  await dispatch(
-    getFaqThunk({
-      instituteId: student?.institute_id?.uuid,
-      branchid: student?.branch_id?.uuid,
-    })
-  );
-};
+  const getFaqData = async () => {
+    await dispatch(
+      getFaqThunk({
+        instituteId: student?.institute_id?.uuid,
+        branchid: student?.branch_id?.uuid,
+      })
+    );
+  };
 
-useEffect(() => {
-  if (student) {
-    getFaqData();
-  }
-}, [dispatch, student]);
+  useEffect(() => {
+    if (student) {
+      getFaqData();
+    }
+  }, [dispatch, student]);
 
-const onRefresh = async () => {
-  setRefreshing(true);
-  await getFaqData();
-  setRefreshing(false);
-};
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await getFaqData();
+    setRefreshing(false);
+  };
 
   const toggleExpand = (index: number) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setExpandedIndex(expandedIndex === index ? null : index);
   };
+
+  const filteredFAQs = selectData?.filter((i: any) =>
+    i.description.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <>
@@ -137,12 +142,9 @@ const onRefresh = async () => {
             style={{ marginBottom: 20 }}
             contentContainerStyle={{ paddingBottom: 20 }}
             showsVerticalScrollIndicator={false}
-             refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-              }>
-            {selectData
-              ?.filter((i: any) => i.title.toLowerCase().includes(search.toLowerCase()))
-              .map((item: any, index: any) => {
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+            {filteredFAQs?.length ? (
+              filteredFAQs?.map((item: any, index: any) => {
                 const open = expandedIndex === index;
                 return (
                   <React.Fragment key={index}>
@@ -167,17 +169,28 @@ const onRefresh = async () => {
                       ))}
                   </React.Fragment>
                 );
-              })}
+              })
+            ) : (
+              <View style={{ marginTop: 155 }}>
+                <Text style={{ ...FONTS.h3, color: COLORS.text_desc, textAlign: 'center' }}>
+                  No FAQ found
+                </Text>
+              </View>
+            )}
           </ScrollView>
 
           {/* Help + CTA */}
-          <Text style={styles.helpTitle}>Need More Help?</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Helpcenter')}>
+            <Text style={styles.helpTitle}>Need More Help?</Text>
+          </TouchableOpacity>
           <Text style={styles.helpText}>
             If You Have Any Further Questions, Feel Free To Reach Out To Our Support Team.
           </Text>
 
           {/* CTA – RAISED */}
-          <TouchableOpacity style={[styles.supportBtn, styles.insetBox]} activeOpacity={0.9}>
+          <TouchableOpacity
+            style={[styles.supportBtn, styles.insetBox]}
+            onPress={() => navigation.navigate('TicketsScreen')}>
             <Text style={styles.supportBtnText}>Contact Support</Text>
           </TouchableOpacity>
         </SafeAreaView>

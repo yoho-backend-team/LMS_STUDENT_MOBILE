@@ -116,9 +116,9 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ route }) => {
     if (otpString.length === 6) {
       try {
         const params_data = { email, token: data?.token, otp: otpString };
-        console.log(params_data, 'params');
+
         const response = await updateVerifyOtpClient(params_data);
-        console.log(response, 'otp verify res');
+
         if (response) {
           toast.success('Success', `OTP Verified successfully!`);
           if (data?.step === 'otp') {
@@ -132,7 +132,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ route }) => {
             navigation.navigate('ResetPassword' as never, { email });
           }
         } else {
-          toast.error('Error', 'Failed to verify OTP');
+          toast.error('Error', 'Enter valid OTP');
         }
       } catch (error) {
         toast.error('Error', 'Failed to verify OTP');

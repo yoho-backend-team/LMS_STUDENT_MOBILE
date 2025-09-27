@@ -58,8 +58,8 @@ const CreateTicket = () => {
         setAttachment(result?.assets[0]);
       }
     } catch (error) {
-      console.error('Error picking file:', error);
-      toast.error('Error', 'Failed to pick file');
+      console.log('Error picking file:', error);
+      toast.error('Error', 'Invalid file format');
     }
   };
 
@@ -84,6 +84,7 @@ const CreateTicket = () => {
           } as any);
 
           const uploadRes = await uploadticketfile(formData);
+
           fileUrl = uploadRes?.data?.data?.file;
         } catch (uploadError) {
           console.error('File upload failed:', uploadError);
@@ -101,10 +102,13 @@ const CreateTicket = () => {
         query: subject,
         user: student?._id,
       };
-
-      await createticketdata(ticketData, {});
-      toast.success('Success', 'Ticket created successfully');
-      navigation.goBack();
+      const response = await createticketdata(ticketData, {});
+      if (response) {
+        toast.success('Success', 'Ticket created successfully');
+        navigation.goBack();
+      } else {
+        toast.error('Error', 'Failed to create ticket');
+      }
     } catch (err) {
       console.error('Ticket creation failed:', err);
       toast.error('Error', 'Failed to create ticket');

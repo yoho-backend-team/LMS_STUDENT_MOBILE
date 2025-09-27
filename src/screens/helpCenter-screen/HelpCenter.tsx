@@ -109,9 +109,12 @@ const HelpCenter = () => {
                 setShowVideo(false);
               }}
               style={styles.backIcon}>
-            <Image source={require('../../assets/profile/back.png')} style={styles.backbutton} />  
+              <Image source={require('../../assets/profile/back.png')} style={styles.backbutton} />
             </TouchableOpacity>
-            <Text style={{ ...FONTS.h1, color: COLORS.text_title , marginBottom:5}}>Learning Resources</Text>
+            <Text
+              style={{ ...FONTS.h2, color: COLORS.text_title, marginBottom: 5, fontWeight: 500 }}>
+              Learning Resources
+            </Text>
           </View>
 
           {/* Additional Info */}
@@ -244,30 +247,39 @@ const HelpCenter = () => {
             <ScrollView
               key={index}
               style={styles.contentArea}
+              showsVerticalScrollIndicator={false}
               refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-              {filteredData?.map((item) => (
-                <View key={item.id} style={styles.card}>
-                  <View style={styles.tag}>
-                    <Text style={styles.tagText}>{item?.category}</Text>
+              {filteredData?.length ? (
+                filteredData?.map((item) => (
+                  <View key={item.id} style={styles.card}>
+                    <View style={styles.tag}>
+                      <Text style={styles.tagText}>{item?.category}</Text>
+                    </View>
+
+                    <Text style={styles.title}>{item.question}</Text>
+                    {item.answer && <Text style={styles.subtitle}>{item?.answer}</Text>}
+
+                    <TouchableOpacity
+                      activeOpacity={0.8}
+                      style={styles.buttonContainer}
+                      onPress={() => setSelectedItem(item)}>
+                      <LinearGradient
+                        colors={['#7B00FF', '#B200FF']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={styles.button}>
+                        <Text style={styles.buttonText}>View Details</Text>
+                      </LinearGradient>
+                    </TouchableOpacity>
                   </View>
-
-                  <Text style={styles.title}>{item.question}</Text>
-                  {item.answer && <Text style={styles.subtitle}>{item?.answer}</Text>}
-
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    style={styles.buttonContainer}
-                    onPress={() => setSelectedItem(item)}>
-                    <LinearGradient
-                      colors={['#7B00FF', '#B200FF']}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                      style={styles.button}>
-                      <Text style={styles.buttonText}>View Details</Text>
-                    </LinearGradient>
-                  </TouchableOpacity>
+                ))
+              ) : (
+                <View style={{ marginTop: 155 }}>
+                  <Text style={{ textAlign: 'center', ...FONTS.h2_02, color: COLORS.text_desc }}>
+                    No articles found
+                  </Text>
                 </View>
-              ))}
+              )}
             </ScrollView>
           );
         })}
@@ -280,7 +292,7 @@ export default HelpCenter;
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 15, backgroundColor: '#F8FAFC' },
-backbutton: {
+  backbutton: {
     width: 48,
     height: 48,
     resizeMode: 'contain',
@@ -364,7 +376,7 @@ backbutton: {
   },
   tagText: { fontSize: 13, color: '#333', fontWeight: '500' },
   title: { fontSize: 16, fontWeight: 'bold', marginBottom: 4, color: '#111' },
-  subtitle: { fontSize: 14, color: '#666', marginBottom: 15 },
+  subtitle: { fontSize: 12, color: '#666', marginBottom: 15, textAlign: 'justify' },
   buttonContainer: { alignSelf: 'flex-end' },
   button: {
     paddingVertical: 10,
@@ -375,12 +387,12 @@ backbutton: {
   },
   buttonText: { color: '#fff', fontWeight: '600', fontSize: 14 },
   headerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 15 },
-  backIcon: { marginRight: 10, padding: 5 },
+  backIcon: { marginRight: 2, padding: 5 },
   headerTitle: { fontSize: 20, fontWeight: '700', color: '#000' },
   sectionTitle: { fontSize: 16, fontWeight: '600', marginBottom: 10, color: '#111' },
   videoCard: {
     marginTop: 10,
-    height: 220,
+    height: 280,
     borderRadius: 12,
     overflow: 'hidden',
     backgroundColor: '#000',
