@@ -135,11 +135,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 10,
-    backgroundColor: '#ebeff3',
+    backgroundColor: '#ffffff',
   },
   scrollContainer: {
     flex: 1,
-    backgroundColor: '#ebeff3',
+    backgroundColor: '#ffff',
     padding: 18,
     marginTop: 10,
   },

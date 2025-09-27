@@ -70,7 +70,7 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
   const [steps, setSteps] = useState<any[]>([]);
   const [currentModule, setCurrentModule] = useState<any>(null);
   useEffect(() => {
-    dispatch(getStudentTask({ course: course?._id }));   
+    dispatch(getStudentTask({ course: course?._id }));
   }, [dispatch]);
 
   useEffect(() => {
@@ -104,6 +104,7 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
       navigation.goBack();
     }
   };
+  console.log('first>>>>', course);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -204,41 +205,90 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
 
         {/* NOTES TAB */}
         {activeTab === 'notes' && (
-          <View style={styles.card}>
+          <View style={{ flex: 1 }}>
             <Text style={styles.sectionTitle}>Notes & Materials</Text>
-            {course?.notes?.length ? (
-              course?.notes?.map((note: any) => (
-                <View key={note.id} style={styles.noteCard}>
-                  <View style={styles.textRow}>
-                    <Text style={styles.labelText}>File</Text>
-                    <Image source={icons.pdf} />
-                  </View>
 
-                  <View style={styles.textRow}>
-                    <Text style={styles.labelText}>Date</Text>
-                    <Text style={styles.valueText}>{formatDateMonthandYear(note?.createdAt)}</Text>
-                  </View>
+            {/* Notes Section */}
+            <View style={{ flex: 1, borderBottomWidth: 1, borderColor: '#ddd' }}>
+              <Text style={[styles.sectionTitle, { fontSize: 18 }]}>Notes</Text>
+              {course?.notes?.length ? (
+                <ScrollView>
+                  {course?.notes?.map((note: any) => (
+                    <View key={note.id} style={styles.noteCard}>
+                      <View style={styles.textRow}>
+                        <Text style={styles.labelText}>File</Text>
+                        <Image source={icons.pdf} />
+                      </View>
 
-                  <View style={styles.textRow}>
-                    <Text style={styles.labelText}>Chapter</Text>
-                    <Text style={styles.valueText}>{note?.title}</Text>
-                  </View>
+                      <View style={styles.textRow}>
+                        <Text style={styles.labelText}>Date</Text>
+                        <Text style={styles.valueText}>
+                          {formatDateMonthandYear(note?.createdAt)}
+                        </Text>
+                      </View>
 
-                  <TouchableOpacity
-                    style={styles.downloadRow}
-                    onPress={() => downloadPdf(note?.file)}>
-                    <Text style={styles.labelText}>PDF Download</Text>
-                    <Image source={icons.download} style={{ width: 55, height: 55 }} />
-                  </TouchableOpacity>
+                      <View style={styles.textRow}>
+                        <Text style={styles.labelText}>Chapter</Text>
+                        <Text style={styles.valueText}>{note?.title}</Text>
+                      </View>
+
+                      <TouchableOpacity
+                        style={styles.downloadRow}
+                        onPress={() => downloadPdf(note?.file)}>
+                        <Text style={styles.labelText}>PDF Download</Text>
+                        <Image source={icons.download} style={{ width: 55, height: 55 }} />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </ScrollView>
+              ) : (
+                <View>
+                  <Text style={{ textAlign: 'center', marginTop: 50 }}>No notes available</Text>
                 </View>
-              ))
-            ) : (
-              <View>
-                <Text style={{ textAlign: 'center', marginTop: 200, marginBottom: 350 }}>
-                  "No notes and materials available"
-                </Text>
-              </View>
-            )}
+              )}
+            </View>
+
+            {/* Study Materials Section */}
+            <View style={{ flex: 1, marginTop: 26 }}>
+              <Text style={[styles.sectionTitle, { fontSize: 18 }]}>Study Materials</Text>
+              {course?.studymaterials?.length ? (
+                <ScrollView>
+                  {course?.studymaterials?.map((material: any) => (
+                    <View key={material.id} style={styles.noteCard}>
+                      <View style={styles.textRow}>
+                        <Text style={styles.labelText}>File</Text>
+                        <Image source={icons.pdf} />
+                      </View>
+
+                      <View style={styles.textRow}>
+                        <Text style={styles.labelText}>Date</Text>
+                        <Text style={styles.valueText}>
+                          {formatDateMonthandYear(material?.createdAt)}
+                        </Text>
+                      </View>
+
+                      <View style={styles.textRow}>
+                        <Text style={styles.labelText}>Chapter</Text>
+                        <Text style={styles.valueText}>{material?.title}</Text>
+                      </View>
+
+                      <TouchableOpacity
+                        style={styles.downloadRow}
+                        onPress={() => downloadPdf(material?.file)}>
+                        <Text style={styles.labelText}>PDF Download</Text>
+                        <Image source={icons.download} style={{ width: 55, height: 55 }} />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </ScrollView>
+              ) : (
+                <View>
+                  <Text style={{ textAlign: 'center', marginTop: 50 }}>
+                    No study materials available
+                  </Text>
+                </View>
+              )}
+            </View>
           </View>
         )}
 
@@ -329,9 +379,7 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
             </View>
 
             <View style={styles.trackCard}>
-              <View style={styles.verticalLine} />
-
-              {steps.map((step) => (
+              {steps.map((step, index) => (
                 <View key={step.id} style={styles.stepRow}>
                   <View style={[styles.sideCol, { alignItems: 'flex-start' }]}>
                     <View style={styles.bubble}>
@@ -349,6 +397,15 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
                         step.status === 'pending' ? styles.dotGray : styles.dotPurple,
                       ]}
                     />
+                    {/* Dynamic connecting line - only show if not the last step */}
+                    {index < steps.length - 1 && (
+                      <View 
+                        style={[
+                          styles.connectingLine,
+                          step.status !== 'pending' ? styles.lineCompleted : styles.linePending
+                        ]} 
+                      />
+                    )}
                   </View>
 
                   <View style={[styles.sideCol, { alignItems: 'flex-end' }]}>
@@ -511,21 +568,17 @@ const styles = StyleSheet.create({
     ...SHADOW,
     position: 'relative',
   },
-  verticalLine: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    left: '53%',
-    width: 5,
-    backgroundColor: '#E5E7EB',
-    transform: [{ translateX: -1.5 }],
-  },
   stepRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     minHeight: 90,
   },
-  centerCol: { width: 36, alignItems: 'center', justifyContent: 'center' },
+  centerCol: { 
+    width: 36, 
+    alignItems: 'center', 
+    justifyContent: 'flex-start',
+    paddingTop: 10,
+  },
   dot: {
     width: 18,
     height: 18,
@@ -537,7 +590,25 @@ const styles = StyleSheet.create({
   dotPurple: { backgroundColor: '#8B5CF6' },
   dotGray: { backgroundColor: '#9CA3AF' },
 
-  sideCol: { flex: 1, justifyContent: 'center' },
+  // New connecting line styles
+  connectingLine: {
+    width: 3,
+    height: 60,
+    marginTop: 5,
+    borderRadius: 1.5,
+  },
+  lineCompleted: {
+    backgroundColor: '#8B5CF6', // Purple for completed
+  },
+  linePending: {
+    backgroundColor: '#E5E7EB',
+    borderStyle: 'dashed',
+    borderWidth: 1,
+    borderColor: '#9CA3AF',
+    // backgroundColor: 'transparent',
+  },
+
+  sideCol: { flex: 1, justifyContent: 'flex-start', paddingTop: 10 },
   sideText: { fontSize: 14, fontWeight: '500', color: '#374151' },
   bubble: {
     backgroundColor: '#F9FAFB',
