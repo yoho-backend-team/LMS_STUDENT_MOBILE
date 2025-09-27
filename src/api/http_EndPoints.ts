@@ -50,7 +50,7 @@ const getEndpoints = (): Endpoints => {
 
     reports: {
       get: '/institutes/reports/users/student',
-      getassement: '/task-project/:courseid/report/:studentid',
+      getassement: '/task-project/:courseId/report/:studentId',
     },
     community: {
       get: `/institutes/community/course/:courseId`,

@@ -89,8 +89,8 @@ class Client {
       getassement: (params: any) =>
         httpClient.get(
           HTTP_END_POINTS.reports.getassement
-            .replace(':studentid', params?.student)
-            .replace(':courseid', params?.course)
+            .replace(':studentId', params?.studentId)
+            .replace(':courseId', params?.courseId)
         ),
     },
     activity: {
