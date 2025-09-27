@@ -10,7 +10,7 @@ import {
   StatusBar,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { FONTS, icons, screens, sidebaricon, SIZES } from '../constants';
+import { COLORS, FONTS, icons, screens, sidebaricon, SIZES } from '../constants';
 import MainLayout from '../layout';
 import { RootState } from '../store/store';
 import { setSelectedTab } from '../store/tab/tabSlice';
@@ -198,7 +198,7 @@ const ServiceDrawerContent: React.FC<any> = ({ navigation }) => {
                 : require('../assets/home/profile.png')
             }
             onError={() => setError(true)}
-            style={{ width: 55, height: 55, borderRadius: 12 }}
+            style={{ width: 55, height: 55, borderRadius: 12, backgroundColor: COLORS.bg_Colour }}
           />
           <View style={{ marginLeft: 12, flex: 1 }}>
             <Text style={{ color: '#333', ...FONTS.h2_01, fontWeight: '600' }}>

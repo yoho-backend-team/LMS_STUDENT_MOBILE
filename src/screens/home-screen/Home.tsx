@@ -239,7 +239,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   headerBox: {
-    backgroundColor: '#BDC2C740',
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 10,
@@ -264,6 +263,7 @@ const styles = StyleSheet.create({
     width: 55,
     height: 55,
     borderRadius: 8,
+    backgroundColor: COLORS.bg_Colour,
   },
   info: {
     flex: 1,

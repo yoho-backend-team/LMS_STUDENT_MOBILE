@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import { View, Image, TouchableOpacity, Text } from 'react-native';
-import { icons, SIZES } from '~/constants';
+import { COLORS, icons, SIZES } from '~/constants';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectNotifications } from '~/features/notification/reducers/selectors';
 import { useEffect } from 'react';
@@ -107,6 +107,7 @@ const Header: React.FC<HeaderProps> = ({ containerStyle }) => {
               height: 50,
               borderRadius: 12,
               resizeMode: 'cover',
+              backgroundColor: COLORS.bg_Colour,
             }}
           />
         </TouchableOpacity>
