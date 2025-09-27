@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Picker } from '@react-native-picker/picker';
 import {
   StatusBar,
   StyleSheet,
@@ -33,8 +34,9 @@ import { getStudentData } from '~/utils/storage';
 import CertificateTemplate from '~/components/profile/CertificateTemplate';
 import * as Print from 'expo-print';
 import { shareAsync } from 'expo-sharing';
+import { COLORS } from '~/constants';
 
-const COLORS = {
+const COLORS1 = {
   black: '#000000',
   white: '#ffffff',
   primary: '#8b5cf6',
@@ -82,6 +84,7 @@ const Profile = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showCertificateModal, setShowCertificateModal] = useState(false);
   const [selectedCertificate, setSelectedCertificate] = useState<any>(null);
+  
 
   const [profileData, setProfileData] = useState({
     first_name: '',
@@ -140,7 +143,7 @@ const Profile = () => {
         setCertificates(response?.data?.data || []);
       }
     } catch (error) {
-      console.log('error in fetchung certificate:', error);
+      console.log('error in fetching certificate:', error);
     }
   };
 
@@ -286,48 +289,58 @@ const Profile = () => {
     return JSON.stringify(profileData) !== JSON.stringify(originalProfileData);
   };
 
-  const handleSubmit = async () => {
-    if (!hasChanges()) {
-      toast.info('Info', 'No changes detected to save.');
-      return;
-    }
+ const handleSubmit = async () => {
+  if (!hasChanges()) {
+    toast.info('Info', 'No changes detected to save.');
+    return;
+  }
 
-    setIsSaving(true);
+  setIsSaving(true);
 
-    try {
-      const dobTimestamp = convertDDMMYYYYToTimestamp(profileData.dateOfBirth);
+  try {
+    const dobTimestamp = convertDDMMYYYYToTimestamp(profileData.dateOfBirth);
 
-      const transformedData = {
-        contact_info: {
-          phone_number: profileData.contact_info.phone_number,
-          alternate_phone_number: profileData.contact_info.alternate_phone_number,
-          address1: profileData.contact_info.address1,
-          address2: profileData.contact_info.address2,
-          pincode: Number.parseInt(profileData.contact_info.pincode) || null,
-        },
-        first_name: profileData.first_name,
-        last_name: profileData.last_name,
-        full_name: `${profileData.first_name} ${profileData.last_name}`,
-        gender: profileData.gender,
-        dob: dobTimestamp,
-      };
+    const transformedData = {
+      contact_info: {
+        phone_number: profileData.contact_info.phone_number,
+        alternate_phone_number: profileData.contact_info.alternate_phone_number,
+        address1: profileData.contact_info.address1,
+        address2: profileData.contact_info.address2,
+        pincode: Number.parseInt(profileData.contact_info.pincode) || null,
+      },
+      first_name: profileData.first_name,
+      last_name: profileData.last_name,
+      full_name: `${profileData.first_name} ${profileData.last_name}`,
+      gender: profileData.gender,
+      dob: dobTimestamp,
+    };
 
-      const response = await updateStudentProfile(transformedData);
+    console.log(transformedData,"td")
 
-      if (response) {
-        dispatch(getStudentProfileThunk({}));
-        toast.success('Success', 'Profile updated successfully!');
-        setIsEditing(false);
-      } else {
-        toast.error('Error', 'Failed to update profile. Please try again.');
-      }
-    } catch (error) {
-      console.error('Failed to update profile:', error);
+    const response = await updateStudentProfile(transformedData);
+
+    console.log(response,"res")
+
+    if (response) {
+      // ✅ update redux again
+      dispatch(getStudentProfileThunk({}));
+
+      // ✅ also sync local state immediately
+      setOriginalProfileData(JSON.parse(JSON.stringify(profileData)));
+
+      toast.success('Success', 'Profile updated successfully!');
+      setIsEditing(false);
+    } else {
       toast.error('Error', 'Failed to update profile. Please try again.');
-    } finally {
-      setIsSaving(false);
     }
-  };
+  } catch (error) {
+    console.error('Failed to update profile:', error);
+    toast.error('Error', 'Failed to update profile. Please try again.');
+  } finally {
+    setIsSaving(false);
+  }
+};
+
 
   const handleCancel = () => {
     if (hasChanges()) {
@@ -401,13 +414,19 @@ const Profile = () => {
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Gender</Text>
-          <TextInput
-            style={styles.input}
-            value={profileData.gender}
-            onChangeText={(text) => handleInputChange('gender', text)}
-            placeholder="Enter gender..."
-            editable={isEditing}
-          />
+<View style={styles.pickerContainer}>
+  <Picker
+    selectedValue={profileData.gender}
+    enabled={isEditing}
+    onValueChange={(itemValue) => handleInputChange('gender', itemValue)}
+    style={styles.picker}
+  >
+    <Picker.Item label="Select Gender" value="" />
+    <Picker.Item label="Male" value="Male" />
+    <Picker.Item label="Female" value="Female" />
+    <Picker.Item label="Other" value="Other" />
+  </Picker>
+</View>
         </View>
 
         <View style={styles.inputGroup}>
@@ -963,7 +982,7 @@ const Profile = () => {
 
   return (
     <>
-      <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
+      <StatusBar backgroundColor={COLORS1.black} barStyle="light-content" />
       <SafeAreaView edges={['top']} style={styles.container}>
         <View style={styles.fixedSection}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
@@ -1171,7 +1190,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: '#ebeff3',
+    // backgroundColor: '#ebeff3',
   },
   fixedSection: {
     padding: 16,
@@ -1183,11 +1202,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: '700',
-    color: COLORS.darkGray,
+    color: COLORS1.darkGray,
     marginBottom: 16,
   },
   card: {
-    backgroundColor: '#ebeff3',
+    backgroundColor: '#fff',
     borderRadius: 16,
     padding: 16,
     shadowOffset: { width: 0, height: 2 },
@@ -1233,6 +1252,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderRadius: 50,
     resizeMode: 'cover',
+    backgroundColor: COLORS.bg_Colour
   },
   avatarContainer: {
     position: 'relative',
@@ -1271,13 +1291,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#7B00FF',
   },
   tabBtnText: {
-    color: COLORS.gray,
+    color: COLORS1.gray,
     fontWeight: '600',
     fontSize: 18,
     textAlign: 'center',
   },
   activeTabText: {
-    color: COLORS.white,
+    color: COLORS1.white,
   },
   sectionTitle: {
     fontSize: 18,
@@ -1314,7 +1334,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 14,
     borderRadius: 12,
-    backgroundColor: COLORS.lightGray,
+    backgroundColor: COLORS1.lightGray,
     marginRight: 8,
     alignItems: 'center',
   },
@@ -1337,10 +1357,10 @@ const styles = StyleSheet.create({
   submitText: {
     fontSize: 14,
     fontWeight: '700',
-    color: COLORS.white,
+    color: COLORS1.white,
   },
   certificateContainer: {
-    backgroundColor: '#ebeff3',
+    backgroundColor: '#fff',
     borderRadius: 16,
     padding: 15,
     marginTop: 10,
@@ -1355,7 +1375,7 @@ const styles = StyleSheet.create({
     height: 180,
     borderRadius: 8,
     resizeMode: 'cover',
-    backgroundColor: '#d1d5db',
+    backgroundColor: COLORS.bg_Colour,
   },
   cardText: {
     marginTop: 6,
@@ -1394,6 +1414,7 @@ const styles = StyleSheet.create({
     borderRadius: 60,
     marginBottom: 20,
     resizeMode: 'cover',
+    backgroundColor: COLORS.bg_Colour
   },
   idCardInfo: {
     alignItems: 'center',
@@ -1438,4 +1459,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 4,
   },
+  pickerContainer: {
+  borderWidth: 1,
+  borderColor: '#ccc',
+  borderRadius: 8,
+  marginBottom: 12,
+},
+picker: {
+  height: 50,
+  width: '100%',
+},
+
 });
