@@ -30,7 +30,7 @@ const UpdatesScreen = () => {
 
   const lastThreeClasses = useMemo(() => {
     return [...classes]
-      .sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime()) // newest → oldest
+      .sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime())
       .slice(0, 3);
   }, [classes]);
 
@@ -92,9 +92,14 @@ const UpdatesScreen = () => {
   return (
     <View style={styles.container}>
       {/* Header */}
+
       <View style={styles.header}>
         <Text style={styles.title}>Updates</Text>
-        <Text style={styles.newMsg}>0 New Messages</Text>
+        {todayClasses.length > 0 && (
+          <Text style={styles.newMsg}>
+            {todayClasses.length} New Message{todayClasses.length !== 1 ? 's' : ''}
+          </Text>
+        )}
       </View>
 
       {/* Tabs */}
@@ -105,7 +110,9 @@ const UpdatesScreen = () => {
               <Text style={styles.activeTabText}>Today</Text>
             </LinearGradient>
           ) : (
-            <Text style={styles.inactiveTab}>Today</Text>
+            <View style={styles.inactiveTabWrapper}>
+              <Text style={styles.inactiveTab}>Today</Text>
+            </View>
           )}
         </TouchableOpacity>
 
@@ -115,15 +122,19 @@ const UpdatesScreen = () => {
               <Text style={styles.activeTabText}>Previous</Text>
             </LinearGradient>
           ) : (
-            <Text style={styles.inactiveTab}>Previous</Text>
+            <View style={styles.inactiveTabWrapper}>
+              <Text style={styles.inactiveTab}>Previous</Text>
+            </View>
           )}
         </TouchableOpacity>
       </View>
 
       {/* Tab Content */}
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        {activeTab === 'today' ? renderTodayClasses() : renderPreviousClasses()}
-      </ScrollView>
+      <View style={styles.tabContentWrapper}>
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+          {activeTab === 'today' ? renderTodayClasses() : renderPreviousClasses()}
+        </ScrollView>
+      </View>
     </View>
   );
 };
@@ -140,8 +151,9 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
     marginBottom: 40,
-    marginTop:10,
+    marginTop: 10,
     flex: 1,
+    minHeight: 300,
   },
   header: {
     flexDirection: 'row',
@@ -178,13 +190,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
   },
-  inactiveTab: {
-    fontSize: 16,
-    color: '#555',
-    fontWeight: '500',
-    paddingVertical: 10,
-    paddingHorizontal: 25,
-  },
+  // inactiveTab: {
+  //   fontSize: 16,
+  //   color: '#555',
+  //   fontWeight: '500',
+  //   paddingVertical: 10,
+  //   paddingHorizontal: 25,
+  // },
   emptyState: {
     flex: 1,
     alignItems: 'center',
@@ -215,6 +227,25 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   row: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
+  tabContentWrapper: {
+    flex: 1,
+    minHeight: 300,
+  },
+  inactiveTabWrapper: {
+    paddingVertical: 10,
+    paddingHorizontal: 25,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ccc', // light gray border
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  inactiveTab: {
+    fontSize: 16,
+    color: '#555',
+    fontWeight: '500',
+    textAlign: 'center',
+  },
 });
 
 export default UpdatesScreen;
