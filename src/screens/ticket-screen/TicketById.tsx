@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
   viewValue: {
     ...FONTS.body4,
     marginTop: 5,
-    backgroundColor: COLORS.shadow_01,
+    backgroundColor: COLORS.bg_Colour,
     padding: 10,
     borderRadius: 8,
     color: COLORS.text_desc,
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 5,
-    backgroundColor: COLORS.shadow_01,
+    backgroundColor: COLORS.bg_Colour,
     padding: 10,
     borderRadius: 8,
     justifyContent: 'space-between',
@@ -141,8 +141,8 @@ const styles = StyleSheet.create({
     fontWeight: 500,
   },
   viewButton: {
-    backgroundColor: COLORS.blue_01,
-    paddingVertical: 6,
+    backgroundColor: COLORS.light_blue,
+    paddingVertical: 3,
     paddingHorizontal: 12,
     borderRadius: 6,
   },

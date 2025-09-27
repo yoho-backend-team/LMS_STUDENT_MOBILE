@@ -484,7 +484,7 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 1,
   },
-  uploadText: { color: '#fff', marginLeft: 6, fontSize: 12 },
+  uploadText: { color: '#fff', fontSize: 12, fontWeight: 500 },
   fileName: { marginTop: 6, fontSize: 14, color: '#374151', marginLeft: 4 },
   taskValueBox: {
     backgroundColor: '#F3F4F6',
@@ -547,9 +547,9 @@ const styles = StyleSheet.create({
   uploadButtonGradient: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 3,
+    paddingVertical: 2,
     paddingHorizontal: 10,
-    borderRadius: 8,
+    borderRadius: 5,
   },
   submitButtonGradient: {
     flex: 1,

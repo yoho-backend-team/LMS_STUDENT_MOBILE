@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { icons } from '~/constants';
+import { COLORS, icons } from '~/constants';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { WebView } from 'react-native-webview';
 import { getFileUrl, getImageUrl } from '~/utils/imageUtils';
@@ -104,7 +104,6 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
       navigation.goBack();
     }
   };
-  console.log('first>>>>', course);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -144,7 +143,10 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
       </View>
 
       {/* Scrollable Content */}
-      <ScrollView style={styles.scroll}>
+      <ScrollView
+        style={styles.scroll}
+        showsHorizontalScrollIndicator={false}
+        showsVerticalScrollIndicator={false}>
         {/* ABOUT TAB */}
         {activeTab === 'about' && (
           <>
@@ -210,9 +212,15 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
 
             {/* Notes Section */}
             <View style={{ flex: 1, borderBottomWidth: 1, borderColor: '#ddd' }}>
-              <Text style={[styles.sectionTitle, { fontSize: 18 }]}>Notes</Text>
+              <Text
+                style={[
+                  styles.sectionTitle,
+                  { fontSize: 18, textDecorationLine: 'underline', color: COLORS.light_green_01 },
+                ]}>
+                Notes
+              </Text>
               {course?.notes?.length ? (
-                <ScrollView>
+                <ScrollView showsVerticalScrollIndicator={false}>
                   {course?.notes?.map((note: any) => (
                     <View key={note.id} style={styles.noteCard}>
                       <View style={styles.textRow}>
@@ -250,9 +258,15 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
 
             {/* Study Materials Section */}
             <View style={{ flex: 1, marginTop: 26 }}>
-              <Text style={[styles.sectionTitle, { fontSize: 18 }]}>Study Materials</Text>
+              <Text
+                style={[
+                  styles.sectionTitle,
+                  { fontSize: 18, textDecorationLine: 'underline', color: COLORS.light_green_01 },
+                ]}>
+                Study Materials
+              </Text>
               {course?.studymaterials?.length ? (
-                <ScrollView>
+                <ScrollView showsVerticalScrollIndicator={false}>
                   {course?.studymaterials?.map((material: any) => (
                     <View key={material.id} style={styles.noteCard}>
                       <View style={styles.textRow}>
@@ -399,11 +413,11 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
                     />
                     {/* Dynamic connecting line - only show if not the last step */}
                     {index < steps.length - 1 && (
-                      <View 
+                      <View
                         style={[
                           styles.connectingLine,
-                          step.status !== 'pending' ? styles.lineCompleted : styles.linePending
-                        ]} 
+                          step.status !== 'pending' ? styles.lineCompleted : styles.linePending,
+                        ]}
                       />
                     )}
                   </View>
@@ -425,10 +439,10 @@ const CourseById: React.FC<Props> = ({ route, navigation }) => {
 export default CourseById;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#ebeff3' },
+  container: { flex: 1, backgroundColor: '#fff' },
 
   header: {
-    backgroundColor: '#ebeff3',
+    backgroundColor: '#fff',
     paddingHorizontal: 16,
     paddingBottom: 8,
   },
@@ -449,27 +463,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 8,
     borderRadius: 8,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.bg_Colour,
   },
   activeTab: { backgroundColor: '#7B00FF' },
-  tabText: { color: '#374151', fontSize: 14 },
+  tabText: { color: COLORS.black, fontSize: 14, fontWeight: 'bold' },
   activeTabText: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
 
   scroll: { flex: 1, padding: 16 },
 
   card: {
-    backgroundColor: '#ebeff3',
+    backgroundColor: '#fff',
     borderRadius: 16,
     padding: 16,
     marginBottom: 18,
     ...SHADOW,
   },
   card1: {
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.bg_Colour,
     borderRadius: 8,
     padding: 10,
   },
-  image: { width: '100%', height: 140, borderRadius: 12, marginBottom: 12 },
+  image: {
+    width: '100%',
+    height: 140,
+    borderRadius: 12,
+    marginBottom: 12,
+    backgroundColor: COLORS.bg_Colour,
+  },
   title: { fontSize: 20, fontWeight: 'bold', marginBottom: 8, color: '#2A2A2A' },
   description: { fontSize: 16, color: '#716F6F', marginBottom: 16 },
 
@@ -482,7 +502,7 @@ const styles = StyleSheet.create({
   footerText: { marginLeft: 4, fontSize: 12, color: '#716F6F', fontWeight: 500 },
 
   infoCard: {
-    backgroundColor: '#ebeff3',
+    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 12,
   },
@@ -495,6 +515,8 @@ const styles = StyleSheet.create({
     padding: 16,
     ...SHADOW,
     marginBottom: 12,
+    marginHorizontal: 5,
+    marginTop: 2,
   },
   textRow: {
     flexDirection: 'row',
@@ -529,9 +551,9 @@ const styles = StyleSheet.create({
   taskValue: { fontSize: 16, color: '#716F6F' },
   statusButton: {
     marginLeft: 8,
-    paddingVertical: 4,
+    paddingVertical: 6,
     paddingHorizontal: 12,
-    borderRadius: 8,
+    borderRadius: 6,
   },
   completed: { backgroundColor: '#4ADE80' },
   pending: { backgroundColor: '#9CA3AF' },
@@ -540,7 +562,7 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 22, fontWeight: 'bold', marginBottom: 12 },
 
   videoCard: {
-    height: 200,
+    height: 250,
     width: '100%',
     borderRadius: 12,
     overflow: 'hidden',
@@ -561,7 +583,7 @@ const styles = StyleSheet.create({
   },
 
   trackCard: {
-    backgroundColor: '#ebeff3',
+    backgroundColor: '#fff',
     borderRadius: 16,
     paddingVertical: 18,
     paddingHorizontal: 10,
@@ -573,9 +595,9 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     minHeight: 90,
   },
-  centerCol: { 
-    width: 36, 
-    alignItems: 'center', 
+  centerCol: {
+    width: 36,
+    alignItems: 'center',
     justifyContent: 'flex-start',
     paddingTop: 10,
   },
@@ -611,10 +633,14 @@ const styles = StyleSheet.create({
   sideCol: { flex: 1, justifyContent: 'flex-start', paddingTop: 10 },
   sideText: { fontSize: 14, fontWeight: '500', color: '#374151' },
   bubble: {
-    backgroundColor: '#F9FAFB',
-    borderRadius: 40,
-    padding: 5,
-    ...SHADOW,
+    borderRadius: 8,
+    paddingHorizontal: 10,
   },
-  bubbleIcon: { width: 35, height: 35, borderRadius: 50 },
+  bubbleIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    backgroundColor: COLORS.bg_Colour,
+    marginTop: -15,
+  },
 });

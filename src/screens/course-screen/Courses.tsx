@@ -38,7 +38,7 @@ const Courses = () => {
       dispatch(getStudentProfileThunk({}));
       setStudent(data);
     })();
-  }, []);
+  }, [dispatch]);
 
   const fetchData = useCallback(async () => {
     if (student) {
@@ -55,7 +55,7 @@ const Courses = () => {
         console.error('Course fetch error:', error);
       }
     }
-  }, [dispatch, student, profileDetails]);
+  }, [student, profileDetails]);
 
   useEffect(() => {
     if (student) {
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   card: {
-    backgroundColor: '#ebeff3',
+    backgroundColor: '#fff',
     borderRadius: 16,
     shadowColor: '#000',
     shadowOpacity: 0.1,
@@ -165,6 +165,7 @@ const styles = StyleSheet.create({
     height: 160,
     borderRadius: 12,
     marginBottom: 12,
+    backgroundColor: COLORS.bg_Colour,
   },
   title: {
     fontSize: 16,

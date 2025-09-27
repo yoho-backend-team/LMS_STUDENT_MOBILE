@@ -10,6 +10,7 @@ import {
   Image,
   Modal,
   RefreshControl,
+  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -156,7 +157,7 @@ const Notifications = () => {
             </Text>
           ) : (
             currentNotifications?.map((item: any) => (
-              <Pressable
+              <TouchableOpacity
                 key={item.uuid}
                 onPress={() => handleNotificationPress(item)}
                 style={[styles.card, styles.neumorphicCard]}>
@@ -180,7 +181,7 @@ const Notifications = () => {
                     {formatMessageDate(item?.createdAt)}
                   </Text>
                 </View>
-              </Pressable>
+              </TouchableOpacity>
             ))
           )}
         </ScrollView>
@@ -279,7 +280,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 12,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: COLORS.bg_Colour,
     minWidth: 100,
     justifyContent: 'center',
     alignItems: 'center',

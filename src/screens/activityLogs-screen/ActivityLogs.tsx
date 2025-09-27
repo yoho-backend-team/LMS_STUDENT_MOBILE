@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 10,
-    backgroundColor: COLORS.bg_Colour,
+    backgroundColor: COLORS.white,
   },
   container1: { flex: 1, paddingHorizontal: 15 },
   headerRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
   dateInput: {
     borderWidth: 1,
     borderColor: COLORS.white,
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.bg_Colour,
     borderRadius: 8,
     padding: 8,
     paddingVertical: 10,
@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
   },
   resetBtn: {
     padding: 5,
-    backgroundColor: COLORS.text_desc,
+    backgroundColor: COLORS.shadow_01,
     borderRadius: 50,
   },
   logContainer: { marginBottom: 20 },
@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   message: { fontWeight: 'bold', marginBottom: 8, color: COLORS.text_title },
-  email: { fontSize: 12, color: COLORS.green_text, marginBottom: 5 },
+  email: { fontSize: 12, color: COLORS.light_green, marginBottom: 5, fontWeight: 500 },
   time: { fontSize: 10, color: COLORS.text_desc, textAlign: 'right' },
   pagination: {
     flexDirection: 'row',

@@ -130,7 +130,9 @@ const CreateTicket = () => {
           <Text style={styles.title}>Create Ticket</Text>
         </View>
 
-        <ScrollView contentContainerStyle={styles.formContainer}>
+        <ScrollView
+          contentContainerStyle={styles.formContainer}
+          showsVerticalScrollIndicator={false}>
           <Text style={styles.label}>Select Your Problem*</Text>
           <View style={styles.dropdownContainer}>
             <Picker

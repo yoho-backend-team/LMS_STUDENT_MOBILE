@@ -15,6 +15,7 @@ import { selectPlacementData } from '~/features/placements/reducer/selectors';
 import { getStudentData } from '~/utils/storage';
 import dayjs from 'dayjs';
 import { LinearGradient } from 'expo-linear-gradient';
+import { COLORS } from '~/constants';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -65,16 +66,13 @@ const Placement = ({ navigation }: any) => {
 
         {/* Conditional Button */}
         {isExpired ? (
-          <View style={[styles.viewBtn, { backgroundColor: '#ccc' }]}>
-            <Text style={styles.viewText}>Expired</Text>
+          <View style={[styles.viewBtn, { backgroundColor: COLORS.bg_Colour }]}>
+            <Text style={[styles.viewText, { color: COLORS.text_desc }]}>Expired</Text>
           </View>
         ) : (
           <TouchableOpacity
             style={styles.viewBtn}
-            onPress={() =>
-              navigation.navigate('PlacementViewScreen', { placement: item })
-            }
-          >
+            onPress={() => navigation.navigate('PlacementViewScreen', { placement: item })}>
             <Text style={styles.viewText}>View</Text>
           </TouchableOpacity>
         )}
@@ -93,7 +91,7 @@ const Placement = ({ navigation }: any) => {
   // handle refresh
   const onRefresh = async () => {
     setRefreshing(true);
-    await fetchPlacements();
+    fetchPlacements();
     setRefreshing(false);
   };
 
@@ -132,13 +130,11 @@ const Placement = ({ navigation }: any) => {
           colors={currentPage === 1 ? ['#E0E0E0', '#E0E0E0'] : ['#7B00FF', '#B200FF']}
           start={{ x: 0.134, y: 0.021 }}
           end={{ x: 1, y: 1 }}
-          style={styles.pageGradient}
-        >
+          style={styles.pageGradient}>
           <TouchableOpacity
             onPress={loadPrevPage}
             disabled={currentPage === 1}
-            style={styles.buttonInner}
-          >
+            style={styles.buttonInner}>
             <Text style={styles.buttonText}>Previous</Text>
           </TouchableOpacity>
         </LinearGradient>
@@ -151,13 +147,11 @@ const Placement = ({ navigation }: any) => {
           colors={currentPage === totalPages ? ['#E0E0E0', '#E0E0E0'] : ['#7B00FF', '#B200FF']}
           start={{ x: 0.134, y: 0.021 }}
           end={{ x: 1, y: 1 }}
-          style={styles.pageGradient}
-        >
+          style={styles.pageGradient}>
           <TouchableOpacity
             onPress={loadNextPage}
             disabled={currentPage === totalPages}
-            style={styles.buttonInner}
-          >
+            style={styles.buttonInner}>
             <Text style={styles.buttonText}>Next</Text>
           </TouchableOpacity>
         </LinearGradient>
@@ -230,7 +224,7 @@ const styles = StyleSheet.create({
   },
   viewText: {
     color: '#fff',
-    fontWeight: '900',
+    fontWeight: 700,
   },
   backIcon: {
     width: 50,

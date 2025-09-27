@@ -9,6 +9,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { COLORS } from '~/constants';
 
 interface SessionExpiredModalProps {
   visible: boolean;
@@ -78,7 +79,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   button: {
-    backgroundColor: '#06b6d4',
+    backgroundColor: COLORS.purple_01,
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,

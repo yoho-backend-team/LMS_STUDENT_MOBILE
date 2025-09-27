@@ -61,7 +61,7 @@ const PlacementViewScreen = ({ route, navigation }: any) => {
 
           {/* Interview Details */}
           <View style={styles.card}>
-            <Text className="mb-2 text-base font-semibold">Interview Details</Text>
+            <Text style={styles.sectionTitle}>Interview Details</Text>
             <Row label="Interview Date" value={formatDate(placement?.schedule?.interviewDate)} />
             <Row label="Venue" value={placement?.schedule?.venue} />
             <Row label="Address" value={placement?.schedule?.address} />

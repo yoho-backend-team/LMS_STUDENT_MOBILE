@@ -130,7 +130,7 @@ const FAQ = () => {
           <View style={[styles.searchBox, styles.insetBox]}>
             <TextInput
               placeholder="Search"
-              placeholderTextColor="#98A2B3"
+              placeholderTextColor={COLORS.text_desc}
               style={styles.searchInput}
               value={search}
               onChangeText={setSearch}
@@ -153,7 +153,7 @@ const FAQ = () => {
                       <View style={{ flex: 1 }}>
                         <Text style={styles.cardText}>{item.title}</Text>
                       </View>
-                      <TouchableOpacity activeOpacity={0.8} onPress={() => toggleExpand(index)}>
+                      <TouchableOpacity onPress={() => toggleExpand(index)}>
                         <PlusMinusIcon open={open} />
                       </TouchableOpacity>
                     </View>
@@ -244,8 +244,8 @@ const commonLightRim = {
 };
 
 const styles = StyleSheet.create<any>({
-  background: { flex: 1, backgroundColor: UI.bg },
-  container: { flex: 1, paddingHorizontal: 16, paddingTop: 20 },
+  background: { flex: 1, backgroundColor: COLORS.white },
+  container: { flex: 1, paddingHorizontal: 16, paddingTop: 10 },
 
   backbutton: {
     width: 48,
@@ -302,7 +302,7 @@ const styles = StyleSheet.create<any>({
     paddingVertical: 3,
     marginBottom: 16,
   },
-  searchInput: { fontSize: 14, color: UI.text },
+  searchInput: { fontSize: 14, color: COLORS.text_desc, fontWeight: 500 },
 
   /* Row */
   card: {
@@ -325,7 +325,7 @@ const styles = StyleSheet.create<any>({
     marginBottom: 14,
     backgroundColor: UI.surface,
   },
-  answerText: { fontSize: 12, color: UI.sub },
+  answerText: { fontSize: 12, color: COLORS.text_desc, fontWeight: 500 },
 
   /* Plus/Minus */
   pmWrap: {

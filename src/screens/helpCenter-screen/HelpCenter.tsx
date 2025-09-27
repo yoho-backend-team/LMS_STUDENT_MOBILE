@@ -156,9 +156,9 @@ const HelpCenter = () => {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
-      <View>
+      <View style={{ backgroundColor: COLORS.white }}>
         <View
           style={{
             flexDirection: 'row',
@@ -197,14 +197,18 @@ const HelpCenter = () => {
                     start={{ x: 0.134, y: 0.021 }}
                     end={{ x: 1, y: 1 }}
                     style={styles.activeBoxGradient}>
-                    <Text style={[styles.boxText, styles.activeBoxText]}>{key}</Text>
+                    <Text style={[styles.boxText, styles.activeBoxText]}>
+                      {key.substring(0, 18)}
+                    </Text>
                     <View style={[styles.countBadge, styles.activeBadge]}>
                       <Text style={[styles.countText, styles.activeCountText]}>{count}</Text>
                     </View>
                   </LinearGradient>
                 ) : (
                   <View style={[styles.box, styles.inactiveBox]}>
-                    <Text style={[styles.boxText, styles.inactiveBoxText]}>{key}</Text>
+                    <Text style={[styles.boxText, styles.inactiveBoxText]}>
+                      {key.substring(0, 18)}
+                    </Text>
                     <View style={[styles.countBadge, styles.inactiveBadge]}>
                       <Text style={[styles.countText, styles.inactiveCountText]}>{count}</Text>
                     </View>
@@ -291,7 +295,7 @@ const HelpCenter = () => {
 export default HelpCenter;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 15, backgroundColor: '#F8FAFC' },
+  container: { flex: 1, padding: 15, backgroundColor: '#fff' },
   backbutton: {
     width: 48,
     height: 48,
@@ -318,7 +322,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   inactiveBox: {
-    backgroundColor: '#EBEFF3',
+    backgroundColor: COLORS.bg_Colour,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -340,18 +344,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
   },
   activeBadge: { backgroundColor: '#FFF' },
-  inactiveBadge: { backgroundColor: '#EBEFF3' },
+  inactiveBadge: { backgroundColor: COLORS.text_desc },
   countText: { fontSize: 12, fontWeight: 'bold' },
   activeCountText: { color: '#B200FF' },
-  inactiveCountText: { color: '#333' },
-  contentArea: { flex: 1, padding: 15 },
+  inactiveCountText: { color: '#fff' },
+  contentArea: { flex: 1, padding: 15, backgroundColor: '#fff' },
   searchContainer: { paddingHorizontal: 15, marginVertical: 10 },
   searchInput: {
-    borderWidth: 1,
+    borderWidth: 0.5,
     borderColor: '#ccc',
     borderRadius: 10,
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 14,
     fontSize: 16,
     backgroundColor: '#fff',
   },
