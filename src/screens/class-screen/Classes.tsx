@@ -10,7 +10,7 @@ function Classes() {
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
       <SafeAreaView edges={['top']} style={styles.container}>
-        <Header />
+        {/* <Header /> */}
 
         {/* code inside the view section*/}
         <View style={{ flex: 1 }}>

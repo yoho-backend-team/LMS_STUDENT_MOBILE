@@ -50,7 +50,7 @@ const Communities = () => {
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
       <SafeAreaView edges={['top']} style={styles.container}>
-        <Header />
+        {/* <Header /> */}
 
         <View style={styles.content}>
           <Text style={styles.header}>Community</Text>

@@ -73,7 +73,7 @@ const Courses = () => {
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
       <SafeAreaView edges={['top']} style={styles.container}>
-        <Header />
+        {/* <Header /> */}
 
         <ScrollView
           style={styles.scrollContainer}

@@ -26,6 +26,7 @@ import {
 } from '../screens';
 import { setSelectedTab } from '../store/tab/tabSlice';
 import { useNavigation } from '@react-navigation/native';
+import Header from '~/components/shared/Header';
 
 type TabButtonProps = {
   label: string;
@@ -196,7 +197,9 @@ const MainLayout: React.FC = () => {
         style={{ flex: 1 }}
         keyboardVerticalOffset={Platform.OS === 'ios' ? -50 : -50}>
         <View style={{ flex: 1, backgroundColor: COLORS.white }}>
-          {/* PagerView for smooth scrolling */}
+          <Header
+            containerStyle={{ backgroundColor: COLORS.white, marginTop: 10, marginBottom: 5 }}
+          />
           <PagerView
             ref={pagerRef}
             style={{ flex: 1 }}

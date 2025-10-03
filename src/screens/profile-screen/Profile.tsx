@@ -84,7 +84,6 @@ const Profile = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showCertificateModal, setShowCertificateModal] = useState(false);
   const [selectedCertificate, setSelectedCertificate] = useState<any>(null);
-  
 
   const [profileData, setProfileData] = useState({
     first_name: '',
@@ -289,58 +288,57 @@ const Profile = () => {
     return JSON.stringify(profileData) !== JSON.stringify(originalProfileData);
   };
 
- const handleSubmit = async () => {
-  if (!hasChanges()) {
-    toast.info('Info', 'No changes detected to save.');
-    return;
-  }
-
-  setIsSaving(true);
-
-  try {
-    const dobTimestamp = convertDDMMYYYYToTimestamp(profileData.dateOfBirth);
-
-    const transformedData = {
-      contact_info: {
-        phone_number: profileData.contact_info.phone_number,
-        alternate_phone_number: profileData.contact_info.alternate_phone_number,
-        address1: profileData.contact_info.address1,
-        address2: profileData.contact_info.address2,
-        pincode: Number.parseInt(profileData.contact_info.pincode) || null,
-      },
-      first_name: profileData.first_name,
-      last_name: profileData.last_name,
-      full_name: `${profileData.first_name} ${profileData.last_name}`,
-      gender: profileData.gender,
-      dob: dobTimestamp,
-    };
-
-    console.log(transformedData,"td")
-
-    const response = await updateStudentProfile(transformedData);
-
-    console.log(response,"res")
-
-    if (response) {
-      // ✅ update redux again
-      dispatch(getStudentProfileThunk({}));
-
-      // ✅ also sync local state immediately
-      setOriginalProfileData(JSON.parse(JSON.stringify(profileData)));
-
-      toast.success('Success', 'Profile updated successfully!');
-      setIsEditing(false);
-    } else {
-      toast.error('Error', 'Failed to update profile. Please try again.');
+  const handleSubmit = async () => {
+    if (!hasChanges()) {
+      toast.info('Info', 'No changes detected to save.');
+      return;
     }
-  } catch (error) {
-    console.error('Failed to update profile:', error);
-    toast.error('Error', 'Failed to update profile. Please try again.');
-  } finally {
-    setIsSaving(false);
-  }
-};
 
+    setIsSaving(true);
+
+    try {
+      const dobTimestamp = convertDDMMYYYYToTimestamp(profileData.dateOfBirth);
+
+      const transformedData = {
+        contact_info: {
+          phone_number: profileData.contact_info.phone_number,
+          alternate_phone_number: profileData.contact_info.alternate_phone_number,
+          address1: profileData.contact_info.address1,
+          address2: profileData.contact_info.address2,
+          pincode: Number.parseInt(profileData.contact_info.pincode) || null,
+        },
+        first_name: profileData.first_name,
+        last_name: profileData.last_name,
+        full_name: `${profileData.first_name} ${profileData.last_name}`,
+        gender: profileData.gender,
+        dob: dobTimestamp,
+      };
+
+      console.log(transformedData, 'td');
+
+      const response = await updateStudentProfile(transformedData);
+
+      console.log(response, 'res');
+
+      if (response) {
+        // ✅ update redux again
+        dispatch(getStudentProfileThunk({}));
+
+        // ✅ also sync local state immediately
+        setOriginalProfileData(JSON.parse(JSON.stringify(profileData)));
+
+        toast.success('Success', 'Profile updated successfully!');
+        setIsEditing(false);
+      } else {
+        toast.error('Error', 'Failed to update profile. Please try again.');
+      }
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      toast.error('Error', 'Failed to update profile. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const handleCancel = () => {
     if (hasChanges()) {
@@ -374,6 +372,8 @@ const Profile = () => {
     }
     setIsEditing(!isEditing);
   };
+  console.log('profile', profileData);
+  console.log('profile details', profileDetails);
 
   const renderProfileContent = () => (
     <>
@@ -414,19 +414,18 @@ const Profile = () => {
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Gender</Text>
-<View style={styles.pickerContainer}>
-  <Picker
-    selectedValue={profileData.gender}
-    enabled={isEditing}
-    onValueChange={(itemValue) => handleInputChange('gender', itemValue)}
-    style={styles.picker}
-  >
-    <Picker.Item label="Select Gender" value="" />
-    <Picker.Item label="Male" value="Male" />
-    <Picker.Item label="Female" value="Female" />
-    <Picker.Item label="Other" value="Other" />
-  </Picker>
-</View>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={profileData.gender}
+              enabled={isEditing}
+              onValueChange={(itemValue) => handleInputChange('gender', itemValue)}
+              style={styles.picker}>
+              <Picker.Item label="Select Gender" value="" />
+              <Picker.Item label="Male" value="Male" />
+              <Picker.Item label="Female" value="Female" />
+              <Picker.Item label="Other" value="Other" />
+            </Picker>
+          </View>
         </View>
 
         <View style={styles.inputGroup}>
@@ -1252,7 +1251,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderRadius: 50,
     resizeMode: 'cover',
-    backgroundColor: COLORS.bg_Colour
+    backgroundColor: COLORS.bg_Colour,
   },
   avatarContainer: {
     position: 'relative',
@@ -1414,7 +1413,7 @@ const styles = StyleSheet.create({
     borderRadius: 60,
     marginBottom: 20,
     resizeMode: 'cover',
-    backgroundColor: COLORS.bg_Colour
+    backgroundColor: COLORS.bg_Colour,
   },
   idCardInfo: {
     alignItems: 'center',
@@ -1460,14 +1459,13 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   pickerContainer: {
-  borderWidth: 1,
-  borderColor: '#ccc',
-  borderRadius: 8,
-  marginBottom: 12,
-},
-picker: {
-  height: 50,
-  width: '100%',
-},
-
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  picker: {
+    height: 50,
+    width: '100%',
+  },
 });
