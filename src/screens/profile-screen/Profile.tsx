@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Picker } from '@react-native-picker/picker';
 import {
   StatusBar,
   StyleSheet,
@@ -12,6 +13,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   Platform,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Pencil, Camera } from 'lucide-react-native';
@@ -20,12 +22,21 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getStudentProfileThunk } from '~/features/Profile/reducer/thunks';
 import { selectProfile } from '~/features/Profile/reducer/selectors';
 import { getImageUrl } from '~/utils/imageUtils';
-import { updateStudentProfile, uploadProfileImage } from '~/features/Profile/services';
+import {
+  getCertificate,
+  updateStudentProfile,
+  uploadProfileImage,
+} from '~/features/Profile/services';
 import * as ImagePicker from 'expo-image-picker';
 import toast from '~/utils/toasts';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { getStudentData } from '~/utils/storage';
+import CertificateTemplate from '~/components/profile/CertificateTemplate';
+import * as Print from 'expo-print';
+import { shareAsync } from 'expo-sharing';
+import { COLORS } from '~/constants';
 
-const COLORS = {
+const COLORS1 = {
   black: '#000000',
   white: '#ffffff',
   primary: '#8b5cf6',
@@ -71,6 +82,9 @@ const Profile = () => {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showCertificateModal, setShowCertificateModal] = useState(false);
+  const [selectedCertificate, setSelectedCertificate] = useState<any>(null);
+  
 
   const [profileData, setProfileData] = useState({
     first_name: '',
@@ -111,34 +125,60 @@ const Profile = () => {
 
   const dispatch = useDispatch<any>();
   const profileDetails = useSelector(selectProfile);
+  const [studentData, setstudentData] = useState<any>('');
+  const certificateRef = useRef<View>(null);
+  const [cerificates, setCertificates] = useState<any>('');
+
+  const getStudent = async () => {
+    const data = await getStudentData();
+    if (data) {
+      setstudentData(data);
+    }
+  };
+
+  const fetchCertificate = async () => {
+    try {
+      const response = await getCertificate({ studentId: studentData?._id });
+      if (response) {
+        setCertificates(response?.data?.data || []);
+      }
+    } catch (error) {
+      console.log('error in fetching certificate:', error);
+    }
+  };
 
   useEffect(() => {
+    fetchCertificate();
+  }, [studentData?._id]);
+
+  useEffect(() => {
+    getStudent();
     dispatch(getStudentProfileThunk({}));
   }, [dispatch]);
 
   useEffect(() => {
-    if (profileDetails && profileDetails.data) {
-      const data = profileDetails.data;
-      const userDetail = data.userDetail || {};
-      const course = userDetail.course || {};
+    if (profileDetails && profileDetails?.data) {
+      const data = profileDetails?.data;
+      const userDetail = data?.userDetail || {};
+      const course = userDetail?.course || {};
 
       const newProfileData = {
-        first_name: data.first_name || '',
-        last_name: data.last_name || '',
-        email: data.email || '',
-        gender: data.gender || '',
-        dateOfBirth: data.dob ? formatDateToDDMMYYYY(data.dob) : '',
+        first_name: data?.first_name || '',
+        last_name: data?.last_name || '',
+        email: data?.email || '',
+        gender: data?.gender || '',
+        dateOfBirth: data.dob ? formatDateToDDMMYYYY(data?.dob) : '',
         contact_info: {
-          phone_number: data.contact_info?.phone_number || '',
-          alternate_phone_number: data.contact_info?.alternate_phone_number || '',
-          address1: data.contact_info?.address1 || '',
-          address2: data.contact_info?.address2 || '',
-          pincode: data.contact_info?.pincode?.toString() || '',
+          phone_number: data?.contact_info?.phone_number || '',
+          alternate_phone_number: data?.contact_info?.alternate_phone_number || '',
+          address1: data?.contact_info?.address1 || '',
+          address2: data?.contact_info?.address2 || '',
+          pincode: data?.contact_info?.pincode?.toString() || '',
         },
-        course: course.course_name || '',
-        batch: 'Batch 2024-25',
-        rollNumber: data.roll_no?.toString() || '',
-        studentID: userDetail.studentId || '',
+        course: course?.course_name || '',
+        batch: userDetail?.institute_id?.batch?.batch_name,
+        rollNumber: data?.roll_no?.toString() || '',
+        studentID: userDetail?.studentId || '',
       };
 
       setProfileData(newProfileData);
@@ -196,8 +236,6 @@ const Profile = () => {
           image: response?.data?.data?.file,
         });
 
-        console.log(updateResponse, 'profile update response');
-
         if (updateResponse) {
           setIsEditing(false);
           dispatch(getStudentProfileThunk({}));
@@ -251,48 +289,58 @@ const Profile = () => {
     return JSON.stringify(profileData) !== JSON.stringify(originalProfileData);
   };
 
-  const handleSubmit = async () => {
-    if (!hasChanges()) {
-      toast.info('Info', 'No changes detected to save.');
-      return;
-    }
+ const handleSubmit = async () => {
+  if (!hasChanges()) {
+    toast.info('Info', 'No changes detected to save.');
+    return;
+  }
 
-    setIsSaving(true);
+  setIsSaving(true);
 
-    try {
-      const dobTimestamp = convertDDMMYYYYToTimestamp(profileData.dateOfBirth);
+  try {
+    const dobTimestamp = convertDDMMYYYYToTimestamp(profileData.dateOfBirth);
 
-      const transformedData = {
-        contact_info: {
-          phone_number: profileData.contact_info.phone_number,
-          alternate_phone_number: profileData.contact_info.alternate_phone_number,
-          address1: profileData.contact_info.address1,
-          address2: profileData.contact_info.address2,
-          pincode: Number.parseInt(profileData.contact_info.pincode) || null,
-        },
-        first_name: profileData.first_name,
-        last_name: profileData.last_name,
-        full_name: `${profileData.first_name} ${profileData.last_name}`,
-        gender: profileData.gender,
-        dob: dobTimestamp,
-      };
+    const transformedData = {
+      contact_info: {
+        phone_number: profileData.contact_info.phone_number,
+        alternate_phone_number: profileData.contact_info.alternate_phone_number,
+        address1: profileData.contact_info.address1,
+        address2: profileData.contact_info.address2,
+        pincode: Number.parseInt(profileData.contact_info.pincode) || null,
+      },
+      first_name: profileData.first_name,
+      last_name: profileData.last_name,
+      full_name: `${profileData.first_name} ${profileData.last_name}`,
+      gender: profileData.gender,
+      dob: dobTimestamp,
+    };
 
-      const response = await updateStudentProfile(transformedData);
+    console.log(transformedData,"td")
 
-      if (response) {
-        dispatch(getStudentProfileThunk({}));
-        toast.success('Success', 'Profile updated successfully!');
-        setIsEditing(false);
-      } else {
-        toast.error('Error', 'Failed to update profile. Please try again.');
-      }
-    } catch (error) {
-      console.error('Failed to update profile:', error);
+    const response = await updateStudentProfile(transformedData);
+
+    console.log(response,"res")
+
+    if (response) {
+      // ✅ update redux again
+      dispatch(getStudentProfileThunk({}));
+
+      // ✅ also sync local state immediately
+      setOriginalProfileData(JSON.parse(JSON.stringify(profileData)));
+
+      toast.success('Success', 'Profile updated successfully!');
+      setIsEditing(false);
+    } else {
       toast.error('Error', 'Failed to update profile. Please try again.');
-    } finally {
-      setIsSaving(false);
     }
-  };
+  } catch (error) {
+    console.error('Failed to update profile:', error);
+    toast.error('Error', 'Failed to update profile. Please try again.');
+  } finally {
+    setIsSaving(false);
+  }
+};
+
 
   const handleCancel = () => {
     if (hasChanges()) {
@@ -366,13 +414,19 @@ const Profile = () => {
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Gender</Text>
-          <TextInput
-            style={styles.input}
-            value={profileData.gender}
-            onChangeText={(text) => handleInputChange('gender', text)}
-            placeholder="Enter gender..."
-            editable={isEditing}
-          />
+<View style={styles.pickerContainer}>
+  <Picker
+    selectedValue={profileData.gender}
+    enabled={isEditing}
+    onValueChange={(itemValue) => handleInputChange('gender', itemValue)}
+    style={styles.picker}
+  >
+    <Picker.Item label="Select Gender" value="" />
+    <Picker.Item label="Male" value="Male" />
+    <Picker.Item label="Female" value="Female" />
+    <Picker.Item label="Other" value="Other" />
+  </Picker>
+</View>
         </View>
 
         <View style={styles.inputGroup}>
@@ -465,7 +519,7 @@ const Profile = () => {
           <TextInput
             style={[styles.input, { backgroundColor: '#e5e5e5' }]}
             value={profileData.batch}
-            placeholder="Batch"
+            placeholder="Batch name"
             editable={false}
           />
         </View>
@@ -521,49 +575,350 @@ const Profile = () => {
     </>
   );
 
+  const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate</title>
+    <link href="https://fonts.googleapis.com/css2?family=Italianno&family=Montserrat:wght@400;600;700&family=Pirata+One&family=Inter:ital@1&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .certificate-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .certificate-content {
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .certificate-title {
+            font-family: 'PirataOne-Regular', 'Pirata One', cursive;
+            font-size: 32px;
+            color: #716F6F;
+            margin-bottom: 10px;
+        }
+        
+        .completion-subtitle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        
+        .arrow {
+            width: 40px;
+            height: 10px;
+            background-color: #ddd; /* Placeholder for actual arrow image */
+            margin: 0 10px;
+        }
+        
+        .completion-text {
+            color: #716F6F;
+            font-weight: 400;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 2px;
+        }
+        
+        .certify-text {
+            color: #716F6F;
+            font-size: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .recipient-name-container {
+            margin: 15px 0;
+        }
+        
+        .recipient-name {
+            font-family: 'Italianno', cursive;
+            font-size: 32px;
+            color: #2A2A2A;
+        }
+        
+        .underline {
+            width: 200px;
+            height: 1px;
+            background-color: #716F6F;
+            margin: 5px auto 0;
+        }
+        
+        .completion-details {
+            margin: 15px 0;
+        }
+        
+        .completion-text-main {
+            color: #716F6F;
+            font-size: 8px;
+            margin-bottom: 5px;
+        }
+        
+        .course-badge {
+            position: relative;
+            margin: 10px 0;
+            display: inline-block;
+        }
+        
+        .course-bg {
+            width: 80px;
+            height: 40px;
+            background-color: #eee; /* Placeholder for actual background image */
+        }
+        
+        .course-title {
+            position: absolute;
+            left: 12px;
+            top: -1px;
+            color: #2A2A2A;
+            font-weight: 600;
+            font-size: 6px;
+            text-align: center;
+            width: calc(100% - 24px);
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .duration-text {
+            color: #716F6F;
+            font-size: 8px;
+            margin-top: 10px;
+        }
+        
+        .duration-text1 {
+            color: #2A2A2A;
+            font-weight: 700;
+        }
+        
+        .signature-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 300px;
+            margin: 20px auto 0;
+        }
+        
+        .signature-left, .signature-right {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .signature-name {
+            color: #FF3131;
+            font-style: italic;
+            font-size: 10px;
+            margin-bottom: 2px;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .signature-line {
+            width: 60px;
+            height: 1px;
+            background-color: #d1d5db;
+            margin: 4px auto;
+        }
+        
+        .signature-title, .instructor-title {
+            color: #2A2A2A;
+            font-weight: 700;
+            font-size: 8px;
+        }
+        
+        @media (max-width: 480px) {
+            .certificate-content {
+                padding: 20px;
+            }
+            
+            .certificate-title {
+                font-size: 28px;
+            }
+            
+            .recipient-name {
+                font-size: 28px;
+            }
+            
+            .signature-section {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="certificate-container">
+        <div class="certificate-content">
+            <h1 class="certificate-title">Certificate</h1>
+            
+            <div class="completion-subtitle">
+                <div class="arrow"></div>
+                <p class="completion-text">OF COMPLETION</p>
+                <div class="arrow"></div>
+            </div>
+            
+            <p class="certify-text">This is to Certify that</p>
+            
+            <div class="recipient-name-container">
+                <h2 class="recipient-name" id="student-name">${profileData?.first_name} ${profileData?.last_name}</h2>
+                <div class="underline"></div>
+            </div>
+            
+            <div class="completion-details">
+                <p class="completion-text-main">has Successfully Completed that</p>
+                <p class="completion-text-main">Course</p>
+                
+                <div class="course-badge">
+                    <div class="course-bg"></div>
+                    <p class="course-title" id="course-title">${selectedCertificate?.certificate_name}</p>
+                </div>
+                
+                <p class="duration-text">
+                    during the period of
+                    <span class="duration-text1">July 2025 - December 2025</span>
+                </p>
+            </div>
+            
+            <div class="signature-section">
+                <div class="signature-left">
+                    <p class="signature-name">Abdul Kalam</p>
+                    <div class="signature-line"></div>
+                    <p class="signature-title">Authorised Signatory</p>
+                </div>
+                
+                <div class="signature-right">
+                    <p class="signature-name">Albert Einstein</p>
+                    <div class="signature-line"></div>
+                    <p class="instructor-title">Course Instructor</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to populate certificate data
+        function populateCertificate(data) {
+            if (data.student) {
+                document.getElementById('student-name').textContent = data.student;
+            }
+            
+            if (data.title) {
+                document.getElementById('course-title').textContent = data.title.substring(0, 15);
+            }
+            
+            // You can add more data population as needed
+        }
+        
+        // Example usage:
+        // const certificateData = {
+        //     student: "John Doe",
+        //     title: "Advanced Web Development"
+        // };
+        // populateCertificate(certificateData);
+    </script>
+</body>
+</html>`;
+
+  const generatePDF = async () => {
+    try {
+      const { uri } = await Print.printToFileAsync({
+        html: htmlContent,
+        base64: false,
+      });
+      await shareAsync(uri);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    }
+  };
+
+  const handleDownloadCertificate = async (certificate: any) => {
+    try {
+      // Set the selected certificate and show modal
+      setSelectedCertificate(certificate);
+      setShowCertificateModal(true);
+    } catch (error) {
+      console.error('Download error:', error);
+      Alert.alert('Error', 'Failed to download certificate. Please try again.', [{ text: 'OK' }]);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowCertificateModal(false);
+    setSelectedCertificate(null);
+  };
+
   const renderCertificateContent = () => {
-    const completedCourses = profileDetails?.data?.userDetail?.completed_courses || [];
-    const currentCourse = profileDetails?.data?.userDetail?.course;
-
-    const allCourses = [];
-
-    if (currentCourse) {
-      allCourses.push({
-        ...currentCourse,
-        status: 'In Progress',
-        cardImage: require('../../assets/profile/card1.png'),
-      });
-    }
-
-    if (completedCourses.length > 0) {
-      completedCourses.forEach((course: any) => {
-        allCourses.push({
-          ...course,
-          status: 'Completed',
-          cardImage: require('../../assets/profile/card2.png'),
-        });
-      });
-    }
-
     return (
       <View style={styles.certificateContainer}>
-        {allCourses.length > 0 ? (
-          allCourses.map((course, index) => (
+        {/* Hidden certificate template for capturing */}
+        <View style={{ position: 'absolute', left: -9999 }}>
+          <View ref={certificateRef}>
+            <CertificateTemplate
+              certificate={{
+                id: 0,
+                title: 'MEAN STACK 2024',
+                description: '',
+                branch: '',
+                batch: '',
+                student: `${profileData?.first_name} ${profileData?.last_name}`,
+                email: profileData.email,
+              }}
+            />
+          </View>
+        </View>
+
+        {cerificates?.length > 0 ? (
+          cerificates?.map((certificate: any, index: any) => (
             <View key={index} style={styles.card}>
-              <Image source={course.cardImage} style={styles.cardImage} />
+              <Image
+                source={{ uri: getImageUrl(certificate?.course?.image) }}
+                style={styles.cardImage}
+              />
               <View style={styles.contentRow}>
                 <View style={styles.textContainer}>
-                  <Text style={styles.cardText}>Course Name: {course.course_name}</Text>
-                  <Text style={styles.cardText}>Duration: {course.duration}</Text>
-                  <Text style={styles.cardText}>Status: {course.status}</Text>
+                  <Text style={styles.cardHeading}>Certificate Name</Text>
+                  <Text style={styles.cardValue}>{certificate?.certificate_name || 'N/A'}</Text>
+
+                  <Text style={styles.cardHeading}>Course</Text>
+                  <Text style={styles.cardValue}>{certificate?.course?.course_name || 'N/A'}</Text>
+
+                  <Text style={styles.cardHeading}>Duration</Text>
+                  <Text style={styles.cardValue}>{certificate?.duration || 'N/A'}</Text>
                 </View>
-                <Image source={require('../../assets/profile/down.png')} style={styles.downIcon} />
+                <TouchableOpacity onPress={() => handleDownloadCertificate(certificate)}>
+                  <Image
+                    source={require('../../assets/profile/down.png')}
+                    style={styles.downIcon}
+                  />
+                </TouchableOpacity>
               </View>
             </View>
           ))
         ) : (
           <View style={styles.card}>
-            <Text style={styles.cardText}>No courses available</Text>
+            <Text style={styles.cardValue}>No certificates available</Text>
           </View>
         )}
       </View>
@@ -585,13 +940,28 @@ const Profile = () => {
         )}
 
         <View style={styles.idCardInfo}>
-          <Text style={styles.idCardName}>
-            {profileData.first_name} {profileData.last_name}
-          </Text>
-          <Text style={styles.idCardText}>Student ID: {profileData.studentID}</Text>
-          <Text style={styles.idCardText}>Roll No: {profileData.rollNumber}</Text>
-          <Text style={styles.idCardText}>Course: {profileData.course}</Text>
-          <Text style={styles.idCardText}>Batch: {profileData.batch}</Text>
+          <View style={styles.idRow}>
+            <Text style={styles.idHeading}>Name:</Text>
+            <Text style={styles.idValue}>
+              {profileData.first_name} {profileData.last_name}
+            </Text>
+          </View>
+          <View style={styles.idRow}>
+            <Text style={styles.idHeading}>Student ID:</Text>
+            <Text style={styles.idValue}>{profileData.studentID}</Text>
+          </View>
+          <View style={styles.idRow}>
+            <Text style={styles.idHeading}>Roll No:</Text>
+            <Text style={styles.idValue}>{profileData.rollNumber}</Text>
+          </View>
+          <View style={styles.idRow}>
+            <Text style={styles.idHeading}>Course:</Text>
+            <Text style={styles.idValue}>{profileData.course}</Text>
+          </View>
+          <View style={styles.idRow}>
+            <Text style={styles.idHeading}>Batch:</Text>
+            <Text style={styles.idValue}>{profileData.batch || 'N/A'}</Text>
+          </View>
         </View>
       </View>
     </View>
@@ -612,7 +982,7 @@ const Profile = () => {
 
   return (
     <>
-      <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
+      <StatusBar backgroundColor={COLORS1.black} barStyle="light-content" />
       <SafeAreaView edges={['top']} style={styles.container}>
         <View style={styles.fixedSection}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
@@ -696,6 +1066,50 @@ const Profile = () => {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
           {renderContent()}
         </ScrollView>
+
+        {/* Certificate Modal */}
+        <Modal
+          visible={showCertificateModal}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={handleCloseModal}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Certificate</Text>
+                <TouchableOpacity onPress={handleCloseModal} style={styles.closeButton}>
+                  <Text style={styles.closeButtonText}>×</Text>
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView style={styles.modalBody}>
+                {selectedCertificate && (
+                  <CertificateTemplate
+                    certificate={{
+                      id: selectedCertificate.id,
+                      title: selectedCertificate.certificate_name,
+                      description: selectedCertificate.description || '',
+                      branch: selectedCertificate.branch_id,
+                      batch: selectedCertificate.batch_id,
+                      student: `${profileData.first_name} ${profileData.last_name}`,
+                      email: profileData.email,
+                    }}
+                  />
+                )}
+
+                <View style={styles.modalActions}>
+                  <TouchableOpacity
+                    style={styles.downloadButton}
+                    onPress={() => {
+                      generatePDF();
+                    }}>
+                    <Text style={styles.downloadButtonText}>Download Certificate</Text>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
       </SafeAreaView>
     </>
   );
@@ -704,9 +1118,79 @@ const Profile = () => {
 export default Profile;
 
 const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+  },
+  modalContent: {
+    width: '95%',
+    maxHeight: '90%',
+    backgroundColor: 'white',
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e5e5',
+    backgroundColor: '#f8f9fa',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2A2A2A',
+  },
+  closeButton: {
+    padding: 4,
+  },
+  closeButtonText: {
+    fontSize: 24,
+    color: '#716F6F',
+    fontWeight: 'bold',
+  },
+  modalBody: {
+    padding: 16,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 20,
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#e5e5e5',
+  },
+  downloadButton: {
+    backgroundColor: '#7B00FF',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+    minWidth: 160,
+    alignItems: 'center',
+  },
+  downloadButtonText: {
+    color: 'white',
+    fontWeight: '600',
+  },
+  shareButton: {
+    backgroundColor: '#8b5cf6',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  shareButtonText: {
+    color: 'white',
+    fontWeight: '600',
+  },
   container: {
     flex: 1,
-    backgroundColor: '#ebeff3',
+    // backgroundColor: '#ebeff3',
   },
   fixedSection: {
     padding: 16,
@@ -718,11 +1202,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: '700',
-    color: COLORS.darkGray,
+    color: COLORS1.darkGray,
     marginBottom: 16,
   },
   card: {
-    backgroundColor: '#ebeff3',
+    backgroundColor: '#fff',
     borderRadius: 16,
     padding: 16,
     shadowOffset: { width: 0, height: 2 },
@@ -768,6 +1252,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderRadius: 50,
     resizeMode: 'cover',
+    backgroundColor: COLORS.bg_Colour
   },
   avatarContainer: {
     position: 'relative',
@@ -806,13 +1291,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#7B00FF',
   },
   tabBtnText: {
-    color: COLORS.gray,
+    color: COLORS1.gray,
     fontWeight: '600',
     fontSize: 18,
     textAlign: 'center',
   },
   activeTabText: {
-    color: COLORS.white,
+    color: COLORS1.white,
   },
   sectionTitle: {
     fontSize: 18,
@@ -849,7 +1334,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 14,
     borderRadius: 12,
-    backgroundColor: COLORS.lightGray,
+    backgroundColor: COLORS1.lightGray,
     marginRight: 8,
     alignItems: 'center',
   },
@@ -872,10 +1357,10 @@ const styles = StyleSheet.create({
   submitText: {
     fontSize: 14,
     fontWeight: '700',
-    color: COLORS.white,
+    color: COLORS1.white,
   },
   certificateContainer: {
-    backgroundColor: '#ebeff3',
+    backgroundColor: '#fff',
     borderRadius: 16,
     padding: 15,
     marginTop: 10,
@@ -890,6 +1375,7 @@ const styles = StyleSheet.create({
     height: 180,
     borderRadius: 8,
     resizeMode: 'cover',
+    backgroundColor: COLORS.bg_Colour,
   },
   cardText: {
     marginTop: 6,
@@ -928,6 +1414,7 @@ const styles = StyleSheet.create({
     borderRadius: 60,
     marginBottom: 20,
     resizeMode: 'cover',
+    backgroundColor: COLORS.bg_Colour
   },
   idCardInfo: {
     alignItems: 'center',
@@ -944,4 +1431,43 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     fontWeight: '500',
   },
+  idRow: {
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  idHeading: {
+    fontWeight: '700',
+    color: '#2A2A2A',
+    fontSize: 16,
+  },
+  idValue: {
+    fontWeight: '500',
+    color: '#716F6F',
+    fontSize: 16,
+  },
+  cardHeading: {
+    fontWeight: '700',
+    color: '#2A2A2A',
+    fontSize: 16,
+    marginTop: 6,
+  },
+  cardValue: {
+    fontWeight: '500',
+    color: '#716F6F',
+    fontSize: 16,
+    marginBottom: 4,
+  },
+  pickerContainer: {
+  borderWidth: 1,
+  borderColor: '#ccc',
+  borderRadius: 8,
+  marginBottom: 12,
+},
+picker: {
+  height: 50,
+  width: '100%',
+},
+
 });

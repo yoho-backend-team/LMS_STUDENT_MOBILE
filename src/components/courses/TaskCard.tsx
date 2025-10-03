@@ -1,31 +1,53 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+  Modal,
+  Linking,
+  Platform,
+} from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, icons } from '~/constants';
 import * as DocumentPicker from 'expo-document-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import toast from '~/utils/toasts';
+import { LinearGradient } from 'expo-linear-gradient';
+import { formatDateMonthandYear } from '~/utils/formatDate';
+import { uploadticketfile } from '~/features/Ticket/Services';
+import { updatetaskdata } from '~/features/Courses/Services';
+import * as Sharing from 'expo-sharing';
+import WebView from 'react-native-webview';
+import { getImageUrl } from '../../utils/imageUtils';
+import { getStudentData } from '~/utils/storage';
 
 type RootStackParamList = {
   TaskCard: { task: any };
-};
-
-type Task = {
-  id: number;
-  instructorname: string;
-  task: string;
-  taskname: string;
-  deadline: string;
-  status: 'Completed' | 'Pending';
-  question: string;
 };
 
 type Props = NativeStackScreenProps<RootStackParamList, 'TaskCard'>;
 
 const TaskCard: React.FC<Props> = ({ route, navigation }) => {
   const { task } = route.params;
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<any>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [fileType, setFileType] = useState<string>('');
+  const [studentData, setstudentData] = useState<any>('');
+
+  const getStudent = async () => {
+    const data = await getStudentData();
+    if (data) {
+      setstudentData(data);
+    }
+  };
+
+  useEffect(() => {
+    getStudent();
+  }, [task]);
 
   const pickDocument = async () => {
     try {
@@ -36,14 +58,136 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const file = result.assets[0];
-        setSelectedFile(file.name);
+        setSelectedFile(file);
       }
     } catch (error) {
       console.log('Error picking document:', error);
+      toast.error('Error', 'Failed to select file');
     }
   };
 
-  const isCompleted = task.status === 'Completed';
+  const handleSubmit = async () => {
+    if (!selectedFile) {
+      toast.error('Missing File', 'Please upload a file before submitting.');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', {
+        uri: selectedFile.uri,
+        name: selectedFile.name,
+        type: selectedFile.mimeType || 'application/octet-stream',
+      } as any);
+
+      const uploadRes = await uploadticketfile(formData);
+
+      if (uploadRes) {
+        toast.success('Success', 'File uploaded successfully!');
+        const taskUpdateData = {
+          taskid: task._id,
+          file: uploadRes?.data?.data?.file,
+          status: 'submitted',
+          student: studentData?._id,
+        };
+
+        const response = await updatetaskdata(taskUpdateData);
+
+        if (response) {
+          toast.success('Task Updated', 'Your task has been updated successfully.');
+          navigation.goBack();
+        }
+      } else {
+        const errorMessage = uploadRes || 'Failed to upload file';
+        toast.error('Upload Failed', errorMessage);
+      }
+    } catch (error: any) {
+      console.log('Error uploading file:', error);
+      const errorMessage = error.message || 'Failed to upload file';
+      toast.error('Error', errorMessage);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const answerDetails = task?.answers?.find((ans: any) => ans?.student?._id === studentData?._id);
+
+  const isCompleted = answerDetails ? (answerDetails?.status !== 'pending' ? true : false) : false;
+
+  // Determine file type for display
+  useEffect(() => {
+    if (task?.question_file) {
+      const fileExtension = task.question_file.split('.').pop()?.toLowerCase();
+      if (['png', 'jpg', 'jpeg', 'gif', 'bmp'].includes(fileExtension || '')) {
+        setFileType('image');
+      } else if (fileExtension === 'pdf') {
+        setFileType('pdf');
+      } else if (['doc', 'docx'].includes(fileExtension || '')) {
+        setFileType('word');
+      } else if (['xls', 'xlsx'].includes(fileExtension || '')) {
+        setFileType('excel');
+      } else {
+        setFileType('other');
+      }
+    }
+  }, [task?.question_file]);
+
+  const downloadFile = async (file: any) => {
+    if (!file) return;
+
+    try {
+      const uri = getImageUrl(file);
+
+      if (Platform.OS === 'ios') {
+        await Sharing.shareAsync(uri);
+      } else {
+        const supported = await Linking.canOpenURL(uri);
+        if (supported) {
+          await Linking.openURL(uri);
+        } else {
+          toast.error('Error', 'Cannot open this PDF URL');
+        }
+      }
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      toast.error('Error', 'Failed to download file');
+    }
+  };
+
+  const openFileModal = () => {
+    if (!task?.question_file) return;
+    setModalVisible(true);
+  };
+
+  const renderFileContent = () => {
+    if (!task?.question_file) return null;
+
+    if (fileType === 'pdf') {
+      return (
+        <WebView
+          source={{ uri: getImageUrl(task?.question_file) }}
+          style={styles.webview}
+          startInLoadingState={true}
+        />
+      );
+    } else if (fileType === 'image') {
+      return (
+        <Image
+          source={{ uri: getImageUrl(task?.question_file) }}
+          style={styles.image}
+          resizeMode="contain"
+        />
+      );
+    } else {
+      return (
+        <View style={styles.unsupportedContainer}>
+          <Text style={styles.unsupportedText}>File preview not supported</Text>
+          <Text style={styles.unsupportedSubtext}>Please download to view this file type</Text>
+        </View>
+      );
+    }
+  };
 
   return (
     <>
@@ -51,89 +195,202 @@ const TaskCard: React.FC<Props> = ({ route, navigation }) => {
         <View style={{ flex: 1 }}>
           <View style={styles.header}>
             <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-              <Image source={icons.back_arrow} style={{ width: 25, height: 25 }} />
+              <Image source={require('../../assets/profile/back.png')} style={styles.backbutton} />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>Assessment Page</Text>
           </View>
 
-          <View style={styles.taskCard}>
-            <View style={styles.textRow}>
-              <Text style={styles.taskText}>Instructor Name</Text>
-              <Text style={styles.taskValue}>{task.instructorname}</Text>
-            </View>
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollViewContent}
+            showsVerticalScrollIndicator={false}>
+            <View style={styles.taskCard}>
+              <View style={styles.textColumn}>
+                <Text style={styles.taskLabel}>Instructor Name</Text>
+                <Text style={styles.taskValue}>
+                  {task?.instructor?.full_name?.substring(0, 15) || 'N/A'}
+                </Text>
+              </View>
+              <View style={styles.textColumn}>
+                <Text style={styles.taskLabel}>Type</Text>
+                <Text style={styles.taskValue}>{task?.task_type?.substring(0, 15) || 'N/A'}</Text>
+              </View>
 
-            <View style={styles.textRow}>
-              <Text style={styles.taskText}>Task</Text>
-              <Text style={styles.taskValue}>{task.task}</Text>
-            </View>
+              <View style={styles.textColumn}>
+                <Text style={styles.taskLabel}>Task Name</Text>
+                <Text style={styles.taskValue}>{task?.task_name || 'N/A'}</Text>
+              </View>
 
-            <View style={styles.textRow}>
-              <Text style={styles.taskText}>Task Name</Text>
-              <Text style={styles.taskValue}>{task.taskname}</Text>
-            </View>
+              <View style={styles.textColumn}>
+                <Text style={styles.taskLabel}>Deadline</Text>
+                <Text style={styles.taskValue}>
+                  {formatDateMonthandYear(task?.deadline) || 'N/A'}
+                </Text>
+              </View>
 
-            <View style={styles.textRow}>
-              <Text style={styles.taskText}>Deadline</Text>
-              <Text style={styles.taskValue}>{task.deadline}</Text>
-            </View>
-
-            <View style={styles.textRow}>
-              <Text style={styles.taskText}>Doubt</Text>
-              <View style={styles.doubtRight}>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.doubtText}>{task.question}</Text>
-
-                  {!isCompleted && (
-                    <>
-                      <TouchableOpacity style={styles.uploadButton} onPress={pickDocument}>
-                        <Ionicons name="cloud-upload-outline" size={20} color="#fff" />
-                        <Text style={styles.uploadText}>Upload</Text>
-                      </TouchableOpacity>
-
-                      <Text
-                        style={[
-                          styles.fileName,
-                          !selectedFile && { color: '#9CA3AF', fontStyle: 'italic' },
-                        ]}>
-                        {selectedFile ? selectedFile : 'Upload Data'}
-                      </Text>
-                    </>
+              <View style={styles.textColumn}>
+                <View style={styles.questionHeader}>
+                  <Text style={styles.taskLabel}>Question</Text>
+                  {task?.question_file && (
+                    <TouchableOpacity onPress={openFileModal} style={styles.viewButton}>
+                      <Text style={styles.viewButtonText}>View</Text>
+                    </TouchableOpacity>
                   )}
                 </View>
-              </View>
-            </View>
+                <View style={styles.questionBox}>
+                  <Text style={styles.questionText}>
+                    {task?.question || 'No question provided'}
+                  </Text>
+                </View>
 
-            <View style={styles.textRow}>
-              <Text style={styles.taskText}>Action</Text>
-              <View
-                style={[
-                  styles.statusButton,
-                  task.status === 'Completed' ? styles.completed : styles.pending,
-                ]}>
-                <Text style={styles.statusText}>{task.status}</Text>
-              </View>
-            </View>
+                {!isCompleted && (
+                  <>
+                    <TouchableOpacity
+                      onPress={pickDocument}
+                      style={{ borderRadius: 8, marginTop: 6, alignSelf: 'flex-start' }}
+                      disabled={isUploading}>
+                      <LinearGradient
+                        colors={['#7B00FF', '#B200FF']}
+                        start={{ x: 0.134, y: 0.021 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.uploadButtonGradient}>
+                        <Ionicons name="cloud-upload-outline" size={20} color="#fff" />
+                        <Text style={styles.uploadText}>Upload</Text>
+                      </LinearGradient>
+                    </TouchableOpacity>
 
-            {!isCompleted && (
-              <View style={styles.submitContainer}>
-                <TouchableOpacity
-                  style={[styles.submitButton, !selectedFile && styles.submitButtonDisabled]}
-                  onPress={() => {
-                    if (!selectedFile) {
-                      toast.error('Missing File', 'Please upload a file before submitting.');
-                      return;
-                    } else {
-                      toast.success('Success', 'File uploaded successfully!');
-                      navigation.goBack();
-                    }
-                  }}>
-                  <Text style={styles.submitText}>Submit</Text>
-                </TouchableOpacity>
+                    <Text
+                      style={[
+                        styles.fileName,
+                        !selectedFile && { color: '#9CA3AF', fontStyle: 'italic' },
+                      ]}>
+                      {selectedFile ? selectedFile.name : 'No file selected'}
+                    </Text>
+                  </>
+                )}
               </View>
-            )}
-          </View>
+
+              <View style={styles.textColumn}>
+                <Text style={styles.taskLabel}>Status</Text>
+                <View style={styles.taskValueBox}>
+                  <View
+                    style={[
+                      styles.statusButtonInsideBox,
+                      isCompleted ? styles.completedStatus : styles.pendingStatus,
+                    ]}>
+                    <Text style={styles.statusTextInside}>
+                      {answerDetails?.status === 'pending' ? 'Pending' : answerDetails?.status}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              <View style={styles.textColumn}>
+                <Text style={styles.taskLabel}>Score</Text>
+                <Text style={styles.taskValue}>
+                  {task?.mark !== null && task?.mark !== undefined
+                    ? `${task?.mark} / 10`
+                    : 'Not reviewed yet'}
+                </Text>
+              </View>
+
+              {answerDetails?.remark && (
+                <View style={styles.textColumn}>
+                  <Text style={styles.taskLabel}>Instructor Remark</Text>
+                  <View style={styles.questionBox}>
+                    <Text style={styles.questionText}>{answerDetails?.remark}</Text>
+                  </View>
+                </View>
+              )}
+
+              {answerDetails?.file && (
+                <View style={styles.textColumn}>
+                  <Text style={styles.taskLabel}>Submitted Notes</Text>
+                  <View style={styles.viewNotesBox}>
+                    <Text style={styles.notesText}>{answerDetails?.file.substring(0, 22)}...</Text>
+                    <TouchableOpacity
+                      style={{ borderRadius: 8, marginLeft: 10 }}
+                      onPress={() => {
+                        downloadFile(answerDetails?.file);
+                      }}>
+                      <LinearGradient
+                        colors={['#7B00FF', '#B200FF']}
+                        start={{ x: 0.134, y: 0.021 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.uploadButtonGradient}>
+                        <Text style={styles.uploadText}>View</Text>
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+
+              {!isCompleted && (
+                <View style={styles.submitContainers}>
+                  <TouchableOpacity
+                    style={[styles.cancelButton]}
+                    onPress={() => navigation.goBack()}
+                    disabled={isUploading}>
+                    <Text style={styles.cancelText}>Cancel</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    disabled={!selectedFile || isUploading}
+                    onPress={handleSubmit}
+                    style={{ flex: 1, borderRadius: 8 }}>
+                    <LinearGradient
+                      colors={
+                        selectedFile && !isUploading
+                          ? ['#7B00FF', '#B200FF']
+                          : ['#9CA3AF', '#9CA3AF']
+                      }
+                      start={{ x: 0.134, y: 0.021 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.submitButtonGradient}>
+                      <Text style={styles.submitText}>
+                        {isUploading ? 'Uploading...' : 'Submit'}
+                      </Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          </ScrollView>
         </View>
       </SafeAreaView>
+
+      {/* File Modal */}
+      <Modal
+        animationType="slide"
+        transparent={false}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Question File</Text>
+            <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
+              <Ionicons name="close" size={24} color="#000" />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.modalContent}>{renderFileContent()}</View>
+
+          <View style={styles.modalFooter}>
+            <TouchableOpacity
+              onPress={() => downloadFile(task?.question_file)}
+              style={styles.downloadButton}>
+              <LinearGradient
+                colors={['#7B00FF', '#B200FF']}
+                start={{ x: 0.134, y: 0.021 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.downloadButtonGradient}>
+                <Ionicons name="download-outline" size={20} color="#fff" />
+                <Text style={styles.downloadText}>Download</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </>
   );
 };
@@ -142,6 +399,13 @@ export default TaskCard;
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16 },
+  scrollView: {
+    flex: 1,
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -150,6 +414,12 @@ const styles = StyleSheet.create({
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  backbutton: {
+    width: 45,
+    height: 45,
+    resizeMode: 'contain',
+    marginTop: 5,
   },
   headerTitle: {
     fontSize: 20,
@@ -167,64 +437,236 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-  },
-  doubtRight: {
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
     flex: 1,
+    gap: 5,
+  },
+  textColumn: {
+    flexDirection: 'column',
+    marginBottom: 12,
+  },
+  questionHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-  },
-  doubtText: {
-    fontSize: 18,
-    color: '#716F6F',
-    flexShrink: 1,
-    marginRight: 10,
-  },
-  textRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginVertical: 8,
-  },
-  taskText: { fontSize: 18, color: '#716F6F', width: '35%' },
-  taskValue: { fontSize: 18, color: '#716F6F', flex: 1, flexWrap: 'wrap' },
-  uploadButton: {
-    flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#3B82F6',
-    paddingVertical: 6,
+    marginBottom: 4,
+  },
+  viewButton: {
+    backgroundColor: '#7B00FF',
+    paddingHorizontal: 12,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  viewButtonText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 500,
+  },
+  taskLabel: {
+    fontSize: 14,
+    color: '#000',
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  taskValue: {
+    fontSize: 16,
+    color: '##6B7280',
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 8,
-    marginTop: 6,
-    alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
-  uploadText: { color: '#fff', marginLeft: 6, fontSize: 14 },
+  uploadText: { color: '#fff', fontSize: 12, fontWeight: 500 },
   fileName: { marginTop: 6, fontSize: 14, color: '#374151', marginLeft: 4 },
-  statusButton: {
-    marginLeft: 8,
-    paddingVertical: 4,
+  taskValueBox: {
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 8,
-  },
-  completed: { backgroundColor: '#4ADE80' },
-  pending: { backgroundColor: '#9CA3AF' },
-  statusText: { color: '#fff', fontWeight: 'bold' },
-  submitButtonDisabled: { backgroundColor: '#9CA3AF' },
-  submitContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginTop: 16,
-  },
-  submitButton: {
-    backgroundColor: '#3B82F6',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    alignSelf: 'flex-end',
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+    width: '100%',
+    alignSelf: 'stretch',
   },
   submitText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  submitContainers: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 16,
+    gap: 10,
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: '#E5E7EB',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cancelText: {
+    color: '#374151',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  statusButtonInsideBox: {
+    paddingVertical: 8,
+    borderRadius: 6,
+    width: '35%',
+    alignItems: 'center',
+  },
+  completedStatus: {
+    backgroundColor: '#4ADE80',
+  },
+  pendingStatus: {
+    backgroundColor: '#9CA3AF',
+  },
+  statusTextInside: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  uploadButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 2,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  submitButtonGradient: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  questionBox: {
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+    width: '100%',
+  },
+  questionText: {
+    fontSize: 16,
+    color: '#6B7280',
+  },
+  viewNotesBox: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+    width: '100%',
+  },
+  notesText: {
+    fontSize: 16,
+    color: '#6B7280',
+    flex: 1,
+  },
+  // Modal styles
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  closeButton: {
+    padding: 4,
+  },
+  modalContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  modalFooter: {
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+  },
+  downloadButton: {
+    borderRadius: 8,
+  },
+  downloadButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  downloadText: {
+    color: '#fff',
+    marginLeft: 8,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  webview: {
+    flex: 1,
+    width: '100%',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+  },
+  unsupportedContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  unsupportedText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#6B7280',
+    marginBottom: 8,
+  },
+  unsupportedSubtext: {
+    fontSize: 14,
+    color: '#9CA3AF',
   },
 });

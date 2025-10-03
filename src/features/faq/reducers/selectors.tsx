@@ -1,0 +1,1 @@
+export const selectFaq =(state:any)=>state.faqSlice.data;

@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useState } from 'react';
-import { Image } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Image, RefreshControl } from 'react-native';
 import {
   StatusBar,
   Text,
@@ -17,6 +17,11 @@ import {
   TextStyle,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useDispatch, useSelector } from 'react-redux';
+import { COLORS, FONTS } from '~/constants';
+import { selectFaq } from '~/features/faq/reducers/selectors';
+import { getFaqThunk } from '~/features/faq/reducers/thunks';
+import { getStudentData } from '~/utils/storage';
 
 const UI = {
   bg: '#EAEFF5', // page background
@@ -28,15 +33,6 @@ const UI = {
   dark: '#C1CADC', // dark rim (bottom/right)
   light: '#FFFFFF', // light rim (top/left)
 };
-
-const faqs = [
-  { question: 'Introduction', answer: 'This is the introduction answer.' },
-  { question: 'How To Access Payil?', answer: 'You can access Payil from the dashboard.' },
-  { question: 'About Payil Dashboard', answer: 'The dashboard shows all courses and progress.' },
-  { question: 'About Payil Courses', answer: 'Courses include video, notes, and exercises.' },
-  { question: 'How To Access Payil Subject', answer: 'Click on a subject to view its content.' },
-  { question: 'How to add a new course?', answer: 'Go to the add course section.' },
-];
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -75,11 +71,47 @@ const FAQ = () => {
   const [search, setSearch] = useState('');
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const navigation = useNavigation<any>();
+  const dispatch = useDispatch<any>();
+  const selectData = useSelector(selectFaq)?.data;
+  const [student, setStudent] = useState<any>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const data = await getStudentData();
+      setStudent(data);
+    })();
+  }, []);
+
+  const getFaqData = async () => {
+    await dispatch(
+      getFaqThunk({
+        instituteId: student?.institute_id?.uuid,
+        branchid: student?.branch_id?.uuid,
+      })
+    );
+  };
+
+  useEffect(() => {
+    if (student) {
+      getFaqData();
+    }
+  }, [dispatch, student]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await getFaqData();
+    setRefreshing(false);
+  };
 
   const toggleExpand = (index: number) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setExpandedIndex(expandedIndex === index ? null : index);
   };
+
+  const filteredFAQs = selectData?.filter((i: any) =>
+    i.description.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <>
@@ -98,7 +130,7 @@ const FAQ = () => {
           <View style={[styles.searchBox, styles.insetBox]}>
             <TextInput
               placeholder="Search"
-              placeholderTextColor="#98A2B3"
+              placeholderTextColor={COLORS.text_desc}
               style={styles.searchInput}
               value={search}
               onChangeText={setSearch}
@@ -109,45 +141,56 @@ const FAQ = () => {
           <ScrollView
             style={{ marginBottom: 20 }}
             contentContainerStyle={{ paddingBottom: 20 }}
-            showsVerticalScrollIndicator={false}>
-            {faqs
-              .filter((i) => i.question.toLowerCase().includes(search.toLowerCase()))
-              .map((item, index) => {
+            showsVerticalScrollIndicator={false}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+            {filteredFAQs?.length ? (
+              filteredFAQs?.map((item: any, index: any) => {
                 const open = expandedIndex === index;
                 return (
                   <React.Fragment key={index}>
                     {/* Row – RAISED (popped-out) */}
                     <View style={[styles.card, styles.insetBox]}>
                       <View style={{ flex: 1 }}>
-                        <Text style={styles.cardText}>{item.question}</Text>
+                        <Text style={styles.cardText}>{item.title}</Text>
                       </View>
-                      <TouchableOpacity activeOpacity={0.8} onPress={() => toggleExpand(index)}>
+                      <TouchableOpacity onPress={() => toggleExpand(index)}>
                         <PlusMinusIcon open={open} />
                       </TouchableOpacity>
                     </View>
 
                     {/* Inline expanded content (same page) */}
                     {open &&
-                      (item.question === 'Introduction' ? (
+                      (item.description === 'Introduction' ? (
                         <IntroContent />
                       ) : (
                         <View style={[styles.answerWrap, styles.insetBox]}>
-                          <Text style={styles.answerText}>{item.answer}</Text>
+                          <Text style={styles.answerText}>{item.description}</Text>
                         </View>
                       ))}
                   </React.Fragment>
                 );
-              })}
+              })
+            ) : (
+              <View style={{ marginTop: 155 }}>
+                <Text style={{ ...FONTS.h3, color: COLORS.text_desc, textAlign: 'center' }}>
+                  No FAQ found
+                </Text>
+              </View>
+            )}
           </ScrollView>
 
           {/* Help + CTA */}
-          <Text style={styles.helpTitle}>Need More Help?</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Helpcenter')}>
+            <Text style={styles.helpTitle}>Need More Help?</Text>
+          </TouchableOpacity>
           <Text style={styles.helpText}>
             If You Have Any Further Questions, Feel Free To Reach Out To Our Support Team.
           </Text>
 
           {/* CTA – RAISED */}
-          <TouchableOpacity style={[styles.supportBtn, styles.insetBox]} activeOpacity={0.9}>
+          <TouchableOpacity
+            style={[styles.supportBtn, styles.insetBox]}
+            onPress={() => navigation.navigate('TicketsScreen')}>
             <Text style={styles.supportBtnText}>Contact Support</Text>
           </TouchableOpacity>
         </SafeAreaView>
@@ -162,33 +205,23 @@ export default FAQ;
 type Styles = {
   background: ViewStyle;
   container: ViewStyle;
-
   backbutton: ViewStyle;
-
   header: TextStyle;
-
   searchBox: ViewStyle;
   searchInput: TextStyle;
-
   card: ViewStyle;
   cardText: TextStyle;
-
   answerWrap: ViewStyle;
   answerText: TextStyle;
-
   pmWrap: ViewStyle;
   hBar: ViewStyle;
   vBar: ViewStyle;
-
   helpTitle: TextStyle;
   helpText: TextStyle;
-
   supportBtn: ViewStyle;
   supportBtnText: TextStyle;
-
   bigCard: ViewStyle;
   bigCardText: TextStyle;
-
   smallCard: ViewStyle;
   smallCardText: TextStyle;
 
@@ -211,8 +244,8 @@ const commonLightRim = {
 };
 
 const styles = StyleSheet.create<any>({
-  background: { flex: 1, backgroundColor: UI.bg },
-  container: { flex: 1, paddingHorizontal: 16, paddingTop: 20 },
+  background: { flex: 1, backgroundColor: COLORS.white },
+  container: { flex: 1, paddingHorizontal: 16, paddingTop: 10 },
 
   backbutton: {
     width: 48,
@@ -269,7 +302,7 @@ const styles = StyleSheet.create<any>({
     paddingVertical: 3,
     marginBottom: 16,
   },
-  searchInput: { fontSize: 14, color: UI.text },
+  searchInput: { fontSize: 14, color: COLORS.text_desc, fontWeight: 500 },
 
   /* Row */
   card: {
@@ -292,7 +325,7 @@ const styles = StyleSheet.create<any>({
     marginBottom: 14,
     backgroundColor: UI.surface,
   },
-  answerText: { fontSize: 12, color: UI.sub },
+  answerText: { fontSize: 12, color: COLORS.text_desc, fontWeight: 500 },
 
   /* Plus/Minus */
   pmWrap: {

@@ -12,9 +12,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '../../components/shared/Header';
-import { COLORS, FONTS } from '../../constants';
+import { COLORS } from '../../constants';
 import Svg, { Circle } from 'react-native-svg';
-import CoursesProgress from '~/components/home/CourseProgress';
 import CoursesProgressChart from '~/components/home/CourseProgress';
 import AttendanceChart from '~/components/home/Attendance';
 import PaymentCard from '~/components/home/Payment';
@@ -25,8 +24,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectDashboardData } from '~/features/home/reducer/selectors';
 import { getDashboardthunks } from '~/features/home/reducer/thunks';
 import { getImageUrl } from '~/utils/imageUtils';
-import { Ionicons } from '@expo/vector-icons';
-
 // Custom Progress Circle Component
 type ProgressCircleProps = {
   percentage: number;
@@ -85,20 +82,11 @@ const Home = () => {
   const dashboardData = useSelector(selectDashboardData);
   const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    dispatch(getDashboardthunks({}) as any);
-  }, [dispatch]);
-
-  // Refresh function
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
     dispatch(getDashboardthunks({}) as any)
-      .then(() => {
-        setRefreshing(false);
-      })
-      .catch(() => {
-        setRefreshing(false);
-      });
+      .then(() => setRefreshing(false))
+      .catch(() => setRefreshing(false));
   }, [dispatch]);
 
   const classStats = dashboardData?.classes?.[0] || {};
@@ -150,12 +138,6 @@ const Home = () => {
     },
   ];
 
-  const classData = [
-    { day: 'Day', topic: 'HTML', link: 'Www.Google.Com', duration: '45 Min', action: 'Join Now' },
-    { day: 'Day 1', topic: 'HTML', link: 'Www.Google.Com', duration: '45 Min', action: 'Join Now' },
-    { day: 'Day 1', topic: 'HTML', link: 'Www.Google.Com', duration: '45 Min', action: 'Join Now' },
-  ];
-
   return (
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
@@ -174,8 +156,6 @@ const Home = () => {
             />
           }>
           <View style={styles.headerBox}>
-            <Text style={styles.header}>Classes</Text>
-
             {/* Profile Card */}
             <View style={styles.card}>
               <Image
@@ -203,6 +183,7 @@ const Home = () => {
             </View>
 
             {/* Stats Cards Grid */}
+            <Text style={styles.header}>Classes</Text>
             <View style={styles.statsGrid}>
               {statsCards.map((item, index) => (
                 <View key={index} style={[styles.statsCard, { backgroundColor: item.bgColor }]}>
@@ -237,13 +218,8 @@ const Home = () => {
           <AssessmentsChart />
           {/* update */}
           <UpdatesScreen />
-          <View style={{ marginBottom: 30 }}></View>
+          <View style={{ marginBottom: 60 }}></View>
         </ScrollView>
-        <TouchableOpacity
-          style={styles.chatbotBtn}
-          onPress={() => navigation.navigate('ChatbotScreen')}>
-          <Ionicons name="chatbubble-ellipses" size={28} color="#fff" />
-        </TouchableOpacity>
       </SafeAreaView>
     </>
   );
@@ -263,7 +239,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   headerBox: {
-    backgroundColor: '#BDC2C740',
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 10,
@@ -276,6 +251,7 @@ const styles = StyleSheet.create({
     color: '#000',
     paddingLeft: 12,
     marginBottom: 15,
+    marginTop: 10,
   },
   card: {
     flexDirection: 'row',
@@ -287,6 +263,7 @@ const styles = StyleSheet.create({
     width: 55,
     height: 55,
     borderRadius: 8,
+    backgroundColor: COLORS.bg_Colour,
   },
   info: {
     flex: 1,
@@ -379,18 +356,5 @@ const styles = StyleSheet.create({
   percentageText: {
     fontSize: 16,
     fontWeight: 'bold',
-  },
-  chatbotBtn: {
-    position: 'absolute',
-    bottom: 80,
-    right: 20,
-    backgroundColor: '#7B00FF',
-    padding: 16,
-    borderRadius: 50,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 5,
   },
 });

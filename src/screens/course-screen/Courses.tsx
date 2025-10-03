@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   StatusBar,
   StyleSheet,
@@ -11,60 +11,63 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '~/components/shared/Header';
-import { COLORS } from '~/constants';
+import { COLORS, FONTS } from '~/constants';
 import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from '~/store/store';
 import { getStudentcourse } from '~/features/Courses/Reducers/thunks';
 import { selectCourse } from '~/features/Courses/Reducers/selectors';
 import { getImageUrl } from '~/utils/imageUtils';
 import { Ionicons } from '@expo/vector-icons';
-
-type RootStackParamList = {
-  Courses: undefined;
-  CourseViewScreen: { course: Course };
-};
-
-type Course = {
-  id: number;
-  title: string;
-  description: string;
-  modules: string;
-  duration: string;
-  image: any;
-};
-
-type CoursesScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Courses'>;
+import { getStudentData } from '~/utils/storage';
+import { getStudentProfileThunk } from '~/features/Profile/reducer/thunks';
+import { selectProfile } from '~/features/Profile/reducer/selectors';
 
 const Courses = () => {
   const navigation = useNavigation<any>();
   const dispatch = useDispatch<AppDispatch>();
   const coursedata = useSelector(selectCourse);
-
+  const course = coursedata?.data;
   const [refreshing, setRefreshing] = useState(false);
-
-  const fetchData = useCallback(async () => {
-    try {
-      const params = {
-        courseId: '67f3b7fcb8d2634300cc87b6',
-      };
-      await dispatch(getStudentcourse(params));
-    } catch (error) {
-      console.error('Course fetch error:', error);
-    }
-  }, [dispatch]);
+  const [student, setStudent] = useState<any>(null);
+  const profileDetails = useSelector(selectProfile)?.data;
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    (async () => {
+      const data = await getStudentData();
+      dispatch(getStudentProfileThunk({}));
+      setStudent(data);
+    })();
+  }, [dispatch]);
+
+  const fetchData = useCallback(async () => {
+    if (student) {
+      try {
+        const params = {
+          instituteId: student?.institute_id?._id,
+          courseId: student?.userDetail?.course
+            ? student?.userDetail?.course
+            : profileDetails?.userDetail?.course?._id,
+          branchId: student?.branch_id?._id,
+        };
+        await dispatch(getStudentcourse(params));
+      } catch (error) {
+        console.error('Course fetch error:', error);
+      }
+    }
+  }, [student, profileDetails]);
+
+  useEffect(() => {
+    if (student) {
+      fetchData();
+    }
+  }, [fetchData, student]);
 
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchData();
     setRefreshing(false);
   };
-  const course = coursedata?.data;
 
   return (
     <>
@@ -77,7 +80,7 @@ const Courses = () => {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
           <Text style={styles.heading}>Courses</Text>
 
-          {course && (
+          {course ? (
             <TouchableOpacity
               style={styles.card}
               onPress={() => navigation.navigate('CourseViewScreen', { course })}>
@@ -101,7 +104,7 @@ const Courses = () => {
                     style={{ width: 24, height: 24 }}
                   />
                   <Text style={styles.footerText}>
-                    {course.coursemodules.length ?? '0'} modules
+                    {course.coursemodules?.length ?? '0'} modules
                   </Text>
                 </View>
 
@@ -114,14 +117,13 @@ const Courses = () => {
                 </View>
               </View>
             </TouchableOpacity>
+          ) : (
+            <View style={styles.noDataContainer}>
+              <Ionicons name="book-outline" size={60} color="#9CA3AF" />
+              <Text style={styles.noDataText}>No courses available</Text>
+            </View>
           )}
         </ScrollView>
-
-        <TouchableOpacity
-          style={styles.chatbotBtn}
-          onPress={() => navigation.navigate('ChatbotScreen')}>
-          <Ionicons name="chatbubble-ellipses" size={28} color="#fff" />
-        </TouchableOpacity>
       </SafeAreaView>
     </>
   );
@@ -133,11 +135,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 10,
-    backgroundColor: '#ebeff3',
+    backgroundColor: '#ffffff',
   },
   scrollContainer: {
     flex: 1,
-    backgroundColor: '#ebeff3',
+    backgroundColor: '#ffff',
     padding: 18,
     marginTop: 10,
   },
@@ -148,7 +150,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   card: {
-    backgroundColor: '#ebeff3',
+    backgroundColor: '#fff',
     borderRadius: 16,
     shadowColor: '#000',
     shadowOpacity: 0.1,
@@ -163,6 +165,7 @@ const styles = StyleSheet.create({
     height: 160,
     borderRadius: 12,
     marginBottom: 12,
+    backgroundColor: COLORS.bg_Colour,
   },
   title: {
     fontSize: 16,
@@ -190,17 +193,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#716F6F',
   },
-  chatbotBtn: {
-    position: 'absolute',
-    bottom: 80,
-    right: 20,
-    backgroundColor: '#7B00FF',
-    padding: 16,
-    borderRadius: 50,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 5,
+  noDataContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 50,
+    marginTop: 150,
+  },
+  noDataText: {
+    marginTop: 12,
+    fontWeight: '500',
+    color: COLORS.text_desc,
+    ...FONTS.body3,
   },
 });

@@ -11,7 +11,6 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Header from '~/components/shared/Header';
 import { COLORS, FONTS, icons } from '~/constants';
 import { formatDateandTime, formatDate } from '~/utils/formatDate';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
@@ -19,6 +18,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllActivityData } from '~/features/reducer/activitylog/reducers/Thunks';
 import { ActivitySelector } from '~/features/reducer/activitylog/reducers/Selector';
+import { LinearGradient } from 'expo-linear-gradient';
 
 type Log = {
   id: string;
@@ -196,23 +196,34 @@ const ActivityLogs = () => {
 
           {/* Pagination controls */}
           <View style={styles.pagination}>
-            <TouchableOpacity
-              onPress={loadPrevPage}
-              disabled={currentPage === 1}
-              style={[styles.pageBtn, currentPage === 1 && styles.disabledBtn]}>
-              <Text style={styles.pageText}>Previous</Text>
-            </TouchableOpacity>
+            <LinearGradient
+              colors={currentPage === 1 ? ['#E0E0E0', '#E0E0E0'] : ['#7B00FF', '#B200FF']}
+              start={{ x: 0.134, y: 0.021 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.pageGradient}>
+              <TouchableOpacity
+                onPress={loadPrevPage}
+                disabled={currentPage === 1}
+                style={[styles.buttonInner]}>
+                <Text style={styles.buttonText}>Previous</Text>
+              </TouchableOpacity>
+            </LinearGradient>
 
             <Text style={styles.pageInfo}>
               Page {currentPage} of {totalPages}
             </Text>
-
-            <TouchableOpacity
-              onPress={loadNextPage}
-              disabled={currentPage === totalPages}
-              style={[styles.pageBtn, currentPage === totalPages && styles.disabledBtn]}>
-              <Text style={styles.pageText}>Next</Text>
-            </TouchableOpacity>
+            <LinearGradient
+              colors={currentPage === totalPages ? ['#E0E0E0', '#E0E0E0'] : ['#7B00FF', '#B200FF']}
+              start={{ x: 0.134, y: 0.021 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.pageGradient}>
+              <TouchableOpacity
+                onPress={loadNextPage}
+                disabled={currentPage === totalPages}
+                style={[styles.buttonInner]}>
+                <Text style={styles.buttonText}>Next</Text>
+              </TouchableOpacity>
+            </LinearGradient>
           </View>
 
           {/* Date Picker Modal */}
@@ -234,7 +245,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 10,
-    backgroundColor: COLORS.bg_Colour,
+    backgroundColor: COLORS.white,
   },
   container1: { flex: 1, paddingHorizontal: 15 },
   headerRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
@@ -258,7 +269,7 @@ const styles = StyleSheet.create({
   dateInput: {
     borderWidth: 1,
     borderColor: COLORS.white,
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.bg_Colour,
     borderRadius: 8,
     padding: 8,
     paddingVertical: 10,
@@ -267,7 +278,7 @@ const styles = StyleSheet.create({
   },
   resetBtn: {
     padding: 5,
-    backgroundColor: COLORS.text_desc,
+    backgroundColor: COLORS.shadow_01,
     borderRadius: 50,
   },
   logContainer: { marginBottom: 20 },
@@ -298,7 +309,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   message: { fontWeight: 'bold', marginBottom: 8, color: COLORS.text_title },
-  email: { fontSize: 12, color: COLORS.green_text, marginBottom: 5 },
+  email: { fontSize: 12, color: COLORS.light_green, marginBottom: 5, fontWeight: 500 },
   time: { fontSize: 10, color: COLORS.text_desc, textAlign: 'right' },
   pagination: {
     flexDirection: 'row',
@@ -314,6 +325,12 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     width: '25%',
   },
+  buttonInner: {
+    paddingVertical: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 110,
+  },
   disabledBtn: {
     backgroundColor: COLORS.text_desc,
   },
@@ -321,6 +338,11 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     textAlign: 'center',
     fontWeight: 500,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
   pageInfo: {
     fontSize: 14,
@@ -335,5 +357,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.text_desc,
     textAlign: 'center',
+  },
+  pageGradient: {
+    borderRadius: 6,
+    overflow: 'hidden',
+    minWidth: 90,
+    marginHorizontal: 5,
   },
 });

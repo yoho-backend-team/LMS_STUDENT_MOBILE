@@ -1,82 +1,199 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Linking, ScrollView } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather'; // or Ionicons 
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Linking, ScrollView, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useNavigation } from '@react-navigation/native';
+import { COLORS, icons, screens } from '~/constants';
+import { formatDate, formatTime } from '~/utils/formatDate';
+import { setSelectedTab } from '~/store/tab/tabSlice';
+import { useDispatch } from 'react-redux';
+import { Download } from 'lucide-react-native';
+import WebView from 'react-native-webview';
+import { getFileUrl } from '~/utils/imageUtils';
+import { Ionicons } from '@expo/vector-icons';
 
-const classInfoData = [
-  { label: 'Date', value: '9 Apr 2025' },
-  { label: 'Start At', value: '9:30 AM' },
-  { label: 'End At', value: '6:00 PM' },
-  { label: 'Duration', value: '6 Mon Hrs' },
-];
+interface ClassDataProps {
+  classData: any;
+}
 
-const CompleteClassDetails = () => (
-  <ScrollView contentContainerStyle={styles.screen}>
-    <View style={styles.container}>
-      <TouchableOpacity style={styles.backButton}>
-        <Icon name="arrow-left" size={24} color="#444" />
-      </TouchableOpacity>
-      <Text style={styles.title}>Class Details</Text>
-    </View>
+const CompleteClassDetails: React.FC<ClassDataProps> = ({ classData }) => {
+  const navigation = useNavigation<any>();
+  const dispatch = useDispatch<any>();
+  const [showVideo, setShowVideo] = useState(false);
 
-    <View style={styles.container1}>
-      <Text style={styles.batchTitle}>Batch No : #13</Text>
-      <Text style={styles.title}>The Path Of MERN Stack</Text>
-      <Text style={styles.description}>
-        The MERN stack is a collection of technologies for building web applications using JavaScript.
-        It's made up of MongoDB, Express.js, React, and Node.js. Mern is a popular, Pre-build,
-        and versatile technologu stack.
-      </Text>
+  const classInfoData = [
+    { label: 'Date', value: formatDate(classData?.start_date) },
+    { label: 'Start At', value: formatTime(classData?.start_time, false) },
+    { label: 'End At', value: formatTime(classData?.end_time, false) },
+    { label: 'Duration', value: classData?.duration },
+  ];
+
+  const sessionNotes: string[] = classData?.notes || [];
+  const studyMaterials: string[] = classData?.study_materials || [];
+
+  const handleDownload = (url: string) => {
+    if (url) {
+      const fullURL = getFileUrl(url);
+      Linking.openURL(fullURL);
+    }
+  };
+
+  const extractVideoId = (url: string) => {
+    if (!url) return '';
+    const regex = /(?:embed\/|v=)([^&?]+)/;
+    const match = url.match(regex);
+    return match ? match[1] : '';
+  };
+
+  return (
+    <ScrollView contentContainerStyle={styles.screen}>
+      <View style={styles.container}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Image source={require('../../assets/profile/back.png')} style={styles.backbutton} />
+        </TouchableOpacity>
+        <Text style={styles.title}>{classData?.class_name}</Text>
+      </View>
 
       <View style={styles.container1}>
+        <Text style={styles.batchTitle}>Batch No : #{classData?.batch?.id || '1'}</Text>
+
         <LinearGradient
           colors={['#7B00FF', '#B200FF']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
-          style={styles.card}
-        >
-          {classInfoData.map((item, index) => (
+          style={styles.card}>
+          {classInfoData?.map((item, index) => (
             <View key={index} style={styles.column}>
               <Text style={styles.label}>{item.label}</Text>
               <Text style={styles.value}>{item.value}</Text>
             </View>
           ))}
         </LinearGradient>
+
+        <Text style={styles.notesubTitle}>
+          Make sure your presence in this class & if you are unable to attend, please inform the
+          Coordinator.
+        </Text>
+
+        <TouchableOpacity
+          style={styles.notesCard}
+          onPress={() => {
+            navigation.goBack();
+            dispatch(setSelectedTab(screens.attendance));
+          }}>
+          <Text style={styles.noteText1}>Check Attendance</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.notesubTitle}>If any issue in attendance please raise a ticket</Text>
       </View>
 
-      <Text style={styles.linkLabel}>Class Meeting Link</Text>
-      <Text style={styles.subText}>Join The Class @9:30 AM</Text>
-      <TouchableOpacity style={styles.joinButton} onPress={() => {/* linking code here */ }}>
-        <Text style={styles.joinText}>Join Now</Text>
-      </TouchableOpacity>
-      <Text style={styles.notesubTitle}>Make sure your presence in this class & if you are unable to attend, plase inform the Coordinator.</Text>
+      {/* uploaded video */}
+      <View style={styles.videoCard}>
+        <Text style={styles.sectionTitle}>Class Video</Text>
+        {showVideo && classData?.video_url ? (
+          <WebView
+            style={{ flex: 1 }}
+            javaScriptEnabled={true}
+            domStorageEnabled={true}
+            allowsFullscreenVideo={true}
+            allowsInlineMediaPlayback={true}
+            mediaPlaybackRequiresUserAction={false}
+            source={{
+              uri: classData?.video_url,
+            }}
+          />
+        ) : (
+          <>
+            <Image
+              source={{
+                uri: classData?.video_url
+                  ? `https://i.ytimg.com/vi/${extractVideoId(classData?.video_url)}/hqdefault.jpg`
+                  : 'https://via.placeholder.com/300x200?text=No+Video',
+              }}
+              style={styles.videoImage}
+            />
+            <TouchableOpacity style={styles.playBtn} onPress={() => setShowVideo(true)}>
+              <Ionicons name="play" size={24} color="#fff" />
+            </TouchableOpacity>
+          </>
+        )}
+      </View>
 
-      <TouchableOpacity style={styles.notesCard1} onPress={() => {/* linking code here */ }}>
-        <Text style={styles.noteText}>Check Attendance</Text>
-      </TouchableOpacity>
-      <Text style={styles.notesubTitle}>If any issue in attendance please raise a ticket</Text>
+      {/* Session Notes */}
+      <View style={{ marginTop: 15 }}>
+        <Text style={styles.noteTitle}>Session Notes</Text>
+        {sessionNotes.length > 0 ? (
+          sessionNotes.map((url: any, idx) => (
+            <View key={idx} style={styles.notesCard1}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 8,
+                }}>
+                <Image source={icons.pdf} style={{ width: 20, height: 25 }} />
+                <View>
+                  <Text style={styles.noteText}>{url?.title}</Text>
+                  <Text style={styles.noteText2}>{url?.description}</Text>
+                </View>
+                <TouchableOpacity
+                  style={{ flex: 1, alignItems: 'flex-end' }}
+                  onPress={() => handleDownload(url?.file)}>
+                  <Download size={18} color={COLORS.text_title} />
+                </TouchableOpacity>
+              </View>
+            </View>
+          ))
+        ) : (
+          <TouchableOpacity style={styles.notesCard1}>
+            <Text style={styles.noteText}>No session notes available</Text>
+          </TouchableOpacity>
+        )}
+      </View>
 
-      <Text style={styles.noteTitle}>Session Notes</Text>
-      <TouchableOpacity style={styles.notesCard1} onPress={() => {/* linking code here */ }}>
-        <Text style={styles.noteText}>Once Class Finished Videos will be Uploaded</Text>
-     </TouchableOpacity>
-    </View>
-
-    <View style={styles.container2}>
-      <Text style={styles.noteTitle}>Study Materials</Text>
-     <TouchableOpacity style={styles.notesCard1} onPress={() => {/* linking code here */ }}>
-        <Text style={styles.noteText}>Once Class Finished Study Materials Videos will be Uploaded</Text>
-      </TouchableOpacity>
-    </View>
-  </ScrollView>
-
-);
+      {/* Study Materials */}
+      <View style={styles.container2}>
+        <Text style={styles.noteTitle}>Study Materials</Text>
+        {studyMaterials.length > 0 ? (
+          studyMaterials.map((url: any, idx) => (
+            <View key={idx} style={styles.notesCard1}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 8,
+                }}>
+                <Image source={icons.pdf} style={{ width: 20, height: 25 }} />
+                <View>
+                  <Text style={styles.noteText}>{url?.title}</Text>
+                  <Text style={styles.noteText2}>{url?.description}</Text>
+                </View>
+                <TouchableOpacity
+                  style={{ flex: 1, alignItems: 'flex-end' }}
+                  onPress={() => handleDownload(url)}>
+                  <Download size={18} color={COLORS.text_title} />
+                </TouchableOpacity>
+              </View>
+            </View>
+          ))
+        ) : (
+          <TouchableOpacity style={styles.notesCard1}>
+            <Text style={styles.noteText}>No study materials available</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    </ScrollView>
+  );
+};
 
 const styles = StyleSheet.create({
   screen: {
-    padding: 20,
-    paddingTop: 20,
-    backgroundColor: '#EBF0F5',
+    paddingHorizontal: 15,
+    backgroundColor: COLORS.white,
+  },
+  backbutton: {
+    width: 48,
+    height: 48,
+    resizeMode: 'contain',
   },
   batchTitle: {
     color: '#7B00FF',
@@ -100,7 +217,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     marginBottom: 24,
-    
     shadowColor: '#FFFFFF',
     shadowOffset: { width: -6, height: -6 },
     shadowOpacity: 1,
@@ -154,8 +270,9 @@ const styles = StyleSheet.create({
   },
   noteTitle: {
     fontSize: 16,
-    color: '#333',
+    color: COLORS.text_title,
     marginBottom: 8,
+    fontWeight: 600,
   },
   notesubTitle: {
     fontSize: 14,
@@ -164,12 +281,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   notesCard1: {
-    alignSelf: 'flex-start',
     paddingVertical: 12,
     paddingHorizontal: 16,
     marginBottom: 20,
-
-    backgroundColor: '#EBF0F5',
+    backgroundColor: COLORS.bg_Colour,
     borderRadius: 14,
     padding: 16,
     // Inset shadow to mimic “inner” effect
@@ -180,7 +295,8 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   notesCard: {
-    backgroundColor: '#EBF0F5',
+    backgroundColor: COLORS.light_blue,
+    alignSelf: 'flex-start',
     borderRadius: 16,
     padding: 16,
     // Inset shadow to mimic “inner” effect
@@ -189,15 +305,25 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 4,
-
   },
   noteText: {
+    fontSize: 12,
+    color: COLORS.text_title,
+    fontWeight: 500,
+    textAlign: 'center',
+  },
+  noteText2: {
+    fontSize: 12,
+    color: COLORS.text_desc,
+  },
+  noteText1: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.white,
+    fontWeight: 500,
   },
   container1: {
     flex: 1,
-    backgroundColor: '#d9e8f5ff',
+    backgroundColor: '#fff',
     padding: 16,
     borderRadius: 20,
     shadowColor: '#3b3030ff',
@@ -208,21 +334,19 @@ const styles = StyleSheet.create({
   },
   container2: {
     flex: 1,
-    backgroundColor: '#d9e8f5ff',
-    padding: 16,
     borderRadius: 20,
-    marginTop: 10,
-    shadowColor: '#3b3030ff',
-    shadowOffset: { width: 6, height: 6 },
-    shadowOpacity: 1,
-    shadowRadius: 6,
-    elevation: 6,
   },
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#edf2f7', 
+    marginVertical: 5,
+    backgroundColor: COLORS.white,
+  },
+  videoImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 12,
+    backgroundColor: COLORS.bg_Colour,
   },
   backButton: {
     width: 36,
@@ -233,6 +357,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 10,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: 500,
+    marginVertical: 12,
+  },
+  videoCard: {
+    height: 280,
+    width: '100%',
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 16,
+  },
+  playBtn: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -25 }, { translateY: -25 }],
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    padding: 15,
+    borderRadius: 40,
   },
   column: {
     flex: 1,
@@ -246,7 +391,7 @@ const styles = StyleSheet.create({
   },
   value: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '400',
   },
   card: {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StatusBar,
   StyleSheet,
@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS, FONTS, icons } from '~/constants';
-import Header from '~/components/shared/Header';
 import { useNavigation } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 import { Picker } from '@react-native-picker/picker';
@@ -19,7 +18,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import { createticketdata, uploadticketfile } from '~/features/Ticket/Services/index';
 import toast from '~/utils/toasts';
 import { LinearGradient } from 'expo-linear-gradient';
-
+import { getStudentData } from '~/utils/storage';
 
 const CreateTicket = () => {
   const navigation = useNavigation();
@@ -29,6 +28,14 @@ const CreateTicket = () => {
   const [attachment, setAttachment] = useState<any>(null);
   const [priority, setPriority] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [student, setStudent] = useState<any>(null);
+
+  useEffect(() => {
+    (async () => {
+      const data = await getStudentData();
+      setStudent(data);
+    })();
+  }, []);
 
   const problemCategories = [
     { label: 'Select your problem', value: '' },
@@ -51,8 +58,8 @@ const CreateTicket = () => {
         setAttachment(result?.assets[0]);
       }
     } catch (error) {
-      console.error('Error picking file:', error);
-      toast.error('Error', 'Failed to pick file');
+      console.log('Error picking file:', error);
+      toast.error('Error', 'Invalid file format');
     }
   };
 
@@ -77,6 +84,7 @@ const CreateTicket = () => {
           } as any);
 
           const uploadRes = await uploadticketfile(formData);
+
           fileUrl = uploadRes?.data?.data?.file;
         } catch (uploadError) {
           console.error('File upload failed:', uploadError);
@@ -85,19 +93,22 @@ const CreateTicket = () => {
       }
 
       const ticketData = {
-        branch: '67f3a26ef4b2c530acd16425',
+        branch: student?.branch_id?._id,
         category: category,
         description: description,
         file: fileUrl,
-        institute: '67f3a26df4b2c530acd16419',
+        institute: student?.institute_id?._id,
         priority: priority,
         query: subject,
-        user: '67f3b8feb8d2634300cc8819',
+        user: student?._id,
       };
-
-      await createticketdata(ticketData, {});
-      toast.success('Success', 'Ticket created successfully');
-      navigation.goBack();
+      const response = await createticketdata(ticketData, {});
+      if (response) {
+        toast.success('Success', 'Ticket created successfully');
+        navigation.goBack();
+      } else {
+        toast.error('Error', 'Failed to create ticket');
+      }
     } catch (err) {
       console.error('Ticket creation failed:', err);
       toast.error('Error', 'Failed to create ticket');
@@ -114,12 +125,14 @@ const CreateTicket = () => {
 
         <View style={styles.headerRow}>
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-            <Image source={icons.back_arrow} style={{ width: 25, height: 25 }} />
+            <Image source={require('../../assets/profile/back.png')} style={styles.backbutton} />
           </TouchableOpacity>
           <Text style={styles.title}>Create Ticket</Text>
         </View>
 
-        <ScrollView contentContainerStyle={styles.formContainer}>
+        <ScrollView
+          contentContainerStyle={styles.formContainer}
+          showsVerticalScrollIndicator={false}>
           <Text style={styles.label}>Select Your Problem*</Text>
           <View style={styles.dropdownContainer}>
             <Picker
@@ -197,8 +210,6 @@ const CreateTicket = () => {
               <Text style={styles.submitText}>{isLoading ? 'Creating...' : 'Create Ticket'}</Text>
             </TouchableOpacity>
           </LinearGradient>
-
-
         </ScrollView>
       </SafeAreaView>
     </>
@@ -216,9 +227,15 @@ const styles = StyleSheet.create({
     gap: 5,
     marginVertical: 10,
   },
-  title: { fontSize: 20, fontWeight: 'bold', },
+  title: { fontSize: 20, fontWeight: 'bold' },
   backButton: { paddingHorizontal: 10, marginTop: 10 },
   formContainer: { paddingHorizontal: 15, paddingBottom: 30 },
+  backbutton: {
+    width: 45,
+    height: 45,
+    resizeMode: 'contain',
+    marginTop: 5,
+  },
   label: { fontSize: 16, fontWeight: '600', marginBottom: 8, marginTop: 15 },
   input: {
     borderWidth: 1,
@@ -237,7 +254,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginBottom: 15,
   },
-  picker: { height: 50, width: '100%' },
+  picker: { height: 55, width: '100%' },
   attachmentButton: {
     borderWidth: 1,
     borderColor: '#ccc',

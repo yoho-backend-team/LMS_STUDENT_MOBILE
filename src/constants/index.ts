@@ -38,7 +38,7 @@ export const icons = {
   user_profile: require('../assets/icons/userprofile.png'),
   notification: require('../assets/icons/notification.png'),
   app_icon: require('../assets/icons/app-icon.png'),
-  back_arrow: require('../assets/icons/backarrow.png'),
+  // back_arrow: require('../assets/icons/backarrow.png'),
   filter: require('../assets/icons/filter.png'),
   barLine: require('../assets/icons/barLine.png'),
   greenCircle: require('../assets/icons/green circle.png'),
@@ -60,7 +60,9 @@ export const sidebaricon={
   payment:require('../assets/sidebar/payment.png'),
   ticket:require('../assets/sidebar/ticket.png'),
   attendance:require('../assets/sidebar/attence.png'),
-  community:require('../assets/sidebar/community.png')
+  community:require('../assets/sidebar/community.png'),
+  spokenenglish:require('../assets/sidebar/spokenenglish.png'),
+  placement:require('../assets/sidebar/placement.png')
 }
 
 export const Auth = {

@@ -3,9 +3,9 @@
   "compilerOptions": {
     "strict": true,
     "jsx": "react-jsx",
-    
-    "esModuleInterop": true,                     // ✅ Fixes default import issue
-    "allowSyntheticDefaultImports": true,    
+
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
 
     "baseUrl": ".",
     "paths": {

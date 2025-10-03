@@ -24,6 +24,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import { updateVerifyOtpClient } from '~/features/Authentication/services';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { saveStudentData } from '~/utils/storage';
 
 type OtpVerificationRouteProp = RouteProp<{ params: { data: any; email: any } }, 'params'>;
 
@@ -114,12 +115,14 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ route }) => {
     const otpString = otp.join('');
     if (otpString.length === 6) {
       try {
-        const response = await updateVerifyOtpClient({ email, token: data?.token, otp: otpString });
+        const params_data = { email, token: data?.token, otp: otpString };
+
+        const response = await updateVerifyOtpClient(params_data);
+
         if (response) {
           toast.success('Success', `OTP Verified successfully!`);
           if (data?.step === 'otp') {
-            await AsyncStorage.setItem('AuthStudentToken', response?.data?.token);
-            await AsyncStorage.setItem('StudentData', JSON.stringify(response?.data?.user));
+            await saveStudentData(response?.data?.token, response?.data?.user);
             toast.success('Success', 'OTP verified & Login successful!');
             navigation.reset({
               index: 0,
@@ -129,7 +132,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ route }) => {
             navigation.navigate('ResetPassword' as never, { email });
           }
         } else {
-          toast.error('Error', 'Failed to verify OTP');
+          toast.error('Error', 'Enter valid OTP');
         }
       } catch (error) {
         toast.error('Error', 'Failed to verify OTP');

@@ -1,25 +1,39 @@
 import { useNavigation } from '@react-navigation/native';
-import { ScrollView, StatusBar, Dimensions, Platform, TouchableOpacity, LayoutAnimation, Image, StyleSheet, Text, View, Modal } from 'react-native';
+import {
+  ScrollView,
+  StatusBar,
+  Dimensions,
+  Platform,
+  TouchableOpacity,
+  LayoutAnimation,
+  Image,
+  StyleSheet,
+  Text,
+  View,
+  Modal,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '~/constants';
 import Svg, { Circle } from 'react-native-svg';
-import React, { useState } from 'react';
-import LearningPathSteps from "./LearningPathSteps";
+import React, { useEffect, useState } from 'react';
+import LearningPathSteps from './LearningPathSteps';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Progress from 'react-native-progress';
+import { MaterialIcons } from '@expo/vector-icons';
+import { StorageService } from '~/utils/storage';
 
 const UI = {
-  bg: '#EAEFF5', // page background
-  surface: '#F2F5F9', // main surface (cards/rows)
-  chip: '#EDF2F7', // inner chips
+  bg: '#EAEFF5',
+  surface: '#F2F5F9',
+  chip: '#EDF2F7',
   text: '#1F2937',
   sub: '#6B7280',
   primary: '#5B84F8',
-  dark: '#C1CADC', // dark rim (bottom/right)
-  light: '#FFFFFF', // light rim (top/left)
+  dark: '#C1CADC',
+  light: '#FFFFFF',
 };
 
-const { width } = Dimensions.get("window");
+const { width, height } = Dimensions.get('window');
 
 const PlusMinusIcon = ({ open }: { open: boolean }) => (
   <View style={[styles.pmWrap, styles.insetBox]}>
@@ -51,38 +65,129 @@ const IntroContent = () => (
 );
 
 const faqs = [
-  { question: "What is a noun?", answer: "A noun is a word that names a person, place, thing, or idea." },
-  { question: "What is a verb?", answer: "A verb is a word that shows action or a state of being." },
-  { question: "What is an adjective?", answer: "An adjective is a word that describes a noun or pronoun." },
-  { question: "What is an adverb?", answer: "An adverb modifies a verb, adjective, or another adverb and often ends in -ly." },
-  { question: "What is a pronoun?", answer: "A pronoun is a word that replaces a noun, such as he, she, it, or they." },
-  { question: "What is a preposition?", answer: "A preposition shows the relationship between a noun or pronoun and another word in a sentence." },
-  { question: "What is a conjunction?", answer: "A conjunction joins words, phrases, or clauses. Examples: and, but, or." },
-  { question: "What is an interjection?", answer: "An interjection is a word that expresses sudden emotion, such as Oh!, Wow!, or Oops!" },
-  { question: "What is a sentence?", answer: "A sentence is a group of words that expresses a complete thought." },
-  { question: "What is a subject in a sentence?", answer: "The subject is the person, place, or thing that the sentence is about." },
-  { question: "What is a predicate in a sentence?", answer: "The predicate tells what the subject does or is." },
-  { question: "What is a clause?", answer: "A clause is a group of words with a subject and a predicate." },
-  { question: "What is a phrase?", answer: "A phrase is a group of words without a subject-verb combination." },
-  { question: "What is the difference between a clause and a phrase?", answer: "A clause has a subject and verb, while a phrase does not." },
-  { question: "What is an article?", answer: "An article is a word that defines a noun as specific or unspecific (a, an, the)." },
-  { question: "What is subject-verb agreement?", answer: "It means the subject and verb must agree in number, singular or plural." },
-  { question: "What are tenses?", answer: "Tenses indicate the time of an action, such as past, present, or future." },
-  { question: "What is the present tense?", answer: "The present tense describes actions happening now or general truths." },
-  { question: "What is the past tense?", answer: "The past tense describes actions that already happened." },
-  { question: "What is the future tense?", answer: "The future tense describes actions that will happen later." },
-  { question: "What is a simple sentence?", answer: "A simple sentence has one independent clause." },
-  { question: "What is a compound sentence?", answer: "A compound sentence has two or more independent clauses joined by a conjunction." },
-  { question: "What is a complex sentence?", answer: "A complex sentence has one independent clause and at least one dependent clause." },
-  { question: "What is passive voice?", answer: "In passive voice, the subject receives the action (e.g., The cake was eaten)." },
-  { question: "What is active voice?", answer: "In active voice, the subject performs the action (e.g., She ate the cake)." },
-  { question: "What is direct speech?", answer: "Direct speech shows the exact words spoken, usually in quotes." },
-  { question: "What is indirect speech?", answer: "Indirect speech reports what someone said without quoting them exactly." },
-  { question: "What is a synonym?", answer: "A synonym is a word with a similar meaning to another word." },
-  { question: "What is an antonym?", answer: "An antonym is a word with the opposite meaning of another word." },
-  { question: "What is a modal verb?", answer: "Modal verbs express ability, possibility, necessity, or permission (can, could, must, should)." },
+  {
+    question: 'What is a noun?',
+    answer: 'A noun is a word that names a person, place, thing, or idea.',
+  },
+  {
+    question: 'What is a verb?',
+    answer: 'A verb is a word that shows action or a state of being.',
+  },
+  {
+    question: 'What is an adjective?',
+    answer: 'An adjective is a word that describes a noun or pronoun.',
+  },
+  {
+    question: 'What is an adverb?',
+    answer: 'An adverb modifies a verb, adjective, or another adverb and often ends in -ly.',
+  },
+  {
+    question: 'What is a pronoun?',
+    answer: 'A pronoun is a word that replaces a noun, such as he, she, it, or they.',
+  },
+  {
+    question: 'What is a preposition?',
+    answer:
+      'A preposition shows the relationship between a noun or pronoun and another word in a sentence.',
+  },
+  {
+    question: 'What is a conjunction?',
+    answer: 'A conjunction joins words, phrases, or clauses. Examples: and, but, or.',
+  },
+  {
+    question: 'What is an interjection?',
+    answer: 'An interjection is a word that expresses sudden emotion, such as Oh!, Wow!, or Oops!',
+  },
+  {
+    question: 'What is a sentence?',
+    answer: 'A sentence is a group of words that expresses a complete thought.',
+  },
+  {
+    question: 'What is a subject in a sentence?',
+    answer: 'The subject is the person, place, or thing that the sentence is about.',
+  },
+  {
+    question: 'What is a predicate in a sentence?',
+    answer: 'The predicate tells what the subject does or is.',
+  },
+  {
+    question: 'What is a clause?',
+    answer: 'A clause is a group of words with a subject and a predicate.',
+  },
+  {
+    question: 'What is a phrase?',
+    answer: 'A phrase is a group of words without a subject-verb combination.',
+  },
+  {
+    question: 'What is the difference between a clause and a phrase?',
+    answer: 'A clause has a subject and verb, while a phrase does not.',
+  },
+  {
+    question: 'What is an article?',
+    answer: 'An article is a word that defines a noun as specific or unspecific (a, an, the).',
+  },
+  {
+    question: 'What is subject-verb agreement?',
+    answer: 'It means the subject and verb must agree in number, singular or plural.',
+  },
+  {
+    question: 'What are tenses?',
+    answer: 'Tenses indicate the time of an action, such as past, present, or future.',
+  },
+  {
+    question: 'What is the present tense?',
+    answer: 'The present tense describes actions happening now or general truths.',
+  },
+  {
+    question: 'What is the past tense?',
+    answer: 'The past tense describes actions that already happened.',
+  },
+  {
+    question: 'What is the future tense?',
+    answer: 'The future tense describes actions that will happen later.',
+  },
+  {
+    question: 'What is a simple sentence?',
+    answer: 'A simple sentence has one independent clause.',
+  },
+  {
+    question: 'What is a compound sentence?',
+    answer: 'A compound sentence has two or more independent clauses joined by a conjunction.',
+  },
+  {
+    question: 'What is a complex sentence?',
+    answer: 'A complex sentence has one independent clause and at least one dependent clause.',
+  },
+  {
+    question: 'What is passive voice?',
+    answer: 'In passive voice, the subject receives the action (e.g., The cake was eaten).',
+  },
+  {
+    question: 'What is active voice?',
+    answer: 'In active voice, the subject performs the action (e.g., She ate the cake).',
+  },
+  {
+    question: 'What is direct speech?',
+    answer: 'Direct speech shows the exact words spoken, usually in quotes.',
+  },
+  {
+    question: 'What is indirect speech?',
+    answer: 'Indirect speech reports what someone said without quoting them exactly.',
+  },
+  {
+    question: 'What is a synonym?',
+    answer: 'A synonym is a word with a similar meaning to another word.',
+  },
+  {
+    question: 'What is an antonym?',
+    answer: 'An antonym is a word with the opposite meaning of another word.',
+  },
+  {
+    question: 'What is a modal verb?',
+    answer:
+      'Modal verbs express ability, possibility, necessity, or permission (can, could, must, should).',
+  },
 ];
-
 
 type ProgressCircleProps = {
   percentage: number;
@@ -140,16 +245,64 @@ const SpokenEnglish = () => {
   const [search, setSearch] = useState('');
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
+  const [isFilterOpen, setFilterOpen] = useState(false);
+  const [isSessionRecapModalOpen, setSessionRecapModalOpen] = useState(false);
+  const [quizScores, setQuizScores] = useState<{ [key: string]: number }>({});
+  const [isLoading, setIsLoading] = useState(true);
   const itemsPerPage = 10;
+
+  const handleScoreUpdate = (scores: { [key: string]: number }) => {
+    setQuizScores(scores);
+  };
+
+  useEffect(() => {
+    loadStoredScores();
+  }, []);
+
+  const loadStoredScores = async () => {
+    try {
+      const storedScores = await StorageService.getQuizScores();
+      setQuizScores(storedScores);
+    } catch (error) {
+      console.error('Error loading stored scores:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const calculateCompletedSections = () => {
+    return Object.values(quizScores).filter(score => score >= 80).length;
+  };
+
+  // Calculate overall progress based on quiz scores
+  const calculateOverallProgress = () => {
+    const stepTitles = ['Beginner', 'Intermediate', 'Advanced', 'Professional'];
+    const completedSteps = stepTitles.filter(title => quizScores[title] >= 80).length;
+    return Math.round((completedSteps / stepTitles.length) * 100);
+  };
+
+  // FIXED: Calculate achievement percentage based on actual scores
+  const calculateAchievementPercentage = () => {
+    const scores = Object.values(quizScores);
+    
+    // If no scores available, return 0
+    if (scores.length === 0) {
+      return 0;
+    }
+    
+    // Calculate average of all available scores
+    const totalScore = scores.reduce((sum, score) => sum + score, 0);
+    const averageScore = totalScore / scores.length;
+    
+    // Return the average score as percentage (already in percentage format)
+    return Math.round(averageScore);
+  };
 
   const toggleExpand = (index: number) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setExpandedIndex(expandedIndex === index ? null : index);
   };
 
-  const [isFilterOpen, setFilterOpen] = useState(false);
-
-  // Calculate pagination
   const totalPages = Math.ceil(faqs.length / itemsPerPage);
   const startIndex = currentPage * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
@@ -158,203 +311,283 @@ const SpokenEnglish = () => {
   const goToNextPage = () => {
     if (currentPage < totalPages - 1) {
       setCurrentPage(currentPage + 1);
-      setExpandedIndex(null); // Close any expanded items when changing pages
+      setExpandedIndex(null);
     }
   };
 
   const goToPrevPage = () => {
     if (currentPage > 0) {
       setCurrentPage(currentPage - 1);
-      setExpandedIndex(null); // Close any expanded items when changing pages
+      setExpandedIndex(null);
     }
+  };
+
+  const calculateCompletionPercentage = () => {
+    const totalSections = 4; 
+    const completedSections = Object.values(quizScores).filter(score => score >= 80).length;
+    return Math.round((completedSections / totalSections) * 100);
   };
 
   const statsCards = [
     {
-      title: 'Day Streak',
-      value: '0',
-      icon: require('../../assets/home/card1icon.png'),
-      color: '#22D3EE',
-      bgColor: COLORS.white,
-    },
-    {
-      title: 'Total XP',
-      value: '0',
-      icon: require('../../assets/home/card6img.png'),
-      color: '#6366F1',
-      bgColor: COLORS.white,
-    },
-    {
-      title: 'Completed ',
-      value: '0',
+      title: 'Completed',
+      value: calculateCompletedSections().toString(),
+      displayValue: `${calculateCompletedSections()}/4 Sections`,
+      percentage: Math.round((calculateCompletedSections() / 4) * 100),
       icon: require('../../assets/home/card2icon.png'),
       color: '#10B981',
       bgColor: COLORS.white,
+      type: 'count' as const,
     },
     {
       title: 'Achievement',
-      value: '0',
+      value: calculateAchievementPercentage().toString(),
+      percentage: calculateAchievementPercentage(),
       icon: require('../../assets/home/card4img.png'),
       color: '#EC4899',
       bgColor: COLORS.white,
-    }
+      type: 'percentage' as const,
+    },
   ];
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text>Loading your progress...</Text>
+      </View>
+    );
+  }
 
   return (
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
-      // Replace the main ScrollView with this structure:
-<SafeAreaView edges={['top']} style={styles.container}>
-  {/* Fixed Header */}
-  <View style={{ padding: 10 }}>
-    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-      <TouchableOpacity onPress={() => navigation.goBack()}>
-        <Image source={require('../../assets/profile/back.png')} style={styles.backbutton} />
-      </TouchableOpacity>
-      <Text style={styles.title}>Learning Path</Text>
-      <TouchableOpacity onPress={() => setFilterOpen(true)}>
-        <Image source={require('../../assets/icons/filter.png')} style={styles.fillterbutton} />
-      </TouchableOpacity>
-    </View>
-
-    <View style={styles.card}>
-      <Text style={styles.cardTitle}>English Mastery Challenge</Text>
-      <Text style={styles.cardSubtitle}>
-        Classic Style Grammar And Speaking Practice
-      </Text>
-    </View>
-
-    <View style={styles.statsGrid}>
-      {statsCards.map((item, index) => (
-        <View key={index} style={[styles.statsCard, { backgroundColor: item.bgColor }]}>
-          <View style={styles.statsHeader}>
-            <Text style={styles.statsTitle}>{item.title}</Text>
+      <SafeAreaView edges={['top']} style={styles.container}>
+        {/* Fixed Header */}
+        <View style={{ padding: 10 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: 16,
+            }}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Image source={require('../../assets/profile/back.png')} style={styles.backbutton} />
+            </TouchableOpacity>
+            <Text style={styles.title}>Learning Path</Text>
+            <TouchableOpacity onPress={() => setFilterOpen(true)} style={styles.challengeButton}>
+              <MaterialIcons name="sports-esports" size={28} color={COLORS.text_title} />
+            </TouchableOpacity>
           </View>
-          <View style={styles.iconcontent}>
-            <View style={[styles.iconContainer, { backgroundColor: item.color }]}>
-              <Image source={item.icon} style={styles.statsIcon} />
+
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>English Mastery Challenge</Text>
+            <Text style={styles.cardSubtitle}>Classic Style Grammar And Speaking Practice</Text>
+            <View style={{ marginTop: 10, alignItems: 'center' }}>
+              <Text style={styles.cardSubtitle}>
+                Overall Progress: {calculateOverallProgress()}%
+              </Text>
+              <Progress.Bar 
+                progress={calculateOverallProgress() / 100} 
+                width={200} 
+                color="#7209b7"
+                style={{ marginTop: 5 }}
+              />
             </View>
           </View>
-          <View style={styles.progress}>
-            <ProgressCircle
-              percentage={parseInt(item.value)}
-              size={60}
-              strokeWidth={8}
-              color={item.color}
-            />
+
+          <View style={styles.statsGrid}>
+            {statsCards.map((item, index) => (
+              <View key={index} style={[styles.statsCard, { backgroundColor: item.bgColor }]}>
+                <View style={styles.statsHeader}>
+                  <Text style={styles.statsTitle}>{item.title}</Text>
+                  <Text style={styles.statsCount}>{item.displayValue}</Text>
+                </View>
+                <View style={styles.iconcontent}>
+                  <View style={[styles.iconContainer, { backgroundColor: item.color }]}>
+                    <Image source={item.icon} style={styles.statsIcon} />
+                  </View>
+                </View>
+                <View style={styles.progress}>
+                  <ProgressCircle
+                    percentage={item.percentage}
+                    size={60}
+                    strokeWidth={8}
+                    color={item.color}
+                  />
+                </View>
+              </View>
+            ))}
+          </View>
+
+          <View style={styles.sessionRecapHeader}>
+            <Text style={styles.cardTitle}>Session Recap</Text>
+            <TouchableOpacity
+              onPress={() => setSessionRecapModalOpen(true)}
+              style={styles.viewAllButton}>
+              <Text style={styles.viewAllText}>View All</Text>
+            </TouchableOpacity>
           </View>
         </View>
-      ))}
-    </View>
 
-    <View>
-      <Text style={styles.cardTitle}>Session Recap</Text>
-    </View>
-  </View>
+        {/* Show only first 3 intro contents on main screen */}
+        <ScrollView
+          style={styles.questionsScrollView}
+          contentContainerStyle={styles.questionsContainer}
+          showsVerticalScrollIndicator={false}>
+          {faqs.slice(0, 3).map((item, index) => {
+            const open = expandedIndex === index;
+            return (
+              <React.Fragment key={index}>
+                {/* Row – RAISED (popped-out) */}
+                <View style={[styles.scrollcard, styles.insetBox]}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.cardText}>{item.question}</Text>
+                  </View>
+                  <TouchableOpacity activeOpacity={0.8} onPress={() => toggleExpand(index)}>
+                    <PlusMinusIcon open={open} />
+                  </TouchableOpacity>
+                </View>
 
-  {/* Scrollable Questions Section */}
-  <ScrollView
-    style={styles.questionsScrollView}
-    contentContainerStyle={styles.questionsContainer}
-    showsVerticalScrollIndicator={false}
-  >
-    {currentFaqs
-      .filter((i) => i.question.toLowerCase().includes(search.toLowerCase()))
-      .map((item, index) => {
-        const globalIndex = startIndex + index;
-        const open = expandedIndex === globalIndex;
-        return (
-          <React.Fragment key={globalIndex}>
-            {/* Row – RAISED (popped-out) */}
-            <View style={[styles.scrollcard, styles.insetBox]}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.cardText}>{item.question}</Text>
-              </View>
-              <TouchableOpacity activeOpacity={0.8} onPress={() => toggleExpand(globalIndex)}>
-                <PlusMinusIcon open={open} />
+                {/* Inline expanded content (same page) */}
+                {open &&
+                  (item.question === 'Introduction' ? (
+                    <IntroContent />
+                  ) : (
+                    <View style={[styles.answerWrap, styles.insetBox]}>
+                      <Text style={styles.answerText}>{item.answer}</Text>
+                    </View>
+                  ))}
+              </React.Fragment>
+            );
+          })}
+        </ScrollView>
+
+        {/* Fixed Footer */}
+        <View style={{ padding: 2 }}>
+          <TouchableOpacity style={styles.startChallengeButton} onPress={() => setFilterOpen(true)}>
+            <LinearGradient colors={['#a259ff', '#7209b7']} style={styles.gradientButton}>
+              <Text style={styles.startChallengeText}>Start Challenge</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+
+        {/* Learning Path Steps Modal */}
+        <Modal
+          visible={isFilterOpen}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setFilterOpen(false)}>
+          <View style={styles.modal}>
+            <View style={styles.modalContent}>
+              <LearningPathSteps 
+                onClose={() => setFilterOpen(false)} 
+                onScoreUpdate={handleScoreUpdate}
+              />
+            </View>
+          </View>
+        </Modal>
+
+        {/* Session Recap Full Screen Modal */}
+        <Modal
+          visible={isSessionRecapModalOpen}
+          animationType="slide"
+          transparent={false}
+          onRequestClose={() => setSessionRecapModalOpen(false)}>
+          <SafeAreaView style={styles.fullScreenModalContainer}>
+            {/* Modal Header */}
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Session Recap</Text>
+              <TouchableOpacity
+                onPress={() => setSessionRecapModalOpen(false)}
+                style={styles.closeButton}>
+                <MaterialIcons name="close" size={20} color={COLORS.text_title} />
               </TouchableOpacity>
             </View>
 
-            {/* Inline expanded content (same page) */}
-            {open &&
-              (item.question === 'Introduction' ? (
-                <IntroContent />
-              ) : (
-                <View style={[styles.answerWrap, styles.insetBox]}>
-                  <Text style={styles.answerText}>{item.answer}</Text>
-                </View>
-              ))}
-          </React.Fragment>
-        );
-      })}
-  </ScrollView>
+            {/* Scrollable Intro Contents */}
+            <ScrollView
+              style={styles.modalScrollView}
+              contentContainerStyle={styles.modalScrollContainer}
+              showsVerticalScrollIndicator={false}>
+              {currentFaqs
+                .filter((i) => i.question.toLowerCase().includes(search.toLowerCase()))
+                .map((item, index) => {
+                  const globalIndex = startIndex + index;
+                  const open = expandedIndex === globalIndex;
+                  return (
+                    <React.Fragment key={globalIndex}>
+                      {/* Row – RAISED (popped-out) */}
+                      <View style={[styles.scrollcard, styles.insetBox]}>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.cardText}>{item.question}</Text>
+                        </View>
+                        <TouchableOpacity
+                          activeOpacity={0.8}
+                          onPress={() => toggleExpand(globalIndex)}>
+                          <PlusMinusIcon open={open} />
+                        </TouchableOpacity>
+                      </View>
 
-  {/* Fixed Footer */}
-  <View style={{ padding: 2 }}>
-    {/* Pagination Controls */}
-    <View style={styles.paginationContainer}>
-      <TouchableOpacity 
-        onPress={goToPrevPage} 
-        disabled={currentPage === 0}
-        style={[styles.paginationButton, currentPage === 0 && styles.disabledButton]}
-      >
-        <Text style={[
-          styles.paginationButtonText, 
-          currentPage === 0 && styles.disabledButtonText
-        ]}>
-          Previous
-        </Text>
-      </TouchableOpacity>
-      
-      <Text style={styles.pageInfo}>
-        Page {currentPage + 1} of {totalPages}
-      </Text>
-      
-      <TouchableOpacity 
-        onPress={goToNextPage} 
-        disabled={currentPage === totalPages - 1}
-        style={[styles.paginationButton, currentPage === totalPages - 1 && styles.disabledButton]}
-      >
-        <Text style={[
-          styles.paginationButtonText, 
-          currentPage === totalPages - 1 && styles.disabledButtonText
-        ]}>
-          Next
-        </Text>
-      </TouchableOpacity>
-    </View>
+                      {/* Inline expanded content (same page) */}
+                      {open &&
+                        (item.question === 'Introduction' ? (
+                          <IntroContent />
+                        ) : (
+                          <View style={[styles.answerWrap, styles.insetBox]}>
+                            <Text style={styles.answerText}>{item.answer}</Text>
+                          </View>
+                        ))}
+                    </React.Fragment>
+                  );
+                })}
+            </ScrollView>
 
-    <TouchableOpacity 
-      style={styles.startChallengeButton}
-      onPress={() => setFilterOpen(true)}
-    >
-      <LinearGradient
-        colors={["#a259ff", "#7209b7"]}
-        style={styles.gradientButton}
-      >
-        <Text style={styles.startChallengeText}>Start Challenge</Text>
-      </LinearGradient>
-    </TouchableOpacity>
-  </View>
+            {/* Pagination Controls in Modal */}
+            <View style={styles.paginationContainer}>
+              <TouchableOpacity
+                onPress={goToPrevPage}
+                disabled={currentPage === 0}
+                style={[styles.paginationButton, currentPage === 0 && styles.disabledButton]}>
+                <Text
+                  style={[
+                    styles.paginationButtonText,
+                    currentPage === 0 && styles.disabledButtonText,
+                  ]}>
+                  Previous
+                </Text>
+              </TouchableOpacity>
 
-  <Modal
-    visible={isFilterOpen}
-    animationType="slide"
-    transparent={true}
-    onRequestClose={() => setFilterOpen(false)}
-  >
-    <View style={styles.modal}>
-      <View style={styles.modalContent}>
-        <LearningPathSteps onClose={() => setFilterOpen(false)} />
-      </View>
-    </View>
-  </Modal>
-</SafeAreaView>
+              <Text style={styles.pageInfo}>
+                Page {currentPage + 1} of {totalPages}
+              </Text>
+
+              <TouchableOpacity
+                onPress={goToNextPage}
+                disabled={currentPage === totalPages - 1}
+                style={[
+                  styles.paginationButton,
+                  currentPage === totalPages - 1 && styles.disabledButton,
+                ]}>
+                <Text
+                  style={[
+                    styles.paginationButtonText,
+                    currentPage === totalPages - 1 && styles.disabledButtonText,
+                  ]}>
+                  Next
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </SafeAreaView>
+        </Modal>
+      </SafeAreaView>
     </>
   );
 };
 
 export default SpokenEnglish;
+
+
 
 const commonRaisedShadow = {
   shadowColor: UI.dark,
@@ -369,6 +602,7 @@ const commonLightRim = {
 };
 
 const styles = StyleSheet.create({
+  
   container: { flex: 1, paddingTop: 10, backgroundColor: COLORS.white },
   scrollContainer: {
     flex: 1,
@@ -377,23 +611,45 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '700',
     color: COLORS.text_title,
+    marginLeft: -95,
   },
   backbutton: {
     width: 48,
     height: 48,
     resizeMode: 'contain',
   },
-  fillterbutton : {
-    width: 28,
-    height: 28,
+  challengeButton: {
+    width: 38,
+    height: 38,
     resizeMode: 'contain',
+    backgroundColor: COLORS.bg_Colour,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   questionsScrollView: {
-  flex: 1,
-  marginBottom: 2,
+    flex: 1,
+    marginBottom: 2,
   },
   questionsContainer: {
     paddingHorizontal: 20,
+  },
+  sessionRecapHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  viewAllButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: UI.primary,
+  },
+  viewAllText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
   },
   headerBox: {
     backgroundColor: '#BDC2C740',
@@ -518,14 +774,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
-  // Progress Section Styles
   progressText: {
     position: 'absolute',
     justifyContent: 'center',
     alignItems: 'center',
   },
   percentageText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
   },
   insetBox: {
@@ -638,13 +893,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   disabledButton: {
-    backgroundColor: '#cccccc',
-    opacity: 0.5,
+    backgroundColor: COLORS.bg_Colour,
   },
   disabledButtonText: {
     color: '#000000',
-  }
-  ,
+  },
   pageInfo: {
     fontSize: 14,
     color: '#666',
@@ -693,7 +946,7 @@ const styles = StyleSheet.create({
   smallCard: { paddingVertical: 14, paddingHorizontal: 14, marginBottom: 12, borderRadius: 14 },
   smallCardText: { fontSize: 13, color: UI.sub, fontWeight: '600' },
 
-  //Modal 
+  //Modal
   modal: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -701,11 +954,48 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   modalContent: {
-    width: width * 0.75,   // 3/4 screen width
+    width: width * 0.75, // 3/4 screen width
     height: '100%',
     backgroundColor: '#fff',
     borderTopLeftRadius: 16,
     borderBottomLeftRadius: 16,
     overflow: 'hidden',
+  },
+
+  // Full Screen Modal Styles
+  fullScreenModalContainer: {
+    flex: 1,
+    backgroundColor: COLORS.white,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: COLORS.text_title,
+  },
+  closeButton: {
+    padding: 5,
+    backgroundColor: COLORS.bg_Colour,
+    borderRadius: 50,
+  },
+  modalScrollView: {
+    flex: 1,
+  },
+  modalScrollContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  statsCount: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#1F2937',
   },
 });

@@ -21,6 +21,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectHelpCenterData } from '~/features/HelpCenter/Reducer/Selector';
 import { fetchHelpCenterThunk } from '~/features/HelpCenter/Reducer/HelpThunk';
 import { useNavigation } from '@react-navigation/native';
+import { getStudentData } from '~/utils/storage';
 
 type HelpItem = {
   id: string;
@@ -41,15 +42,25 @@ const HelpCenter = () => {
   const dispatch = useDispatch<any>();
   const helpData = useSelector(selectHelpCenterData);
   const navigation = useNavigation<any>();
+  const [student, setStudent] = useState<any>(null);
 
   useEffect(() => {
-    const instituteid = '973195c0-66ed-47c2-b098-d8989d3e4529';
-    dispatch(fetchHelpCenterThunk({ instituteid }));
-  }, [dispatch]);
+    (async () => {
+      const data = await getStudentData();
+      setStudent(data);
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (student) {
+      const instituteid = student?.institute_id?.uuid;
+      dispatch(fetchHelpCenterThunk({ instituteid }));
+    }
+  }, [dispatch, student]);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    const instituteid = '973195c0-66ed-47c2-b098-d8989d3e4529';
+    const instituteid = student?.institute_id?.uuid;
     await dispatch(fetchHelpCenterThunk({ instituteid }));
     setRefreshing(false);
   };
@@ -98,12 +109,12 @@ const HelpCenter = () => {
                 setShowVideo(false);
               }}
               style={styles.backIcon}>
-              <Image
-                source={require('./../../assets/icons/backarrow.png')}
-                style={{ width: 24, height: 24 }}
-              />
+              <Image source={require('../../assets/profile/back.png')} style={styles.backbutton} />
             </TouchableOpacity>
-            <Text style={{ ...FONTS.h1, color: COLORS.text_title }}>Learning Resources</Text>
+            <Text
+              style={{ ...FONTS.h2, color: COLORS.text_title, marginBottom: 5, fontWeight: 500 }}>
+              Learning Resources
+            </Text>
           </View>
 
           {/* Additional Info */}
@@ -145,9 +156,9 @@ const HelpCenter = () => {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
-      <View>
+      <View style={{ backgroundColor: COLORS.white }}>
         <View
           style={{
             flexDirection: 'row',
@@ -186,14 +197,18 @@ const HelpCenter = () => {
                     start={{ x: 0.134, y: 0.021 }}
                     end={{ x: 1, y: 1 }}
                     style={styles.activeBoxGradient}>
-                    <Text style={[styles.boxText, styles.activeBoxText]}>{key}</Text>
+                    <Text style={[styles.boxText, styles.activeBoxText]}>
+                      {key.substring(0, 18)}
+                    </Text>
                     <View style={[styles.countBadge, styles.activeBadge]}>
                       <Text style={[styles.countText, styles.activeCountText]}>{count}</Text>
                     </View>
                   </LinearGradient>
                 ) : (
                   <View style={[styles.box, styles.inactiveBox]}>
-                    <Text style={[styles.boxText, styles.inactiveBoxText]}>{key}</Text>
+                    <Text style={[styles.boxText, styles.inactiveBoxText]}>
+                      {key.substring(0, 18)}
+                    </Text>
                     <View style={[styles.countBadge, styles.inactiveBadge]}>
                       <Text style={[styles.countText, styles.inactiveCountText]}>{count}</Text>
                     </View>
@@ -236,30 +251,39 @@ const HelpCenter = () => {
             <ScrollView
               key={index}
               style={styles.contentArea}
+              showsVerticalScrollIndicator={false}
               refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-              {filteredData?.map((item) => (
-                <View key={item.id} style={styles.card}>
-                  <View style={styles.tag}>
-                    <Text style={styles.tagText}>{item?.category}</Text>
+              {filteredData?.length ? (
+                filteredData?.map((item) => (
+                  <View key={item.id} style={styles.card}>
+                    <View style={styles.tag}>
+                      <Text style={styles.tagText}>{item?.category}</Text>
+                    </View>
+
+                    <Text style={styles.title}>{item.question}</Text>
+                    {item.answer && <Text style={styles.subtitle}>{item?.answer}</Text>}
+
+                    <TouchableOpacity
+                      activeOpacity={0.8}
+                      style={styles.buttonContainer}
+                      onPress={() => setSelectedItem(item)}>
+                      <LinearGradient
+                        colors={['#7B00FF', '#B200FF']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={styles.button}>
+                        <Text style={styles.buttonText}>View Details</Text>
+                      </LinearGradient>
+                    </TouchableOpacity>
                   </View>
-
-                  <Text style={styles.title}>{item.question}</Text>
-                  {item.answer && <Text style={styles.subtitle}>{item?.answer}</Text>}
-
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    style={styles.buttonContainer}
-                    onPress={() => setSelectedItem(item)}>
-                    <LinearGradient
-                      colors={['#7B00FF', '#B200FF']}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                      style={styles.button}>
-                      <Text style={styles.buttonText}>View Details</Text>
-                    </LinearGradient>
-                  </TouchableOpacity>
+                ))
+              ) : (
+                <View style={{ marginTop: 155 }}>
+                  <Text style={{ textAlign: 'center', ...FONTS.h2_02, color: COLORS.text_desc }}>
+                    No articles found
+                  </Text>
                 </View>
-              ))}
+              )}
             </ScrollView>
           );
         })}
@@ -271,7 +295,7 @@ const HelpCenter = () => {
 export default HelpCenter;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 15, backgroundColor: '#F8FAFC' },
+  container: { flex: 1, padding: 15, backgroundColor: '#fff' },
   backbutton: {
     width: 48,
     height: 48,
@@ -298,7 +322,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   inactiveBox: {
-    backgroundColor: '#EBEFF3',
+    backgroundColor: COLORS.bg_Colour,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -320,18 +344,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
   },
   activeBadge: { backgroundColor: '#FFF' },
-  inactiveBadge: { backgroundColor: '#EBEFF3' },
+  inactiveBadge: { backgroundColor: COLORS.text_desc },
   countText: { fontSize: 12, fontWeight: 'bold' },
   activeCountText: { color: '#B200FF' },
-  inactiveCountText: { color: '#333' },
-  contentArea: { flex: 1, padding: 15 },
+  inactiveCountText: { color: '#fff' },
+  contentArea: { flex: 1, padding: 15, backgroundColor: '#fff' },
   searchContainer: { paddingHorizontal: 15, marginVertical: 10 },
   searchInput: {
-    borderWidth: 1,
+    borderWidth: 0.5,
     borderColor: '#ccc',
     borderRadius: 10,
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 14,
     fontSize: 16,
     backgroundColor: '#fff',
   },
@@ -356,7 +380,7 @@ const styles = StyleSheet.create({
   },
   tagText: { fontSize: 13, color: '#333', fontWeight: '500' },
   title: { fontSize: 16, fontWeight: 'bold', marginBottom: 4, color: '#111' },
-  subtitle: { fontSize: 14, color: '#666', marginBottom: 15 },
+  subtitle: { fontSize: 12, color: '#666', marginBottom: 15, textAlign: 'justify' },
   buttonContainer: { alignSelf: 'flex-end' },
   button: {
     paddingVertical: 10,
@@ -367,12 +391,12 @@ const styles = StyleSheet.create({
   },
   buttonText: { color: '#fff', fontWeight: '600', fontSize: 14 },
   headerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 15 },
-  backIcon: { marginRight: 10, padding: 5 },
+  backIcon: { marginRight: 2, padding: 5 },
   headerTitle: { fontSize: 20, fontWeight: '700', color: '#000' },
   sectionTitle: { fontSize: 16, fontWeight: '600', marginBottom: 10, color: '#111' },
   videoCard: {
     marginTop: 10,
-    height: 220,
+    height: 280,
     borderRadius: 12,
     overflow: 'hidden',
     backgroundColor: '#000',
