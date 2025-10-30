@@ -196,9 +196,9 @@ const MainLayout: React.FC = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
         keyboardVerticalOffset={Platform.OS === 'ios' ? -50 : -50}>
-        <View style={{ flex: 1, backgroundColor: COLORS.white }}>
+        <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: COLORS.white }}>
           <Header
-            containerStyle={{ backgroundColor: COLORS.white, marginTop: 10, marginBottom: 5 }}
+            containerStyle={{ backgroundColor: COLORS.white, marginTop: 10, }}
           />
           <PagerView
             ref={pagerRef}
@@ -232,7 +232,7 @@ const MainLayout: React.FC = () => {
               </TouchableOpacity>
             </>
           )}
-        </View>
+        </SafeAreaView>
 
         {/* Bottom Tab Bar */}
         <SafeAreaView edges={['bottom']} style={{ backgroundColor: COLORS.white }}>

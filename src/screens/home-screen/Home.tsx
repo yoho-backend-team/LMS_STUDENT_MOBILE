@@ -141,7 +141,7 @@ const Home = () => {
   return (
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
-      <SafeAreaView edges={['top']} style={styles.container}>
+      <View style={styles.container}>
         {/* <Header /> */}
 
         <ScrollView
@@ -220,7 +220,7 @@ const Home = () => {
           <UpdatesScreen />
           <View style={{ marginBottom: 60 }}></View>
         </ScrollView>
-      </SafeAreaView>
+      </View>
     </>
   );
 };
@@ -230,7 +230,7 @@ export default Home;
 const styles = StyleSheet.create({
   container: {
     backgroundColor: COLORS.white,
-    paddingTop: 10,
+    // paddingTop: 10,
     flex: 1,
   },
   scrollContainer: {

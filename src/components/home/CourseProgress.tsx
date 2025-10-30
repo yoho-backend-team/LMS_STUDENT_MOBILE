@@ -1,9 +1,10 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
-import { COLORS } from '~/constants';
-import { useSelector } from 'react-redux';
+import { COLORS, screens } from '~/constants';
+import { useDispatch, useSelector } from 'react-redux';
 import { selectDashboardData } from '~/features/home/reducer/selectors';
+import { setSelectedTab } from '~/store/tab/tabSlice';
 
 const CHART_COLORS = {
   primary: '#7B00FF',
@@ -18,13 +19,13 @@ const CHART_COLORS = {
 
 const CoursesProgressChart: React.FC = () => {
   const dashboard = useSelector(selectDashboardData);
+  const dispatch = useDispatch<any>();
   const { progress, totalClasses } = useMemo(() => {
     const classStats = dashboard?.classes?.[0];
     if (!classStats) return { progress: 0, totalClasses: 0 };
 
     const completed =
-      (classStats.online_class?.completed || 0) +
-      (classStats.offline_class?.completed || 0);
+      (classStats.online_class?.completed || 0) + (classStats.offline_class?.completed || 0);
 
     const total = classStats.total || 0;
     const progress = total === 0 ? 0 : Math.round((completed / total) * 100);
@@ -85,12 +86,7 @@ const CoursesProgressChart: React.FC = () => {
           </Svg>
 
           {/* Sun Icon */}
-          <View
-            style={[
-              styles.iconContainer,
-              { left: sunX + 20 - 16, top: sunY + 20 - 16 },
-            ]}
-          >
+          <View style={[styles.iconContainer, { left: sunX + 20 - 16, top: sunY + 20 - 16 }]}>
             <Image
               source={require('../../assets/home/moon.png')}
               style={{ width: 30, height: 30 }}
@@ -98,12 +94,7 @@ const CoursesProgressChart: React.FC = () => {
           </View>
 
           {/* Moon Icon */}
-          <View
-            style={[
-              styles.iconContainer,
-              { left: moonX + 20 - 16, top: moonY + 20 - 16 },
-            ]}
-          >
+          <View style={[styles.iconContainer, { left: moonX + 20 - 16, top: moonY + 20 - 16 }]}>
             <Image
               source={require('../../assets/home/sun.png')}
               style={{ width: 30, height: 30 }}
@@ -120,13 +111,15 @@ const CoursesProgressChart: React.FC = () => {
 
       {/* Bottom Section */}
       <View style={styles.bottomSection}>
-        <TouchableOpacity style={styles.batchButton}>
+        <TouchableOpacity
+          style={styles.batchButton}
+          onPress={() => dispatch(setSelectedTab(screens.classes))}>
           <Text style={styles.batchText}>Total Classes</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.registerButton}>
+        <View style={styles.registerButton}>
           <Text style={styles.registerText}>{totalClasses} Classes</Text>
-        </TouchableOpacity>
+        </View>
       </View>
     </View>
   );

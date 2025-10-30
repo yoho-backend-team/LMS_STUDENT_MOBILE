@@ -9,14 +9,14 @@ function Classes() {
   return (
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
-      <SafeAreaView edges={['top']} style={styles.container}>
+      <View style={styles.container}>
         {/* <Header /> */}
 
         {/* code inside the view section*/}
         <View style={{ flex: 1 }}>
           <Classcards />
         </View>
-      </SafeAreaView>
+      </View>
     </>
   );
 }

@@ -23,7 +23,7 @@ import { formatTime } from '~/utils/formatDate';
 
 const Communities = () => {
   const navigation = useNavigation<any>();
-  const communityList = useSelector(GetCommuntiySelector);
+  const communityList = useSelector(GetCommuntiySelector) || [];
   const dispatch = useDispatch<any>();
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
@@ -49,7 +49,7 @@ const Communities = () => {
   return (
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
-      <SafeAreaView edges={['top']} style={styles.container}>
+      <View style={styles.container}>
         {/* <Header /> */}
 
         <View style={styles.content}>
@@ -108,7 +108,7 @@ const Communities = () => {
                 <Text
                   style={{
                     textAlign: 'center',
-                    marginTop: 50,
+                    marginTop: 150,
                     color: COLORS.text_desc,
                     ...FONTS.h3,
                   }}>
@@ -119,7 +119,7 @@ const Communities = () => {
           </View>
           <View style={{ marginTop: 80 }}></View>
         </View>
-      </SafeAreaView>
+      </View>
     </>
   );
 };
@@ -129,7 +129,6 @@ export default Communities;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 10,
     backgroundColor: COLORS.white,
   },
   content: {

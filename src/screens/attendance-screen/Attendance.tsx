@@ -61,55 +61,55 @@ const Attendance = () => {
   const [student, setStudent] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
   useEffect(() => {
-  if (selectedDate) { 
-    const formattedDate = selectedDate.toISOString().split('T')[0];
-    dispatch(getattendanceByDate({ date: formattedDate }));
-  }
-}, [selectedDate, dispatch]);
+    if (selectedDate) {
+      const formattedDate = selectedDate.toISOString().split('T')[0];
+      dispatch(getattendanceByDate({ date: formattedDate }));
+    }
+  }, [selectedDate, dispatch]);
 
-useEffect(() => {
-  (async () => {
-    const data = await getStudentData();
-    setStudent(data);
-  })();
-}, []);
+  useEffect(() => {
+    (async () => {
+      const data = await getStudentData();
+      setStudent(data);
+    })();
+  }, []);
 
-useEffect(() => {
-  if (student) {
-    fetchAttendance();
-  }
-}, [selectedMonth, selectedYear, student]);
+  useEffect(() => {
+    if (student) {
+      fetchAttendance();
+    }
+  }, [selectedMonth, selectedYear, student]);
 
-const fetchAttendance = async () => {
-  const payload = {
-    userId: student?.uuid,
-    month: selectedMonth,
-    year: selectedYear,
-    instituteId: student?.institute_id?.uuid,
+  const fetchAttendance = async () => {
+    const payload = {
+      userId: student?.uuid,
+      month: selectedMonth,
+      year: selectedYear,
+      instituteId: student?.institute_id?.uuid,
+    };
+    await dispatch(getStudentattendance(payload));
   };
-  await dispatch(getStudentattendance(payload));
-};
 
-// 🔄 Refresh function
-const onRefresh = async () => {
-  setRefreshing(true);
+  // 🔄 Refresh function
+  const onRefresh = async () => {
+    setRefreshing(true);
 
-  if (selectedDate) {
-    const formattedDate = selectedDate.toISOString().split('T')[0];
-    await dispatch(getattendanceByDate({ date: formattedDate }));
-  }
+    if (selectedDate) {
+      const formattedDate = selectedDate.toISOString().split('T')[0];
+      await dispatch(getattendanceByDate({ date: formattedDate }));
+    }
 
-  if (student) {
-    await fetchAttendance();
-  }
+    if (student) {
+      await fetchAttendance();
+    }
 
-  setRefreshing(false);
-};
+    setRefreshing(false);
+  };
 
   return (
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
-      <SafeAreaView edges={['top']} style={styles.container}>
+      <View style={styles.container}>
         {/* <Header /> */}
 
         {/* Header */}
@@ -117,7 +117,10 @@ const onRefresh = async () => {
           <Text style={styles.headerTitle}>Attendance</Text>
           <TouchableOpacity style={styles.filterBtn} onPress={() => setShowFilter(!showFilter)}>
             {/* <Ionicons name="filter" size={20} color="#555" /> */}
-            <Image source={require('../../assets/icons/filterbtn.png')}style={{width:20,height:22,}}/>
+            <Image
+              source={require('../../assets/icons/filterbtn.png')}
+              style={{ width: 20, height: 22 }}
+            />
           </TouchableOpacity>
         </View>
 
@@ -204,10 +207,9 @@ const onRefresh = async () => {
         {/* Calendar */}
         <Text style={styles.calendarTitle}>Calendar</Text>
 
-        <ScrollView showsVerticalScrollIndicator={false}
-          refreshControl={
-    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-  }>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
           <View style={styles.calendarCard}>
             {/* Calendar Header */}
             <View style={styles.calendarHeader}>
@@ -315,7 +317,7 @@ const onRefresh = async () => {
             </View>
           </View>
         </ScrollView>
-      </SafeAreaView>
+      </View>
     </>
   );
 };
@@ -325,9 +327,9 @@ export default Attendance;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 15,
+    paddingHorizontal: 15,
     backgroundColor: COLORS.white,
-    paddingBottom: 60,
+    paddingBottom: 70,
   },
   headerRow: {
     flexDirection: 'row',
@@ -345,7 +347,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f4f5f7',
     padding: 8,
     borderRadius: 12,
-    marginRight:6
+    marginRight: 6,
   },
   filterContainer: {
     flexDirection: 'row',
