@@ -44,9 +44,9 @@
       ]
     },
     "extra": {
-      // "eas": {
-      //   "projectId": "f8c99f75-06da-40c5-9f7f-3f7475c68c2d"
-      // }
+      "eas": {
+        "projectId": "4c53e8d7-ca3c-4b59-bd9f-f501376d3588"
+      }
     }
   }
 }
