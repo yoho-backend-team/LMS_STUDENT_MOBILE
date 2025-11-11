@@ -64,7 +64,7 @@ const AssessmentsChart: React.FC = () => {
   const completed = assessmentData?.completed ?? 0;
 
   // Calculate display values based on active tab
-  const { displayValue, displayLabel, progress } = useMemo(() => {
+  const { displayValue, displayLabel, progress, activeColor } = useMemo(() => {
     const totalVal = assessmentData?.total ?? 0;
     const pendingVal = assessmentData?.pending ?? 0;
     const completedVal = assessmentData?.completed ?? 0;
@@ -74,6 +74,7 @@ const AssessmentsChart: React.FC = () => {
         displayValue: totalVal,
         displayLabel: 'Total',
         progress: 100, // Always 100% for total
+        activeColor: CHART_COLORS.primary,
       };
     }
 
@@ -83,6 +84,7 @@ const AssessmentsChart: React.FC = () => {
         displayValue: pendingVal,
         displayLabel: 'Pending',
         progress: percentage,
+        activeColor: CHART_COLORS.secondary,
       };
     }
 
@@ -92,35 +94,40 @@ const AssessmentsChart: React.FC = () => {
         displayValue: completedVal,
         displayLabel: 'Completed',
         progress: percentage,
+        activeColor: CHART_COLORS.blue,
       };
     }
 
-    return { displayValue: 0, displayLabel: '-', progress: 0 };
+    return {
+      displayValue: 0,
+      displayLabel: '-',
+      progress: 0,
+      activeColor: CHART_COLORS.primary,
+    };
   }, [assessmentData, activeTab]);
 
-  // Generate chart points based on actual data percentages
+  // Generate chart points based on active tab percentage
   const chartWidth = width - 80;
   const chartHeight = 120;
   const chartPoints = useMemo(() => {
-    const completedPercent = total > 0 ? (completed / total) * 100 : 0;
-    const pendingPercent = total > 0 ? (pending / total) * 100 : 0;
+    // Use the progress percentage from active tab
+    const progressPercentage = progress / 100;
 
-    // Create a smooth curve that reflects progress over time
     const baseHeight = 90; // Start from bottom
     const maxVariation = 60; // How much the line can vary
 
-    const progressFactor = completedPercent / 100;
-
+    // Create points that reflect the current progress percentage
+    // The line height will scale with the progress percentage
     return [
-      { x: 30, y: baseHeight - progressFactor * 10 },
-      { x: 70, y: baseHeight - progressFactor * 25 },
-      { x: 110, y: baseHeight - progressFactor * 15 },
-      { x: 150, y: baseHeight - progressFactor * 35 },
-      { x: 190, y: baseHeight - progressFactor * 45 },
-      { x: 230, y: baseHeight - progressFactor * 55 },
-      { x: 270, y: baseHeight - progressFactor * maxVariation },
+      { x: 30, y: baseHeight - progressPercentage * 10 },
+      { x: 70, y: baseHeight - progressPercentage * 25 },
+      { x: 110, y: baseHeight - progressPercentage * 15 },
+      { x: 150, y: baseHeight - progressPercentage * 35 },
+      { x: 190, y: baseHeight - progressPercentage * 45 },
+      { x: 230, y: baseHeight - progressPercentage * 55 },
+      { x: 270, y: baseHeight - progressPercentage * maxVariation },
     ];
-  }, [assessmentData, total, completed, pending]);
+  }, [progress]); // Only depend on progress
 
   const generatePath = (points: { x: number; y: number }[]) => {
     if (points.length === 0) return '';
@@ -134,6 +141,34 @@ const AssessmentsChart: React.FC = () => {
     return path;
   };
 
+  // Get gradient colors based on active tab
+    const getGradientColors = (): readonly [string, string] => {
+      switch (activeTab) {
+        case 'Total':
+          return ['#00BFA5', '#40E0D0'] as const;
+        case 'Completed':
+          return ['#2196F3', '#64B5F6'] as const;
+        case 'Pending':
+          return ['#40E0D0', '#2196F3'] as const;
+        default:
+          return ['#00BFA5', '#40E0D0'] as const;
+      }
+    };
+
+  // Get background gradient colors based on active tab
+    const getBackgroundGradient = (): readonly [string, string] => {
+      switch (activeTab) {
+        case 'Total':
+          return ['#F8FDFC', '#E0F7FA'] as const;
+        case 'Completed':
+          return ['#F3F9FF', '#E3F2FD'] as const;
+        case 'Pending':
+          return ['#F0FDFA', '#E0F7FA'] as const;
+        default:
+          return ['#F8FDFC', '#E0F7FA'] as const;
+      }
+    };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Assessments</Text>
@@ -141,23 +176,23 @@ const AssessmentsChart: React.FC = () => {
       {/* Chart Section */}
       <View style={styles.chartContainer}>
         <LinearGradient
-          colors={['#F8FDFC', '#E0F7FA']}
+          colors={getBackgroundGradient()}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.chartBackground}
         />
 
         <Svg width={chartWidth} height={chartHeight} style={styles.svg}>
-          {/* Chart line with gradient effect */}
+          {/* Chart line with dynamic color based on active tab */}
           <Path
             d={generatePath(chartPoints)}
-            stroke={CHART_COLORS.primary}
+            stroke={activeColor}
             strokeWidth={4}
             fill="none"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
-          {/* Chart points */}
+          {/* Chart points with dynamic color */}
           {chartPoints.map((point, index) => (
             <Circle
               key={index}
@@ -165,36 +200,42 @@ const AssessmentsChart: React.FC = () => {
               cy={point.y}
               r={5}
               fill={CHART_COLORS.white}
-              stroke={CHART_COLORS.primary}
+              stroke={activeColor}
               strokeWidth={3}
             />
           ))}
         </Svg>
 
-        {/* Progress Percentage Circle */}
+        {/* Progress Percentage Circle with dynamic color */}
         <View style={styles.percentageContainer}>
           <LinearGradient
-            colors={[CHART_COLORS.primary, CHART_COLORS.secondary]}
+            colors={getGradientColors()}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.percentageCircle}>
             <Text style={styles.percentageText}>{progress}%</Text>
-            <Text style={styles.percentageLabel}>Done</Text>
+            <Text style={styles.percentageLabel}>{displayLabel}</Text>
           </LinearGradient>
         </View>
 
         {/* Data summary overlay */}
         <View style={styles.dataOverlay}>
           <View style={styles.dataPoint}>
-            <Text style={styles.dataValue}>{total}</Text>
+            <Text style={[styles.dataValue, activeTab === 'Total' && { color: activeColor }]}>
+              {total}
+            </Text>
             <Text style={styles.dataLabel}>Total</Text>
           </View>
           <View style={styles.dataPoint}>
-            <Text style={[styles.dataValue, { color: CHART_COLORS.blue }]}>{completed}</Text>
+            <Text style={[styles.dataValue, activeTab === 'Completed' && { color: activeColor }]}>
+              {completed}
+            </Text>
             <Text style={styles.dataLabel}>Completed</Text>
           </View>
           <View style={styles.dataPoint}>
-            <Text style={[styles.dataValue, { color: CHART_COLORS.secondary }]}>{pending}</Text>
+            <Text style={[styles.dataValue, activeTab === 'Pending' && { color: activeColor }]}>
+              {pending}
+            </Text>
             <Text style={styles.dataLabel}>Pending</Text>
           </View>
         </View>
@@ -209,19 +250,22 @@ const AssessmentsChart: React.FC = () => {
         {/* Total */}
         <TouchableOpacity style={styles.categoryWrapper} onPress={() => setActiveTab('Total')}>
           <LinearGradient
-            colors={activeTab === 'Total' ? ['#00BFA5', '#40E0D0'] : ['#B2DFDB', '#E0F7FA']}
+            colors={activeTab === 'Total' ? getGradientColors() : (['#B2DFDB', '#E0F7FA'] as const)}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.categoryButton}>
             <Image source={require('../../assets/home/chart.png')} style={styles.profileicon} />
-            <Text style={styles.categoryText}>Total ({total})</Text>
+            <Text
+              style={[styles.categoryText, activeTab !== 'Total' && { color: CHART_COLORS.text }]}>
+              Total ({total})
+            </Text>
           </LinearGradient>
         </TouchableOpacity>
 
         {/* Completed */}
         <TouchableOpacity style={styles.categoryWrapper} onPress={() => setActiveTab('Completed')}>
           <LinearGradient
-            colors={activeTab === 'Completed' ? ['#2196F3', '#64B5F6'] : ['#C5CAE9', '#E8EAF6']}
+            colors={activeTab === 'Completed' ? getGradientColors() : (['#C5CAE9', '#E8EAF6'] as const)}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.categoryButton}>
@@ -229,14 +273,20 @@ const AssessmentsChart: React.FC = () => {
               source={require('../../assets/home/task-square.png')}
               style={styles.profileicon}
             />
-            <Text style={styles.categoryText}>Completed ({completed})</Text>
+            <Text
+              style={[
+                styles.categoryText,
+                activeTab !== 'Completed' && { color: CHART_COLORS.text },
+              ]}>
+              Completed ({completed})
+            </Text>
           </LinearGradient>
         </TouchableOpacity>
 
         {/* Pending */}
         <TouchableOpacity style={styles.categoryWrapper} onPress={() => setActiveTab('Pending')}>
           <LinearGradient
-            colors={activeTab === 'Pending' ? ['#40E0D0', '#2196F3'] : ['#BBDEFB', '#E3F2FD']}
+            colors={activeTab === 'Pending' ? getGradientColors() : (['#BBDEFB', '#E3F2FD'] as const)}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.categoryButton}>
@@ -244,7 +294,13 @@ const AssessmentsChart: React.FC = () => {
               source={require('../../assets/home/clipboard-text.png')}
               style={styles.profileicon}
             />
-            <Text style={styles.categoryText}>Pending ({pending})</Text>
+            <Text
+              style={[
+                styles.categoryText,
+                activeTab !== 'Pending' && { color: CHART_COLORS.text },
+              ]}>
+              Pending ({pending})
+            </Text>
           </LinearGradient>
         </TouchableOpacity>
       </ScrollView>
@@ -320,10 +376,6 @@ const styles = StyleSheet.create({
     marginTop: -2,
   },
   dataOverlay: {
-    // position: 'absolute',
-    // top: 20,
-    // right: 20,
-    // flexDirection: 'column',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -334,13 +386,13 @@ const styles = StyleSheet.create({
   dataValue: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: CHART_COLORS.primary,
+    color: CHART_COLORS.lightText,
   },
   dataLabel: {
     fontSize: 10,
     color: CHART_COLORS.lightText,
     marginTop: -2,
-    fontWeight: 500
+    fontWeight: '500',
   },
   categoriesContainer: {
     flexDirection: 'row',

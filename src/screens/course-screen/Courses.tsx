@@ -72,8 +72,8 @@ const Courses = () => {
   return (
     <>
       <StatusBar backgroundColor={COLORS.black} barStyle="light-content" />
-      <SafeAreaView edges={['top']} style={styles.container}>
-        <Header />
+      <View style={styles.container}>
+        {/* <Header /> */}
 
         <ScrollView
           style={styles.scrollContainer}
@@ -124,7 +124,7 @@ const Courses = () => {
             </View>
           )}
         </ScrollView>
-      </SafeAreaView>
+      </View>
     </>
   );
 };
@@ -134,7 +134,6 @@ export default Courses;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 10,
     backgroundColor: '#ffffff',
   },
   scrollContainer: {

@@ -78,10 +78,10 @@ const Login = () => {
             });
           }
         } else {
-          toast.error('Error', 'Failed to login');
+          toast.error('Error', 'Invalid credentials');
         }
       } catch (error) {
-        toast.error('Error', 'Failed to login');
+        toast.error('Error', 'Invalid credentials');
       }
     }
   };
