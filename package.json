@@ -27,7 +27,7 @@
     "axios": "^1.11.0",
     "dayjs": "^1.11.18",
     "dotenv": "^17.2.1",
-    "expo": "^54.0.23",
+    "expo": "~54.0.25",
     "expo-blur": "~15.0.7",
     "expo-document-picker": "~14.0.7",
     "expo-file-system": "~19.0.17",
@@ -83,6 +83,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
+    "@react-native-community/cli": "^20.0.2",
     "@types/react": "~19.1.10",
     "@types/react-native-svg-charts": "^5.0.16",
     "@types/react-native-vector-icons": "^6.4.18",
